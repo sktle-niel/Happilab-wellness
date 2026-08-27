@@ -30,13 +30,19 @@ class OnboardingBackdrop extends StatelessWidget {
       const ColoredBox(color: AppColors.canvas),
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 600),
-        child: stageIndex == 0
-            ? const _BrandCover(key: ValueKey('cover'))
-            : const RemoteImage(
-                key: ValueKey('poster'),
-                url: _posterUrl,
-                fit: BoxFit.cover,
-              ),
+        // AnimatedSwitcher sizes to its child, so the stage has to claim the
+        // whole stack itself or a photo letterboxes inside it.
+        child: SizedBox.expand(
+          key: ValueKey(stageIndex),
+          child: stageIndex == 0
+              ? const _BrandCover()
+              : const RemoteImage(
+                  url: _posterUrl,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                ),
+        ),
       ),
       const _ReadabilityScrim(),
     ],
@@ -46,7 +52,7 @@ class OnboardingBackdrop extends StatelessWidget {
 /// The cream cover: petals, mark and wordmark, held high so the copy below has
 /// room.
 class _BrandCover extends StatelessWidget {
-  const _BrandCover({super.key});
+  const _BrandCover();
 
   @override
   Widget build(BuildContext context) => const ColoredBox(
