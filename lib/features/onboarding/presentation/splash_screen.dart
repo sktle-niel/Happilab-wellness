@@ -7,11 +7,11 @@ import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../shared/widgets/brand_mark.dart';
 import '../../../shared/widgets/faith_wordmark.dart';
+import '../../../shared/widgets/floating_petals.dart';
 import 'widgets/faith_mascot.dart';
-import 'widgets/floating_petals.dart';
 
 /// The loader: brand lockup, drifting petals and the mascot, then a hand-off to
-/// sign in.
+/// the product showcase.
 ///
 /// One controller drives the whole entrance; each element claims an interval of
 /// it, which is what keeps the stagger in step no matter how the timings change.
@@ -34,7 +34,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-    _handoff = Timer(AppDuration.splash, _continueToSignIn);
+    _handoff = Timer(AppDuration.splash, _continueToShowcase);
   }
 
   @override
@@ -44,9 +44,9 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
-  void _continueToSignIn() {
+  void _continueToShowcase() {
     if (!mounted) return;
-    Navigator.of(context).pushReplacementNamed(AppRoutes.signIn);
+    Navigator.of(context).pushReplacementNamed(AppRoutes.productIntro);
   }
 
   @override

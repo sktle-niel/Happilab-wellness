@@ -17,7 +17,7 @@ void main() {
       expect(find.text(FaithWordmark.tagline), findsOneWidget);
     });
 
-    testWidgets('hands over to sign in and cannot be navigated back to', (
+    testWidgets('hands over to the showcase and cannot be navigated back to', (
       tester,
     ) async {
       usePhoneViewport(tester);
@@ -26,7 +26,7 @@ void main() {
       await tester.pump(AppDuration.splash);
       await tester.pumpAndSettle();
 
-      expect(find.text('Welcome back'), findsOneWidget);
+      expect(find.text('Our Products'), findsOneWidget);
       expect(find.text('FAITH'), findsNothing);
     });
   });

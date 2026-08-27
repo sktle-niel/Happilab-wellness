@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme/app_colors.dart';
+import '../../app/theme/app_colors.dart';
 
-/// Petals drifting up the loader background.
+/// Petals drifting up a cream background — the loader and the onboarding
+/// cover share them.
 ///
 /// Each petal owns one controller running at its own period and reads a phase
 /// offset instead of waiting on a timer, so the five never fall into step and

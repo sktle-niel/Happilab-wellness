@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../features/auth/presentation/create_account_screen.dart';
 import '../../features/auth/presentation/sign_in_screen.dart';
-import '../../features/auth/presentation/splash_screen.dart';
 import '../../features/counter/presentation/counter_screen.dart';
+import '../../features/onboarding/presentation/onboarding_screen.dart';
+import '../../features/onboarding/presentation/product_intro_screen.dart';
+import '../../features/onboarding/presentation/splash_screen.dart';
 import '../../shared/widgets/app_scaffold.dart';
 import 'app_routes.dart';
 
@@ -18,6 +20,8 @@ abstract final class AppRouter {
         settings: settings,
         builder: switch (settings.name) {
           AppRoutes.splash => (_) => const SplashScreen(),
+          AppRoutes.productIntro => (_) => const ProductIntroScreen(),
+          AppRoutes.onboarding => (_) => const OnboardingScreen(),
           AppRoutes.signIn => (_) => const SignInScreen(),
           AppRoutes.createAccount => (_) => const CreateAccountScreen(),
           // Stands in for Home until that screen is designed and built.
