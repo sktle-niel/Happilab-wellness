@@ -33,6 +33,9 @@ abstract final class AppRadius {
   static const BorderRadius input = BorderRadius.all(Radius.circular(16));
   static const BorderRadius card = BorderRadius.all(Radius.circular(24));
 
+  /// The larger radius the design uses on hero cards.
+  static const BorderRadius hero = BorderRadius.all(Radius.circular(26));
+
   /// Buttons and chips are fully rounded in this design.
   static const BorderRadius pill = BorderRadius.all(Radius.circular(999));
 }
@@ -45,6 +48,11 @@ abstract final class AppShadows {
 
   static const List<BoxShadow> raised = [
     BoxShadow(color: Color(0x1F966414), blurRadius: 18, offset: Offset(0, 6)),
+  ];
+
+  /// The lift under content cards on the cream canvas.
+  static const List<BoxShadow> soft = [
+    BoxShadow(color: Color(0x14966414), blurRadius: 22, offset: Offset(0, 8)),
   ];
 
   static const List<BoxShadow> card = [

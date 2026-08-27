@@ -5,10 +5,18 @@ import 'package:happilab/app/theme/app_theme.dart';
 
 /// Boots the real router and theme at [initialRoute], so navigation between
 /// screens under test behaves exactly as it does in the app.
+///
+/// [onGenerateInitialRoutes] is overridden because a path like `/sign-in`
+/// otherwise makes Navigator build `/` underneath it: the screen under test
+/// would start with a hidden splash below it, `canPop()` would lie, and a back
+/// button would appear to work while going somewhere else entirely.
 Widget testApp({required String initialRoute}) => MaterialApp(
   theme: AppTheme.light(),
   initialRoute: initialRoute,
   onGenerateRoute: AppRouter.onGenerateRoute,
+  onGenerateInitialRoutes: (route) => [
+    AppRouter.onGenerateRoute(RouteSettings(name: route)),
+  ],
 );
 
 /// Sizes the test surface like the phone frame in the design canvas.

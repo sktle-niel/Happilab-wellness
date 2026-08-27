@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.happilab"
+    namespace = "ph.faithwellness.referral"
     // flutter_secure_storage 11 compiles against android-37, and Gradle refuses
     // to link a library built against a newer SDK than the app. targetSdk stays
     // on the Flutter default: raising it opts into new runtime behaviour, which
@@ -19,8 +19,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.happilab"
+        applicationId = "ph.faithwellness.referral"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

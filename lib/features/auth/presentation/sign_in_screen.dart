@@ -7,6 +7,7 @@ import '../../../app/theme/app_typography.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/brand_mark.dart';
+import '../../../shared/widgets/centered_scroll_view.dart';
 import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/google_mark.dart';
 import '../../../shared/widgets/inline_action_text.dart';
@@ -45,40 +46,37 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: AppColors.canvas,
     body: SafeArea(
-      child: SingleChildScrollView(
+      child: CenteredScrollView(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.screenInset,
           56,
           AppSpacing.screenInset,
           50,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const _SignInHeader(),
-            const Gap(22),
-            AppButton.secondary(
-              label: 'Continue with Google',
-              leading: const GoogleMark(),
-              onPressed: _showProviderUnavailable,
-            ),
-            const Gap(18),
-            const OrDivider(),
-            const Gap(18),
-            ListenableBuilder(
-              listenable: _controller,
-              builder: (context, _) =>
-                  _SignInForm(controller: _controller, onSubmit: _submit),
-            ),
-            const Gap.sm(),
-            InlineActionText(
-              text: 'No account yet?',
-              actionLabel: 'Join with a referral code',
-              onPressed: () =>
-                  Navigator.of(context).pushNamed(AppRoutes.createAccount),
-            ),
-          ],
-        ),
+        children: [
+          const _SignInHeader(),
+          const Gap(22),
+          AppButton.secondary(
+            label: 'Continue with Google',
+            leading: const GoogleMark(),
+            onPressed: _showProviderUnavailable,
+          ),
+          const Gap(18),
+          const OrDivider(),
+          const Gap(18),
+          ListenableBuilder(
+            listenable: _controller,
+            builder: (context, _) =>
+                _SignInForm(controller: _controller, onSubmit: _submit),
+          ),
+          const Gap.sm(),
+          InlineActionText(
+            text: 'No account yet?',
+            actionLabel: 'Join with a referral code',
+            onPressed: () =>
+                Navigator.of(context).pushNamed(AppRoutes.createAccount),
+          ),
+        ],
       ),
     ),
   );
