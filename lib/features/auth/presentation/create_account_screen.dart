@@ -13,8 +13,8 @@ import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/google_mark.dart';
 import '../../../shared/widgets/inline_action_text.dart';
 import '../../../shared/widgets/or_divider.dart';
+import '../../../shared/widgets/password_requirement_chips.dart';
 import 'create_account_controller.dart';
-import 'widgets/password_requirement_chips.dart';
 
 /// Join with a referral code — the only way into the programme.
 class CreateAccountScreen extends StatefulWidget {

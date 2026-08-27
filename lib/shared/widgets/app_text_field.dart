@@ -4,6 +4,16 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_tokens.dart';
 import '../../app/theme/app_typography.dart';
 
+/// How a field sits on the page.
+enum AppTextFieldStyle {
+  /// White and lifted — the auth screens, on the bare canvas.
+  raised,
+
+  /// Cream and inset — fields inside a card, where a second shadow would read
+  /// as a card within a card.
+  inset,
+}
+
 /// Labelled input used by every form in the app.
 ///
 /// Validation state arrives as [errorText] rather than being computed here: the
@@ -22,6 +32,7 @@ class AppTextField extends StatefulWidget {
     this.trailing,
     this.onChanged,
     this.onSubmitted,
+    this.style = AppTextFieldStyle.raised,
     super.key,
   });
 
@@ -39,6 +50,7 @@ class AppTextField extends StatefulWidget {
   final Widget? trailing;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
+  final AppTextFieldStyle style;
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -67,6 +79,16 @@ class _AppTextFieldState extends State<AppTextField> {
     setState(() => _hasFocus = _focusNode.hasFocus);
   }
 
+  bool get _isInset => widget.style == AppTextFieldStyle.inset;
+
+  Color get _borderColor {
+    if (widget.errorText != null) return AppColors.danger;
+    if (_hasFocus) return AppColors.focus;
+    return _isInset
+        ? AppColors.accent.withValues(alpha: 0.18)
+        : Colors.transparent;
+  }
+
   @override
   Widget build(BuildContext context) {
     final hasError = widget.errorText != null;
@@ -79,16 +101,14 @@ class _AppTextFieldState extends State<AppTextField> {
         Container(
           height: AppSpacing.inputHeight,
           decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: AppRadius.input,
-            boxShadow: AppShadows.input,
+            color: _isInset ? AppColors.canvas : AppColors.surface,
+            borderRadius: _isInset
+                ? const BorderRadius.all(Radius.circular(14))
+                : AppRadius.input,
+            boxShadow: _isInset ? null : AppShadows.input,
             border: Border.all(
-              color: hasError
-                  ? AppColors.danger
-                  : _hasFocus
-                  ? AppColors.focus
-                  : Colors.transparent,
-              width: 2,
+              color: _borderColor,
+              width: _hasFocus || hasError ? 2 : 1.5,
             ),
           ),
           child: Row(

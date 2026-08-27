@@ -37,7 +37,10 @@ features/  ──▶  shared/  ──▶  core/  ──▶  (Flutter SDK)
 
 - `core/` knows nothing about features, widgets or screens. Pure Dart where possible.
 - `shared/` holds cross-feature UI. It never imports a feature.
-- `features/` never import each other. A shared need is promoted to `shared/` or `core/`.
+- `features/` never import each other. The moment two need the same thing, it is promoted to
+  `shared/` — that is how `MemberSummary`, the catalogue, the mascot and `PasswordPolicy` got there.
+- `app/shell/` owns the five tab destinations; everything else is pushed on top of a tab and carries
+  a back button.
 - **No singletons, no service locators.** `AppDependencies` is the single composition root; services
   reach widgets through `AppScope.of(context)`. Anything constructing its own `ApiClient` is a bug.
 - **Every boundary is an interface.** `HttpTransport`, `TokenStore` — depend on the contract so the
@@ -66,33 +69,21 @@ lib/
   main.dart                        # entry point only: build deps, runApp
   app/                             # application shell
     app.dart                       # HappilabApp: scope + theme + router
-    di/app_dependencies.dart       # composition root — every service built once
-    di/app_scope.dart              # InheritedWidget exposing dependencies
-    router/app_routes.dart         # route name constants
-    router/app_router.dart         # route table + unknown-route fallback
-    theme/app_colors.dart          # color seeds
-    theme/app_tokens.dart          # spacing, radii, durations
-    theme/app_typography.dart      # type scale
-    theme/app_theme.dart           # light/dark ThemeData
+    di/                            # composition root + AppScope
+    router/                        # route names and the route table
+    shell/                         # signed-in tab shell and its bottom bar
+    theme/                         # colors, tokens, typography, ThemeData
   core/                            # framework-level, feature-agnostic
-    config/app_config.dart         # flavors + --dart-define values, TLS enforced
-    errors/app_exception.dart      # sealed failure set
-    errors/result.dart             # Result<T> = Success | Failure
-    logging/app_logger.dart        # redacted, level-filtered logging
-    network/http_transport.dart    # transport contract + request/response models
-    network/io_http_transport.dart # dart:io implementation
-    network/api_client.dart        # rate limit -> auth -> timeout -> retry -> Result
-    network/rate_limiter.dart      # sliding-window limiter
-    network/retry_policy.dart      # exponential backoff + jitter
-    security/token_store.dart      # credential storage contract + in-memory impl
-    security/secure_token_store.dart # Keychain / Android KeyStore implementation
-    security/redactor.dart         # secret scrubbing for logs
-    security/input_validator.dart  # validation + sanitising
-    utils/debouncer.dart           # collapse call bursts
-  features/<name>/                 # vertical slices (see above)
-  shared/widgets/                  # AppScaffold, AppButton, AsyncView, ErrorView, Gap
+    config/ errors/ logging/ network/ security/ utils/
+  features/<name>/                 # vertical slices
+    auth/ onboarding/ home/ referrals/ rewards/ community/
+    notifications/ profile/ support/
+  shared/                          # used by two or more features
+    domain/                        # models and copy every feature reads
+    utils/                         # formatting and share helpers
+    widgets/                       # AppCard, AppButton, AppTextField, ...
 test/
-  core/ features/ support/         # mirrors lib/; support/ holds reusable fakes
+  app/ core/ features/ shared/ support/   # mirrors lib/; support/ holds fakes
 ```
 
 Mirror this layout in `test/`. Create a folder when the first file needs it — never leave empty

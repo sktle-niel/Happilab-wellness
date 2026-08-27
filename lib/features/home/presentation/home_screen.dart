@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../app/router/app_routes.dart';
+import '../../../app/shell/app_shell_scope.dart';
+import '../../../app/shell/app_tab.dart';
+import '../../../app/shell/widgets/faith_nav_bar.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_tokens.dart';
+import '../../../shared/domain/activity_entry.dart';
 import '../../../shared/domain/catalogue.dart';
+import '../../../shared/domain/member_summary.dart';
+import '../../../shared/utils/share_actions.dart';
 import '../../../shared/widgets/gap.dart';
+import '../../../shared/widgets/product_share_tile.dart';
 import '../../../shared/widgets/section_header.dart';
-import '../domain/activity_entry.dart';
-import '../domain/member_summary.dart';
 import 'widgets/activity_card.dart';
 import 'widgets/affiliate_banner.dart';
 import 'widgets/home_top_bar.dart';
 import 'widgets/points_card.dart';
 import 'widgets/referral_code_card.dart';
-import 'widgets/share_product_tile.dart';
 
 /// The member's landing screen: what they have earned, their code, and the
 /// products worth sharing next.
@@ -23,6 +26,13 @@ class HomeScreen extends StatelessWidget {
 
   /// Products the home grid puts forward. The full list lives on Suggestions.
   static const int _featuredCount = 4;
+
+  /// Switches tabs when home is inside the shell, and pushes the screen when
+  /// it is not — the same tap should not stack a second copy of a destination.
+  static void _open(BuildContext context, AppTab tab, String route) {
+    if (AppShellScope.open(context, tab)) return;
+    Navigator.of(context).pushNamed(route);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +43,12 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: AppColors.canvas,
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
+          padding: const EdgeInsets.fromLTRB(
+            20,
+            12,
+            20,
+            FaithNavBar.contentInset,
+          ),
           children: [
             HomeTopBar(
               summary: summary,
@@ -44,9 +59,9 @@ class HomeScreen extends StatelessWidget {
             PointsCard(
               summary: summary,
               onCashOut: () =>
-                  Navigator.of(context).pushNamed(AppRoutes.rewards),
+                  _open(context, AppTab.rewards, AppRoutes.rewards),
               onShareCode: () =>
-                  Navigator.of(context).pushNamed(AppRoutes.myReferrals),
+                  _open(context, AppTab.refer, AppRoutes.myReferrals),
             ),
             const Gap(AppSpacing.md),
             ReferralCodeCard(code: summary.referralCode),
@@ -81,21 +96,12 @@ class _ProductGrid extends StatelessWidget {
   final List<Product> products;
   final String code;
 
-  /// Sharing is a clipboard copy until a share sheet is wired up; the message
-  /// is the one thing a member would actually send.
-  Future<void> _share(BuildContext context, Product product) async {
-    final messenger = ScaffoldMessenger.of(context);
-    await Clipboard.setData(
-      ClipboardData(
-        text:
-            'Try ${product.name} from Faith Wellness — ${product.price}. '
-            'Use my code $code.',
-      ),
-    );
-    messenger.showSnackBar(
-      SnackBar(content: Text('Message for ${product.name} copied.')),
-    );
-  }
+  Future<void> _share(BuildContext context, Product product) =>
+      ShareActions.copy(
+        context,
+        ShareActions.productMessage(product, code),
+        confirmation: 'Message for ${product.name} copied.',
+      );
 
   @override
   Widget build(BuildContext context) => GridView.builder(
@@ -112,7 +118,7 @@ class _ProductGrid extends StatelessWidget {
     ),
     itemBuilder: (context, index) {
       final product = products[index];
-      return ShareProductTile(
+      return ProductShareTile(
         product: product,
         onShare: () => _share(context, product),
       );

@@ -6,9 +6,9 @@ import '../../../app/router/app_routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
+import '../../../shared/domain/catalogue.dart';
 import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/rise_in.dart';
-import '../../../shared/domain/catalogue.dart';
 import 'widgets/product_card.dart';
 
 /// The product showcase that plays between the loader and the onboarding pitch.

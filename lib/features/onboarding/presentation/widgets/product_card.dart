@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../shared/domain/catalogue.dart';
 import '../../../../shared/widgets/gap.dart';
 import '../../../../shared/widgets/remote_image.dart';
-import '../../../../shared/domain/catalogue.dart';
 
 /// One product in the intro showcase.
 ///

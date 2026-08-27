@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/router/app_routes.dart';
+import '../../../app/shell/app_shell_scope.dart';
+import '../../../app/shell/app_tab.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
@@ -41,8 +43,13 @@ class HowItWorksScreen extends StatelessWidget {
           const Gap(AppSpacing.lg),
           AppButton(
             label: 'Start referring',
-            onPressed: () =>
-                Navigator.of(context).pushNamed(AppRoutes.myReferrals),
+            onPressed: () {
+              // Pop back to the shell first: the explainer was pushed on top
+              // of it, so switching tabs underneath would be invisible.
+              Navigator.of(context).pop();
+              if (AppShellScope.open(context, AppTab.refer)) return;
+              Navigator.of(context).pushNamed(AppRoutes.myReferrals);
+            },
           ),
         ],
       ),

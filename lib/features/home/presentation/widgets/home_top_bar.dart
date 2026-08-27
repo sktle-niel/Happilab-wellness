@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../shared/domain/member_summary.dart';
 import '../../../../shared/widgets/avatar_circle.dart';
 import '../../../../shared/widgets/circle_icon_button.dart';
 import '../../../../shared/widgets/gap.dart';
-import '../../domain/member_summary.dart';
 
 /// Who is signed in, and the way to their notifications.
 class HomeTopBar extends StatelessWidget {

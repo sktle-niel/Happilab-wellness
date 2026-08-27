@@ -1,24 +1,30 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme/app_colors.dart';
-import '../../../../app/theme/app_typography.dart';
-import '../../../../shared/domain/catalogue.dart';
-import '../../../../shared/widgets/app_card.dart';
-import '../../../../shared/widgets/gap.dart';
-import '../../../../shared/widgets/pressable_scale.dart';
-import '../../../../shared/widgets/remote_image.dart';
-import '../../../../shared/widgets/status_pill.dart';
+import '../../app/theme/app_colors.dart';
+import '../../app/theme/app_typography.dart';
+import '../domain/catalogue.dart';
+import 'app_card.dart';
+import 'gap.dart';
+import 'pressable_scale.dart';
+import 'remote_image.dart';
+import 'status_pill.dart';
 
-/// One product in the two-column "Products to share" grid.
-class ShareProductTile extends StatelessWidget {
-  const ShareProductTile({
+/// One product in a two-column share grid — the home preview and the full
+/// Suggestions list are the same tile.
+///
+/// [showDescription] is what separates them: the home grid is a glance, the
+/// suggestions list is a decision.
+class ProductShareTile extends StatelessWidget {
+  const ProductShareTile({
     required this.product,
     required this.onShare,
+    this.showDescription = false,
     super.key,
   });
 
   final Product product;
   final VoidCallback onShare;
+  final bool showDescription;
 
   @override
   Widget build(BuildContext context) => AppCard(
@@ -44,6 +50,18 @@ class ShareProductTile extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
+              if (showDescription) ...[
+                const Gap(2),
+                Text(
+                  product.blurb,
+                  style: AppTypography.figtree(
+                    size: 12,
+                    color: AppColors.textMuted,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
               const Gap.sm(),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,

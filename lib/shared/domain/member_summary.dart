@@ -1,4 +1,4 @@
-import '../../../shared/utils/number_format.dart';
+import '../utils/number_format.dart';
 
 /// The signed-in member's headline figures.
 ///

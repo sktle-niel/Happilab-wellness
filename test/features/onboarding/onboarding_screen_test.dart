@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:happilab/app/router/app_routes.dart';
-import 'package:happilab/shared/domain/program_terms.dart';
 import 'package:happilab/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:happilab/features/onboarding/presentation/widgets/onboarding_backdrop.dart';
 import 'package:happilab/features/onboarding/presentation/widgets/stage_dots.dart';
+import 'package:happilab/shared/domain/program_terms.dart';
 
 import '../../support/harness.dart';
 

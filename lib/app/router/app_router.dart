@@ -2,13 +2,25 @@ import 'package:flutter/material.dart';
 
 import '../../features/auth/presentation/create_account_screen.dart';
 import '../../features/auth/presentation/sign_in_screen.dart';
-import '../../features/home/presentation/home_screen.dart';
+import '../../features/community/presentation/news_feed_screen.dart';
+import '../../features/community/presentation/suggestions_screen.dart';
+import '../../features/community/presentation/testimonials_screen.dart';
+import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../features/onboarding/presentation/product_intro_screen.dart';
 import '../../features/onboarding/presentation/splash_screen.dart';
+import '../../features/profile/presentation/account_activity_screen.dart';
+import '../../features/profile/presentation/edit_profile_screen.dart';
+import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/referrals/presentation/how_it_works_screen.dart';
 import '../../features/referrals/presentation/my_referrals_screen.dart';
+import '../../features/rewards/presentation/add_payout_method_screen.dart';
+import '../../features/rewards/presentation/edit_payout_number_screen.dart';
+import '../../features/rewards/presentation/rewards_screen.dart';
+import '../../features/support/presentation/help_center_screen.dart';
+import '../../features/support/presentation/terms_screen.dart';
 import '../../shared/widgets/app_scaffold.dart';
+import '../shell/app_shell.dart';
 import 'app_routes.dart';
 
 /// Central route table.
@@ -26,9 +38,21 @@ abstract final class AppRouter {
           AppRoutes.onboarding => (_) => const OnboardingScreen(),
           AppRoutes.signIn => (_) => const SignInScreen(),
           AppRoutes.createAccount => (_) => const CreateAccountScreen(),
-          AppRoutes.home => (_) => const HomeScreen(),
+          AppRoutes.home => (_) => const AppShell(),
           AppRoutes.howItWorks => (_) => const HowItWorksScreen(),
           AppRoutes.myReferrals => (_) => const MyReferralsScreen(),
+          AppRoutes.rewards => (_) => const RewardsScreen(),
+          AppRoutes.addPayoutMethod => (_) => const AddPayoutMethodScreen(),
+          AppRoutes.editPayoutNumber => (_) => const EditPayoutNumberScreen(),
+          AppRoutes.newsFeed => (_) => const NewsFeedScreen(),
+          AppRoutes.testimonials => (_) => const TestimonialsScreen(),
+          AppRoutes.suggestions => (_) => const SuggestionsScreen(),
+          AppRoutes.notifications => (_) => const NotificationsScreen(),
+          AppRoutes.profile => (_) => const ProfileScreen(),
+          AppRoutes.editProfile => (_) => const EditProfileScreen(),
+          AppRoutes.accountActivity => (_) => const AccountActivityScreen(),
+          AppRoutes.helpCenter => (_) => const HelpCenterScreen(),
+          AppRoutes.terms => (_) => const TermsScreen(),
           _ => (_) => const _RouteNotFoundScreen(),
         },
       );

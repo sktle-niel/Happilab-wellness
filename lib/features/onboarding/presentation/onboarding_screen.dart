@@ -6,9 +6,9 @@ import '../../../app/router/app_routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
+import '../../../shared/domain/program_terms.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/gap.dart';
-import '../../../shared/domain/program_terms.dart';
 import 'widgets/onboarding_backdrop.dart';
 import 'widgets/stage_dots.dart';
 
