@@ -29,7 +29,18 @@ class ProductShareTile extends StatelessWidget {
 
   /// How far the share button sits past the card's corner. Kept under the
   /// column gap so it never lands on the card beside it.
-  static const double _overhang = 10;
+  static const double _overhang = 8;
+
+  /// The button reads as an accent on the card, not a second subject, so it
+  /// stays around a fifth of the card's width.
+  static const double _buttonSize = 42;
+
+  /// Ring of page colour that cuts the notch.
+  static const double _buttonRing = 7;
+
+  /// What the money block leaves free for the button.
+  static const double _buttonClearance =
+      _buttonSize + _buttonRing * 2 - _overhang;
 
   final Product product;
   final VoidCallback onShare;
@@ -138,7 +149,9 @@ class _Details extends StatelessWidget {
       const SizedBox(height: 10),
       // The share button overhangs this corner, so the money keeps clear of it.
       Padding(
-        padding: const EdgeInsets.only(right: 54),
+        padding: const EdgeInsets.only(
+          right: ProductShareTile._buttonClearance,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -181,22 +194,22 @@ class _ShareButton extends StatelessWidget {
         // The ring is page colour, so where it crosses the card it reads as a
         // notch cut out of the corner, and where it crosses the page it
         // disappears.
-        padding: const EdgeInsets.all(9),
+        padding: const EdgeInsets.all(ProductShareTile._buttonRing),
         decoration: const BoxDecoration(
           color: AppColors.canvas,
-          borderRadius: BorderRadius.all(Radius.circular(28)),
+          borderRadius: BorderRadius.all(Radius.circular(24)),
         ),
         child: Container(
-          width: 52,
-          height: 52,
+          width: ProductShareTile._buttonSize,
+          height: ProductShareTile._buttonSize,
           decoration: const BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.all(Radius.circular(19)),
+            borderRadius: BorderRadius.all(Radius.circular(15)),
             boxShadow: AppShadows.input,
           ),
           child: const Icon(
             Icons.share_outlined,
-            size: 20,
+            size: 18,
             color: AppColors.textPrimary,
           ),
         ),

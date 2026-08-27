@@ -113,12 +113,12 @@ class _ProductGrid extends StatelessWidget {
       crossAxisCount: 2,
       // Extra vertical room: the share button overhangs the card's bottom
       // corner, and would otherwise sit on the row below.
-      mainAxisSpacing: 22,
+      mainAxisSpacing: 20,
       crossAxisSpacing: 12,
       // A square photo plus the name and the money underneath it.
-      // Room for a two-line name and a two-line earn line, which is what
-      // the longest product needs in a half-width column.
-      childAspectRatio: 0.60,
+      // A square photo plus two lines of name and the money under it. The
+      // smaller share button freed the width that was forcing a third line.
+      childAspectRatio: 0.68,
     ),
     itemBuilder: (context, index) {
       final product = products[index];
