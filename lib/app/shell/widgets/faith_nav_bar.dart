@@ -11,7 +11,9 @@ import '../app_tab.dart';
 /// The floating bar the signed-in app navigates from.
 ///
 /// The middle tab is raised and carries the mascot — it is the action the whole
-/// product is about, so it does not look like the other four.
+/// product is about, so it does not look like the other four. That button is
+/// drawn in an unclipped layer above the bar: inside it, the bar's own rounded
+/// clip cuts its head off.
 class FaithNavBar extends StatelessWidget {
   const FaithNavBar({
     required this.selected,
@@ -19,43 +21,65 @@ class FaithNavBar extends StatelessWidget {
     super.key,
   });
 
-  /// Height of the bar itself; screens add this plus the inset to their
-  /// bottom padding so content scrolls clear of it.
   static const double height = 74;
 
-  /// What a tab screen should leave free at the bottom.
+  /// What a tab screen should leave free at the bottom, so its last row is not
+  /// stranded under the bar.
   static const double contentInset = height + 14 + 16;
+
+  static const BorderRadius _shape = BorderRadius.all(Radius.circular(28));
 
   final AppTab selected;
   final ValueChanged<AppTab> onSelect;
 
   @override
-  Widget build(BuildContext context) => ClipRRect(
-    borderRadius: const BorderRadius.all(Radius.circular(28)),
-    child: BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-      child: Container(
-        height: height,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.95),
-          borderRadius: const BorderRadius.all(Radius.circular(28)),
-          boxShadow: AppShadows.card,
-        ),
-        child: Row(
-          children: [
-            for (final tab in AppTab.values)
-              Expanded(
-                child: tab.isFeature
-                    ? _FeatureTab(tab: tab, onPressed: () => onSelect(tab))
-                    : _NavTab(
-                        tab: tab,
-                        isSelected: tab == selected,
-                        onPressed: () => onSelect(tab),
-                      ),
+  Widget build(BuildContext context) => SizedBox(
+    height: height,
+    child: Stack(
+      clipBehavior: Clip.none,
+      children: [
+        ClipRRect(
+          borderRadius: _shape,
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+            child: Container(
+              height: height,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.95),
+                borderRadius: _shape,
+                boxShadow: AppShadows.card,
               ),
-          ],
+              child: Row(
+                children: [
+                  for (final tab in AppTab.values)
+                    Expanded(
+                      child: tab.isFeature
+                          // The raised button sits in the layer above; this
+                          // slot only reserves its width.
+                          ? const SizedBox.expand()
+                          : _NavTab(
+                              tab: tab,
+                              isSelected: tab == selected,
+                              onPressed: () => onSelect(tab),
+                            ),
+                    ),
+                ],
+              ),
+            ),
+          ),
         ),
-      ),
+        Positioned(
+          left: 0,
+          right: 0,
+          top: -20,
+          child: Center(
+            child: _FeatureTab(
+              tab: AppTab.refer,
+              onPressed: () => onSelect(AppTab.refer),
+            ),
+          ),
+        ),
+      ],
     ),
   );
 }
@@ -117,38 +141,27 @@ class _FeatureTab extends StatelessWidget {
       onTap: onPressed,
       behavior: HitTestBehavior.opaque,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Transform.translate(
-            offset: const Offset(0, -22),
-            child: Container(
-              width: 52,
-              height: 52,
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                color: AppColors.accent,
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.canvas, width: 5),
-                boxShadow: AppShadows.card,
-              ),
-              child: const FittedBox(
-                fit: BoxFit.cover,
-                child: Padding(
-                  padding: EdgeInsets.only(top: 14),
-                  child: FaithMascot(),
-                ),
-              ),
+          Container(
+            width: 54,
+            height: 54,
+            padding: const EdgeInsets.all(7),
+            decoration: BoxDecoration(
+              color: AppColors.accent,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.canvas, width: 4),
+              boxShadow: AppShadows.card,
             ),
+            child: const FittedBox(fit: BoxFit.contain, child: FaithMascot()),
           ),
-          Transform.translate(
-            offset: const Offset(0, -18),
-            child: Text(
-              tab.label,
-              style: AppTypography.figtree(
-                size: 10.5,
-                weight: 800,
-                color: AppColors.accentText,
-              ),
+          const SizedBox(height: 2),
+          Text(
+            tab.label,
+            style: AppTypography.figtree(
+              size: 10.5,
+              weight: 800,
+              color: AppColors.accentText,
             ),
           ),
         ],

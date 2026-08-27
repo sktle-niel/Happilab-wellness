@@ -37,6 +37,7 @@ class Product {
       blurb: 'Gentle wellness soap with sunscreen benefits',
       price: '₱150',
       pointsRange: '7–11',
+      tag: 'BEST SELLER',
       imageUrl: 'https://images.unsplash.com/photo-1584305574647-0cc949a2bb9f?w=400&q=80',
     ),
     Product(
@@ -44,6 +45,7 @@ class Product {
       blurb: 'Daily protection made for everyday glow',
       price: '₱380',
       pointsRange: '19–27',
+      tag: 'TOP EARNER',
       imageUrl: 'https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=400&q=80',
     ),
     Product(
