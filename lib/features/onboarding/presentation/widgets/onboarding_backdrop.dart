@@ -23,6 +23,7 @@ class OnboardingBackdrop extends StatefulWidget {
   static const List<String> clips = [
     'assets/video/onboarding-lotion.mp4',
     'assets/video/onboarding-routine.mp4',
+    'assets/video/onboarding-coffee.mp4',
   ];
 
   /// The cover plus one stage per clip — what the progress pips count.
