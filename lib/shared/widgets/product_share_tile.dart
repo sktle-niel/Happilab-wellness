@@ -27,6 +27,10 @@ class ProductShareTile extends StatelessWidget {
   static const double _imageRadius = 20;
   static const double _inset = 12;
 
+  /// How far the share button sits past the card's corner. Kept under the
+  /// column gap so it never lands on the card beside it.
+  static const double _overhang = 10;
+
   final Product product;
   final VoidCallback onShare;
   final bool showDescription;
@@ -58,8 +62,8 @@ class ProductShareTile extends StatelessWidget {
         ),
       ),
       Positioned(
-        right: -2,
-        bottom: -2,
+        right: -_overhang,
+        bottom: -_overhang,
         child: _ShareButton(onPressed: onShare, label: product.name),
       ),
     ],
@@ -134,7 +138,7 @@ class _Details extends StatelessWidget {
       const SizedBox(height: 10),
       // The share button overhangs this corner, so the money keeps clear of it.
       Padding(
-        padding: const EdgeInsets.only(right: 56),
+        padding: const EdgeInsets.only(right: 54),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -174,10 +178,13 @@ class _ShareButton extends StatelessWidget {
       scale: 0.9,
       onPressed: onPressed,
       child: Container(
-        padding: const EdgeInsets.all(7),
+        // The ring is page colour, so where it crosses the card it reads as a
+        // notch cut out of the corner, and where it crosses the page it
+        // disappears.
+        padding: const EdgeInsets.all(9),
         decoration: const BoxDecoration(
           color: AppColors.canvas,
-          borderRadius: BorderRadius.all(Radius.circular(26)),
+          borderRadius: BorderRadius.all(Radius.circular(28)),
         ),
         child: Container(
           width: 52,
