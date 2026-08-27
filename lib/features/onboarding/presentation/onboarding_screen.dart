@@ -22,8 +22,13 @@ class OnboardingScreen extends StatefulWidget {
   static const String headline =
       'Share Wellness, Earn Real Money with Every Referral!';
 
-  /// How long each backdrop stage holds.
-  static const Duration stageHold = Duration(milliseconds: 3600);
+  /// How long the brand cover holds before the first clip.
+  static const Duration coverHold = Duration(milliseconds: 3600);
+
+  /// Ceiling on a clip stage. Playback normally advances the stage when the
+  /// clip ends; this is the guard for a clip that never starts or never
+  /// finishes, so the backdrop can never strand on one frame.
+  static const Duration clipTimeout = Duration(seconds: 12);
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -36,7 +41,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   void initState() {
     super.initState();
-    _stageTimer = Timer.periodic(OnboardingScreen.stageHold, _advanceStage);
+    _scheduleStageTimeout();
   }
 
   @override
@@ -45,9 +50,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     super.dispose();
   }
 
-  void _advanceStage(Timer timer) {
+  void _scheduleStageTimeout() {
+    _stageTimer?.cancel();
+    _stageTimer = Timer(
+      _stageIndex == 0
+          ? OnboardingScreen.coverHold
+          : OnboardingScreen.clipTimeout,
+      _advanceStage,
+    );
+  }
+
+  void _advanceStage() {
     if (!mounted) return;
     setState(() => _stageIndex = (_stageIndex + 1) % OnboardingBackdrop.count);
+    _scheduleStageTimeout();
   }
 
   @override
@@ -56,7 +72,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     body: Stack(
       fit: StackFit.expand,
       children: [
-        OnboardingBackdrop(stageIndex: _stageIndex),
+        OnboardingBackdrop(
+          stageIndex: _stageIndex,
+          onClipFinished: _advanceStage,
+        ),
         SafeArea(
           child: Align(
             alignment: Alignment.bottomCenter,

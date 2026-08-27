@@ -39,6 +39,10 @@ dependencies:
   # There is no SDK equivalent — see CLAUDE.md > Security.
   flutter_secure_storage: ^11.0.0
 
+  # Onboarding plays short brand clips behind the pitch; there is no SDK
+  # video surface.
+  video_player: ^2.14.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -53,6 +57,10 @@ dev_dependencies:
   # Test seam only: lets SecureTokenStore run against an in-memory platform.
   flutter_secure_storage_platform_interface: ^2.0.3
 
+  # Generates the launcher icon set from one source image. Tooling only —
+  # it produces assets at build time and ships no code.
+  flutter_launcher_icons: ^0.14.4
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -62,6 +70,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/video/
 
   # Variable fonts: one file per family, weights selected at runtime through
   # FontVariation in AppTypography.
@@ -103,3 +112,15 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Launcher icons, generated with: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  image_path: assets/images/faith-mark.png
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  adaptive_icon_background: "#FDF4E6"
+  adaptive_icon_foreground: assets/images/faith-mark.png
+  # The mark fills its square, and Android crops an adaptive icon to a safe
+  # circle; the inset keeps the ring from being clipped.
+  adaptive_icon_foreground_inset: 18

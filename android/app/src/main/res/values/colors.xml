@@ -3,4 +3,5 @@
     <!-- Keep in step with AppColors.canvas so the Android launch screen hands
          over to the Flutter loader without a white flash. -->
     <color name="brand_canvas">#FDF4E6</color>
+	<color name="ic_launcher_background">#FDF4E6</color>
 </resources>

@@ -29,7 +29,11 @@ void main() {
       expect(find.text('Our Products'), findsOneWidget);
 
       await tester.pump(ProductIntroScreen.hold);
-      await tester.pumpAndSettle();
+      // Explicit pumps, not pumpAndSettle: onboarding animates its backdrop
+      // forever, so settling would run the clock into the next stage.
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump();
 
       expect(find.text('Our Products'), findsNothing);
       expect(find.text('Get Started'), findsOneWidget);
