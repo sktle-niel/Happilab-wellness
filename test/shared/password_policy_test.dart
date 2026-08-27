@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:happilab/features/auth/domain/password_policy.dart';
+import 'package:happilab/shared/domain/password_policy.dart';
 
 void main() {
   group('PasswordPolicy', () {

@@ -10,6 +10,7 @@ class ScreenHeader extends StatelessWidget {
     required this.title,
     this.onBack,
     this.trailing,
+    this.showBack = true,
     super.key,
   });
 
@@ -19,15 +20,21 @@ class ScreenHeader extends StatelessWidget {
   final VoidCallback? onBack;
   final Widget? trailing;
 
+  /// False on a screen that is a destination rather than a step — a tab has
+  /// nothing behind it to return to.
+  final bool showBack;
+
   @override
   Widget build(BuildContext context) => Row(
     children: [
-      CircleIconButton(
-        icon: Icons.arrow_back,
-        semanticLabel: 'Back',
-        onPressed: onBack ?? Navigator.of(context).pop,
-      ),
-      const SizedBox(width: AppSpacing.sm + 2),
+      if (showBack) ...[
+        CircleIconButton(
+          icon: Icons.arrow_back,
+          semanticLabel: 'Back',
+          onPressed: onBack ?? Navigator.of(context).pop,
+        ),
+        const SizedBox(width: AppSpacing.sm + 2),
+      ],
       Expanded(
         child: Text(
           title,

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:happilab/app/router/app_routes.dart';
-import 'package:happilab/shared/domain/catalogue.dart';
 import 'package:happilab/features/onboarding/presentation/product_intro_screen.dart';
+import 'package:happilab/shared/domain/catalogue.dart';
 
 import '../../support/harness.dart';
 

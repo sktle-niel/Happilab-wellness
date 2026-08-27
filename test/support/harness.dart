@@ -34,6 +34,8 @@ void usePhoneViewport(WidgetTester tester) {
 /// button below the fold, exactly as it does for a real user.
 Future<void> tapVisible(WidgetTester tester, Finder finder) async {
   await tester.ensureVisible(finder);
-  await tester.pumpAndSettle();
+  // A plain pump, not pumpAndSettle: several screens animate forever, so there
+  // is no settled frame to wait for.
+  await tester.pump(const Duration(milliseconds: 300));
   await tester.tap(finder);
 }

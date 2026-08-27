@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../core/security/input_validator.dart';
-import '../domain/password_policy.dart';
+import '../../../shared/domain/password_policy.dart';
 
 /// Form state for the create-account screen.
 ///

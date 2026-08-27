@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme/app_colors.dart';
-import '../../../../app/theme/app_tokens.dart';
-import '../../../../app/theme/app_typography.dart';
-import '../../domain/password_policy.dart';
+import '../../app/theme/app_colors.dart';
+import '../../app/theme/app_tokens.dart';
+import '../../app/theme/app_typography.dart';
+import '../domain/password_policy.dart';
 
 /// Live checklist under the password field.
 ///

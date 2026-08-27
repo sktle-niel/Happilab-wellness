@@ -1,4 +1,4 @@
-import '../../../shared/utils/number_format.dart';
+import '../utils/number_format.dart';
 
 /// What kind of movement an activity row reports, which decides how its amount
 /// is coloured.

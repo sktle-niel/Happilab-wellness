@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../app/shell/app_shell_scope.dart';
+import '../../../app/shell/widgets/faith_nav_bar.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
+import '../../../shared/domain/member_summary.dart';
+import '../../../shared/utils/share_actions.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/divided_column.dart';
 import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/screen_header.dart';
-import '../../home/domain/member_summary.dart';
 import '../domain/referral.dart';
 import 'widgets/referral_row.dart';
 
@@ -24,9 +27,17 @@ class MyReferralsScreen extends StatelessWidget {
       backgroundColor: AppColors.canvas,
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
+          padding: const EdgeInsets.fromLTRB(
+            20,
+            12,
+            20,
+            FaithNavBar.contentInset,
+          ),
           children: [
-            const ScreenHeader(title: 'My referrals'),
+            ScreenHeader(
+              showBack: !AppShellScope.contains(context),
+              title: 'My referrals',
+            ),
             const Gap(AppSpacing.md),
             _CodeCard(code: summary.referralCode),
             const Gap(14),
@@ -77,19 +88,11 @@ class _CodeCardState extends State<_CodeCard> {
     setState(() => _hasCopied = true);
   }
 
-  Future<void> _shareInvite() async {
-    final messenger = ScaffoldMessenger.of(context);
-    await Clipboard.setData(
-      ClipboardData(
-        text:
-            'Join me on Faith Wellness and use my code ${widget.code} when '
-            'you sign up.',
-      ),
-    );
-    messenger.showSnackBar(
-      const SnackBar(content: Text('Invite message copied.')),
-    );
-  }
+  Future<void> _shareInvite() => ShareActions.copy(
+    context,
+    ShareActions.inviteMessage(widget.code),
+    confirmation: 'Invite message copied.',
+  );
 
   @override
   Widget build(BuildContext context) => AppCard(

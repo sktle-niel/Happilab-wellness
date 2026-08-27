@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../shared/domain/member_summary.dart';
 import '../../../../shared/widgets/faith_mascot.dart';
 import '../../../../shared/widgets/gap.dart';
 import '../../../../shared/widgets/pressable_scale.dart';
-import '../../domain/member_summary.dart';
 
 /// The gold hero card: what the member has earned, and the two things they can
 /// do about it.

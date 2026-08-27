@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../shared/domain/activity_entry.dart';
 import '../../../../shared/widgets/app_card.dart';
 import '../../../../shared/widgets/divided_column.dart';
-import '../../domain/activity_entry.dart';
 
 /// Recent movements on the member's balance.
 class ActivityCard extends StatelessWidget {
