@@ -17,12 +17,13 @@ class HappilabApp extends StatelessWidget {
   Widget build(BuildContext context) => AppScope(
     dependencies: dependencies,
     child: MaterialApp(
-      title: 'Happilab',
+      title: 'Faith Wellness',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
-      themeMode: ThemeMode.system,
-      initialRoute: AppRoutes.counter,
+      // The design canvas has no dark variant yet; pinning light keeps the app
+      // matching it instead of half-rendering an undesigned theme.
+      themeMode: ThemeMode.light,
+      initialRoute: AppRoutes.splash,
       onGenerateRoute: AppRouter.onGenerateRoute,
     ),
   );

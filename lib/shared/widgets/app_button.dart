@@ -1,19 +1,31 @@
 import 'package:flutter/material.dart';
 
+import '../../app/theme/app_colors.dart';
+import '../../app/theme/app_tokens.dart';
+import '../../app/theme/app_typography.dart';
 import 'gap.dart';
+import 'pressable_scale.dart';
 
-enum AppButtonVariant { primary, secondary }
+enum AppButtonVariant {
+  /// Gold pill — the single primary action on a screen.
+  primary,
+
+  /// White pill on the cream canvas, used for provider sign-in.
+  secondary,
+}
 
 /// The app's button. Screens use this instead of raw Material buttons so
-/// sizing, loading behaviour and disabled state stay identical everywhere.
+/// sizing, press feedback, loading behaviour and disabled state stay identical
+/// everywhere.
 ///
-/// While [isLoading] is true the button is inert — the single most common
-/// source of duplicate submissions is a button that stays tappable.
+/// While [isLoading] is true the button is inert — the single most common source
+/// of duplicate submissions is a button that stays tappable.
 class AppButton extends StatelessWidget {
   const AppButton({
     required this.label,
     this.onPressed,
     this.icon,
+    this.leading,
     this.isLoading = false,
     this.variant = AppButtonVariant.primary,
     super.key,
@@ -23,6 +35,7 @@ class AppButton extends StatelessWidget {
     required this.label,
     this.onPressed,
     this.icon,
+    this.leading,
     this.isLoading = false,
     super.key,
   }) : variant = AppButtonVariant.secondary;
@@ -30,51 +43,90 @@ class AppButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
   final IconData? icon;
+
+  /// Arbitrary leading widget — used for multi-colour provider marks that an
+  /// [IconData] cannot express.
+  final Widget? leading;
   final bool isLoading;
   final AppButtonVariant variant;
 
+  bool get _isPrimary => variant == AppButtonVariant.primary;
+
   @override
   Widget build(BuildContext context) {
-    final callback = isLoading ? null : onPressed;
-    final child = isLoading
-        ? const _ButtonProgress()
-        : _ButtonContent(label: label, icon: icon);
+    final isEnabled = onPressed != null && !isLoading;
+    final foreground = _isPrimary ? AppColors.surface : AppColors.textPrimary;
 
-    return switch (variant) {
-      AppButtonVariant.primary => FilledButton(
-        onPressed: callback,
-        child: child,
+    return Semantics(
+      button: true,
+      enabled: isEnabled,
+      label: label,
+      child: PressableScale(
+        onPressed: isEnabled ? onPressed : null,
+        child: Opacity(
+          opacity: isEnabled ? 1 : 0.55,
+          child: Container(
+            height: AppSpacing.buttonHeight,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: _isPrimary ? AppColors.accent : AppColors.surface,
+              borderRadius: AppRadius.pill,
+              boxShadow: _isPrimary ? null : AppShadows.raised,
+            ),
+            child: isLoading
+                ? _ButtonProgress(color: foreground)
+                : _ButtonContent(
+                    label: label,
+                    icon: icon,
+                    leading: leading,
+                    style: _isPrimary
+                        ? AppTypography.buttonPrimary
+                        : AppTypography.buttonSecondary,
+                  ),
+          ),
+        ),
       ),
-      AppButtonVariant.secondary => OutlinedButton(
-        onPressed: callback,
-        child: child,
-      ),
-    };
+    );
   }
 }
 
 class _ButtonContent extends StatelessWidget {
-  const _ButtonContent({required this.label, this.icon});
+  const _ButtonContent({
+    required this.label,
+    required this.style,
+    this.icon,
+    this.leading,
+  });
 
   final String label;
+  final TextStyle style;
   final IconData? icon;
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context) => Row(
     mainAxisSize: MainAxisSize.min,
     children: [
-      if (icon != null) ...[Icon(icon, size: 20), const Gap.sm()],
-      Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
+      if (leading != null) ...[leading!, const Gap.sm()],
+      if (leading == null && icon != null) ...[
+        Icon(icon, size: 19, color: style.color),
+        const Gap.sm(),
+      ],
+      Flexible(
+        child: Text(label, style: style, overflow: TextOverflow.ellipsis),
+      ),
     ],
   );
 }
 
 class _ButtonProgress extends StatelessWidget {
-  const _ButtonProgress();
+  const _ButtonProgress({required this.color});
+
+  final Color color;
 
   @override
-  Widget build(BuildContext context) => const SizedBox.square(
+  Widget build(BuildContext context) => SizedBox.square(
     dimension: 20,
-    child: CircularProgressIndicator(strokeWidth: 2),
+    child: CircularProgressIndicator(strokeWidth: 2, color: color),
   );
 }

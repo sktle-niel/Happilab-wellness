@@ -1,22 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:happilab/app/app.dart';
-import 'package:happilab/app/di/app_dependencies.dart';
-import 'package:happilab/core/config/app_config.dart';
+import 'package:happilab/app/router/app_routes.dart';
+import 'package:happilab/shared/widgets/app_button.dart';
 
-import '../../support/fake_http_transport.dart';
+import '../../support/harness.dart';
 
 void main() {
-  AppDependencies buildDependencies() => AppDependencies.withTransport(
-    config: AppConfig(
-      environment: AppEnvironment.dev,
-      apiBaseUrl: Uri.parse('https://api.test.local'),
-    ),
-    transport: FakeHttpTransport(),
-  );
+  // Counter stands in for Home until that screen is designed and built.
+  Future<void> pumpCounter(WidgetTester tester) async {
+    usePhoneViewport(tester);
+    await tester.pumpWidget(testApp(initialRoute: AppRoutes.home));
+  }
 
   testWidgets('counter starts at zero and increments on tap', (tester) async {
-    await tester.pumpWidget(HappilabApp(dependencies: buildDependencies()));
+    await pumpCounter(tester);
 
     expect(find.text('0'), findsOneWidget);
 
@@ -28,14 +25,14 @@ void main() {
   });
 
   testWidgets('reset is disabled until the counter moves', (tester) async {
-    await tester.pumpWidget(HappilabApp(dependencies: buildDependencies()));
+    await pumpCounter(tester);
 
-    final resetButton = find.widgetWithText(OutlinedButton, 'Reset');
-    expect(tester.widget<OutlinedButton>(resetButton).onPressed, isNull);
+    final resetButton = find.widgetWithText(AppButton, 'Reset');
+    expect(tester.widget<AppButton>(resetButton).onPressed, isNull);
 
     await tester.tap(find.byIcon(Icons.add));
     await tester.pump();
-    expect(tester.widget<OutlinedButton>(resetButton).onPressed, isNotNull);
+    expect(tester.widget<AppButton>(resetButton).onPressed, isNotNull);
 
     await tester.tap(resetButton);
     await tester.pump();
