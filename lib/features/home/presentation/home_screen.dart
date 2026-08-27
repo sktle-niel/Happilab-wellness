@@ -111,10 +111,14 @@ class _ProductGrid extends StatelessWidget {
     itemCount: products.length,
     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
       crossAxisCount: 2,
-      mainAxisSpacing: 12,
+      // Extra vertical room: the share button overhangs the card's bottom
+      // corner, and would otherwise sit on the row below.
+      mainAxisSpacing: 22,
       crossAxisSpacing: 12,
-      // Tall enough for a two-line name above the price row.
-      childAspectRatio: 0.72,
+      // A square photo plus the name and the money underneath it.
+      // Room for a two-line name and a two-line earn line, which is what
+      // the longest product needs in a half-width column.
+      childAspectRatio: 0.60,
     ),
     itemBuilder: (context, index) {
       final product = products[index];

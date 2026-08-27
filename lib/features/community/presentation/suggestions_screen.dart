@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_colors.dart';
+import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/domain/catalogue.dart';
 import '../../../shared/domain/member_summary.dart';
@@ -48,16 +49,9 @@ class SuggestionsScreen extends StatelessWidget {
             ),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
-              sliver: SliverGrid.builder(
+              sliver: SliverList.separated(
                 itemCount: Product.showcase.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  // Taller than the home grid: this tile also carries the
-                  // product description.
-                  childAspectRatio: 0.58,
-                ),
+                separatorBuilder: (context, index) => const Gap(AppSpacing.md),
                 itemBuilder: (context, index) {
                   final product = Product.showcase[index];
                   return ProductShareTile(
