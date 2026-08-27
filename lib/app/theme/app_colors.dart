@@ -30,11 +30,17 @@ abstract final class AppColors {
 
   static const Color danger = Color(0xFFE0563E);
 
+  /// Warm tint behind chips, avatars and secondary buttons.
+  static const Color cream = Color(0xFFFDEED3);
+
+  /// Deeper gold for small uppercase labels on cream.
+  static const Color accentDeep = Color(0xFFC47A12);
+
   /// Splash decoration.
   static const Color petalLight = Color(0xFFF0C8CD);
   static const Color petalDeep = Color(0xFFDDAAB1);
   static const Color blush = Color(0xFFF5B8BD);
-  static const Color mascotBody = Color(0xFFFDEED3);
+  static const Color mascotBody = cream;
 
   /// Every elevation in the design is the same warm brown at a different alpha.
   static const Color shadow = Color(0xFF966414);

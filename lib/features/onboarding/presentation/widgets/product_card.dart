@@ -5,7 +5,7 @@ import '../../../../app/theme/app_tokens.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../shared/widgets/gap.dart';
 import '../../../../shared/widgets/remote_image.dart';
-import '../../domain/product_highlight.dart';
+import '../../../../shared/domain/catalogue.dart';
 
 /// One product in the intro showcase.
 ///
@@ -14,7 +14,7 @@ import '../../domain/product_highlight.dart';
 class ProductCard extends StatelessWidget {
   const ProductCard({required this.product, this.tiltDegrees = 0, super.key});
 
-  final ProductHighlight product;
+  final Product product;
   final double tiltDegrees;
 
   @override
@@ -46,7 +46,7 @@ class ProductCard extends StatelessWidget {
 class _ProductDetails extends StatelessWidget {
   const _ProductDetails({required this.product});
 
-  final ProductHighlight product;
+  final Product product;
 
   @override
   Widget build(BuildContext context) => Column(

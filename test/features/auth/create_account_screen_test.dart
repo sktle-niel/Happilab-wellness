@@ -85,7 +85,10 @@ void main() {
       await fillValidForm(tester, referralCode: 'FAITH-MARIA24');
 
       await tapVisible(tester, submitButton());
-      await tester.pumpAndSettle();
+      // Explicit pumps, not pumpAndSettle: home animates its mascot caret
+      // forever, so there is never a settled frame to wait for.
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
 
       expect(find.text('Join and start earning from day one'), findsNothing);
     });

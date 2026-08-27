@@ -8,7 +8,7 @@ import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/rise_in.dart';
-import '../domain/product_highlight.dart';
+import '../../../shared/domain/catalogue.dart';
 import 'widgets/product_card.dart';
 
 /// The product showcase that plays between the loader and the onboarding pitch.
@@ -69,8 +69,7 @@ class _ProductIntroScreenState extends State<ProductIntroScreen>
               children: [
                 const _ShowcaseHeading(),
                 const Gap(AppSpacing.md),
-                for (final (index, product)
-                    in ProductHighlight.showcase.indexed) ...[
+                for (final (index, product) in Product.showcase.indexed) ...[
                   if (index > 0) const Gap(12),
                   RiseIn(
                     animation: _entrance,

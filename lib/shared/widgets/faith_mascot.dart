@@ -2,9 +2,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme/app_colors.dart';
+import '../../app/theme/app_colors.dart';
 
-/// The waving mascot on the loader.
+/// The waving mascot. It draws at its natural 96x92; callers that want it
+/// smaller wrap it in a [FittedBox], as the points card does.
 ///
 /// Three controllers, one per rhythm in the design: the body bob (which the
 /// ground shadow shares), the faster arm wave, and the slow blink. Sharing one

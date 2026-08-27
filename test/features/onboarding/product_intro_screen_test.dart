@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:happilab/app/router/app_routes.dart';
-import 'package:happilab/features/onboarding/domain/product_highlight.dart';
+import 'package:happilab/shared/domain/catalogue.dart';
 import 'package:happilab/features/onboarding/presentation/product_intro_screen.dart';
 
 import '../../support/harness.dart';
@@ -18,7 +18,7 @@ void main() {
     ) async {
       await pumpShowcase(tester);
 
-      for (final product in ProductHighlight.showcase) {
+      for (final product in Product.showcase) {
         expect(find.text(product.name), findsOneWidget);
         expect(find.text(product.earnLine), findsOneWidget);
       }

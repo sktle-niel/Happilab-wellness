@@ -6,9 +6,9 @@ import '../../../app/router/app_routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../shared/widgets/brand_mark.dart';
+import '../../../shared/widgets/faith_mascot.dart';
 import '../../../shared/widgets/faith_wordmark.dart';
 import '../../../shared/widgets/floating_petals.dart';
-import 'widgets/faith_mascot.dart';
 
 /// The loader: brand lockup, drifting petals and the mascot, then a hand-off to
 /// the product showcase.

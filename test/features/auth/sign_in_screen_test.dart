@@ -59,7 +59,10 @@ void main() {
       await tester.enterText(identifierField(), 'ivy@gmail.com');
       await tester.enterText(passwordField(), 'Sakura99!');
       await tapVisible(tester, find.text('Sign in'));
-      await tester.pumpAndSettle();
+      // Explicit pumps, not pumpAndSettle: home animates its mascot caret
+      // forever, so there is never a settled frame to wait for.
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
 
       expect(find.text('Welcome back'), findsNothing);
     });
