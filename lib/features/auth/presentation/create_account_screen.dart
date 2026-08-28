@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/router/app_routes.dart';
-import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/widgets/app_button.dart';
@@ -15,6 +14,7 @@ import '../../../shared/widgets/inline_action_text.dart';
 import '../../../shared/widgets/or_divider.dart';
 import '../../../shared/widgets/password_requirement_chips.dart';
 import 'create_account_controller.dart';
+import '../../../app/theme/app_palette.dart';
 
 /// Join with a referral code — the only way into the programme.
 class CreateAccountScreen extends StatefulWidget {
@@ -36,8 +36,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   void _submit() {
     if (!_controller.validate()) return;
     // No auth backend yet: a valid form goes straight through. Swap this for a
-    // repository call once the API exists.
-    Navigator.of(context).pushReplacementNamed(AppRoutes.home);
+    // repository call once the API exists. The first-run stack goes with it:
+    // an onboarding route left underneath keeps cycling its video clips.
+    Navigator.of(context)
+        .pushNamedAndRemoveUntil(AppRoutes.home, (route) => false);
   }
 
   void _backToSignIn() {
@@ -55,7 +57,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppColors.canvas,
+    backgroundColor: context.palette.canvas,
     body: SafeArea(
       child: CenteredScrollView(
         padding: const EdgeInsets.fromLTRB(
@@ -113,7 +115,7 @@ class _CreateAccountHeader extends StatelessWidget {
       const Gap(2),
       Text(
         'Join and start earning from day one',
-        style: AppTypography.screenSubtitle,
+        style: AppTypography.screenSubtitle(context.palette),
         textAlign: TextAlign.center,
       ),
     ],
@@ -166,7 +168,7 @@ class _CreateAccountForm extends StatelessWidget {
         label: 'Referral code',
         requiredNote: '*required',
         controller: controller.referralCode,
-        hint: 'e.g. FAITH-MARIA24',
+        hint: 'e.g. FCV-MARIA24',
         textInputAction: TextInputAction.done,
         helperText: 'Ask the friend who invited you for their code.',
         errorText: controller.referralCodeError,

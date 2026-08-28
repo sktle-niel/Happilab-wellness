@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../app/theme/app_palette.dart';
 
 /// A heading over a paragraph — the shape both the FAQ and the terms use.
 class ProseBlock extends StatelessWidget {
@@ -24,7 +24,7 @@ class ProseBlock extends StatelessWidget {
           style: AppTypography.figtree(
             size: 13.5,
             height: 1.55,
-            color: AppColors.textMuted,
+            color: context.palette.textMuted,
           ),
         ),
       ],

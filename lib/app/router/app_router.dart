@@ -14,7 +14,6 @@ import '../../features/profile/presentation/edit_profile_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/referrals/presentation/how_it_works_screen.dart';
 import '../../features/referrals/presentation/my_referrals_screen.dart';
-import '../../features/rewards/presentation/add_payout_method_screen.dart';
 import '../../features/rewards/presentation/edit_payout_number_screen.dart';
 import '../../features/rewards/presentation/rewards_screen.dart';
 import '../../features/support/presentation/help_center_screen.dart';
@@ -42,7 +41,6 @@ abstract final class AppRouter {
           AppRoutes.howItWorks => (_) => const HowItWorksScreen(),
           AppRoutes.myReferrals => (_) => const MyReferralsScreen(),
           AppRoutes.rewards => (_) => const RewardsScreen(),
-          AppRoutes.addPayoutMethod => (_) => const AddPayoutMethodScreen(),
           AppRoutes.editPayoutNumber => (_) => const EditPayoutNumberScreen(),
           AppRoutes.newsFeed => (_) => const NewsFeedScreen(),
           AppRoutes.testimonials => (_) => const TestimonialsScreen(),

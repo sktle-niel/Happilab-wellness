@@ -8,7 +8,7 @@ enum AppTab {
   home('Home', Icons.home_outlined),
   feed('Feed', Icons.explore_outlined),
   refer('Refer', Icons.card_giftcard_rounded),
-  rewards('Rewards', Icons.account_balance_wallet_outlined),
+  products('Products', Icons.storefront_outlined),
   profile('Profile', Icons.person_outline_rounded);
 
   const AppTab(this.label, this.icon);

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../shared/domain/program_terms.dart';
 import '../../../../shared/widgets/gap.dart';
 import '../../../../shared/widgets/pressable_scale.dart';
 import '../../../../shared/widgets/remote_image.dart';
+import '../../../../app/theme/app_palette.dart';
 
 /// Cream banner pointing at the programme explainer.
 class AffiliateBanner extends StatelessWidget {
@@ -21,8 +21,8 @@ class AffiliateBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(18),
-    decoration: const BoxDecoration(
-      color: AppColors.cream,
+    decoration: BoxDecoration(
+      color: context.palette.tint,
       borderRadius: AppRadius.hero,
     ),
     child: Row(
@@ -38,7 +38,7 @@ class AffiliateBanner extends StatelessWidget {
                   size: 11,
                   weight: 800,
                   letterSpacing: 0.66,
-                  color: AppColors.accentDeep,
+                  color: context.palette.accentDeep,
                 ),
               ),
               const Gap(4),
@@ -83,8 +83,8 @@ class _HowItWorksButton extends StatelessWidget {
         height: 38,
         padding: const EdgeInsets.symmetric(horizontal: 18),
         alignment: Alignment.center,
-        decoration: const BoxDecoration(
-          color: AppColors.accent,
+        decoration: BoxDecoration(
+          color: context.palette.accent,
           borderRadius: AppRadius.pill,
         ),
         child: Text(
@@ -92,7 +92,7 @@ class _HowItWorksButton extends StatelessWidget {
           style: AppTypography.figtree(
             size: 13.5,
             weight: 700,
-            color: AppColors.surface,
+            color: context.palette.onAccent,
           ),
         ),
       ),

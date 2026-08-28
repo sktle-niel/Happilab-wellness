@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/app_colors.dart';
+import '../../app/theme/app_palette.dart';
 
 /// Petals drifting up a cream background — the loader and the onboarding
 /// cover share them.
@@ -12,11 +12,11 @@ class FloatingPetals extends StatelessWidget {
   const FloatingPetals({super.key});
 
   static const List<_PetalSpec> _petals = [
-    _PetalSpec(0.12, 16, 12, 5.5, 0, AppColors.petalLight),
-    _PetalSpec(0.30, 12, 9, 6.5, 1.2, AppColors.petalDeep),
-    _PetalSpec(0.52, 18, 13, 5, 2.1, AppColors.petalLight),
-    _PetalSpec(0.70, 13, 10, 7, 0.6, AppColors.petalDeep),
-    _PetalSpec(0.86, 15, 11, 6, 1.7, AppColors.petalLight),
+    _PetalSpec(0.12, 16, 12, 5.5, 0, AppPalette.petalLight),
+    _PetalSpec(0.30, 12, 9, 6.5, 1.2, AppPalette.petalDeep),
+    _PetalSpec(0.52, 18, 13, 5, 2.1, AppPalette.petalLight),
+    _PetalSpec(0.70, 13, 10, 7, 0.6, AppPalette.petalDeep),
+    _PetalSpec(0.86, 15, 11, 6, 1.7, AppPalette.petalLight),
   ];
 
   @override

@@ -1,15 +1,18 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme/app_colors.dart';
-import '../../../../app/theme/app_tokens.dart';
+import '../../../../app/theme/app_palette.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../shared/domain/member_summary.dart';
-import '../../../../shared/widgets/faith_mascot.dart';
 import '../../../../shared/widgets/gap.dart';
 import '../../../../shared/widgets/pressable_scale.dart';
 
-/// The gold hero card: what the member has earned, and the two things they can
-/// do about it.
+/// The accent hero card, cut like a ticket: the balance on the left, the two
+/// things the member can do about it as round buttons on the right.
+///
+/// It sits at a slight tilt — a ticket is something you are handed, not a
+/// panel in a form.
 class PointsCard extends StatelessWidget {
   const PointsCard({
     required this.summary,
@@ -18,57 +21,79 @@ class PointsCard extends StatelessWidget {
     super.key,
   });
 
-  static const String mascotMessage = 'Keep sharing!';
+  static const double _tiltDegrees = -2.5;
 
   final MemberSummary summary;
   final VoidCallback onCashOut;
   final VoidCallback onShareCode;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(22),
-    decoration: const BoxDecoration(
-      color: AppColors.accent,
-      borderRadius: AppRadius.hero,
-      boxShadow: AppShadows.soft,
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  Widget build(BuildContext context) => Transform.rotate(
+    angle: _tiltDegrees * math.pi / 180,
+    child: PhysicalShape(
+      clipper: const _TicketClipper(),
+      color: context.palette.accent,
+      elevation: 8,
+      shadowColor: context.palette.shadow,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(26, 20, 22, 18),
+        child: Row(
           children: [
             Expanded(child: _Balance(summary: summary)),
-            const Gap.sm(),
-            const _MascotAside(),
-          ],
-        ),
-        const Gap(18),
-        Row(
-          children: [
-            Expanded(
-              child: _CardAction(
-                label: 'Cash out',
-                onPressed: onCashOut,
-                background: AppColors.surface,
-                foreground: AppColors.accentText,
-              ),
+            const Gap(12),
+            _RoundAction(
+              label: 'Cash out',
+              icon: Icons.account_balance_wallet_outlined,
+              onPressed: onCashOut,
             ),
-            const Gap.sm(),
-            Expanded(
-              child: _CardAction(
-                label: 'Share code',
-                onPressed: onShareCode,
-                background: Colors.white.withValues(alpha: 0.22),
-                foreground: AppColors.surface,
-                outlined: true,
-              ),
+            const Gap(10),
+            _RoundAction(
+              label: 'Share code',
+              icon: Icons.share_outlined,
+              onPressed: onShareCode,
             ),
           ],
         ),
-      ],
+      ),
     ),
   );
+}
+
+/// A rounded card with a semicircle bitten out of each side at mid-height —
+/// the tear notches that make it read as a ticket.
+class _TicketClipper extends CustomClipper<Path> {
+  const _TicketClipper();
+
+  static const double _cornerRadius = 22;
+  static const double _notchRadius = 12;
+
+  @override
+  Path getClip(Size size) {
+    final card = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Offset.zero & size,
+          const Radius.circular(_cornerRadius),
+        ),
+      );
+    final notches = Path()
+      ..addOval(
+        Rect.fromCircle(
+          center: Offset(0, size.height / 2),
+          radius: _notchRadius,
+        ),
+      )
+      ..addOval(
+        Rect.fromCircle(
+          center: Offset(size.width, size.height / 2),
+          radius: _notchRadius,
+        ),
+      );
+    return Path.combine(PathOperation.difference, card, notches);
+  }
+
+  @override
+  bool shouldReclip(_TicketClipper oldClipper) => false;
 }
 
 class _Balance extends StatelessWidget {
@@ -77,190 +102,98 @@ class _Balance extends StatelessWidget {
   final MemberSummary summary;
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Text(
-        'YOUR POINTS',
-        style: AppTypography.figtree(
-          size: 11.5,
-          weight: 700,
-          letterSpacing: 0.92,
-          color: Colors.white.withValues(alpha: 0.85),
-        ),
-      ),
-      const Gap(3),
-      Text.rich(
-        TextSpan(
-          text: summary.pointsFormatted,
+  Widget build(BuildContext context) {
+    final ink = context.palette.onAccent;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'YOUR POINTS',
           style: AppTypography.figtree(
-            size: 27,
-            weight: 800,
-            height: 1.15,
-            letterSpacing: -0.54,
-            color: AppColors.surface,
+            size: 11,
+            weight: 700,
+            letterSpacing: 1.1,
+            color: ink.withValues(alpha: 0.75),
           ),
+        ),
+        const Gap(6),
+        Text(
+          '${summary.pointsFormatted} POINTS',
+          style: AppTypography.figtree(
+            size: 26,
+            weight: 800,
+            height: 1.1,
+            letterSpacing: -0.5,
+            color: ink,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const Gap(4),
+        Text(
+          '= ${summary.pesoValue}',
+          style: AppTypography.figtree(
+            size: 13,
+            weight: 700,
+            color: ink.withValues(alpha: 0.85),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// A disc with its name beneath — the action reads at a glance and the label
+/// keeps it honest.
+class _RoundAction extends StatelessWidget {
+  const _RoundAction({
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  static const double _size = 48;
+
+  final String label;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+
+    return Semantics(
+      button: true,
+      label: label,
+      child: PressableScale(
+        scale: 0.94,
+        onPressed: onPressed,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            TextSpan(
-              text: '  pts',
+            Container(
+              width: _size,
+              height: _size,
+              decoration: BoxDecoration(
+                color: palette.surface,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 21, color: palette.accentText),
+            ),
+            const Gap(6),
+            Text(
+              label,
               style: AppTypography.figtree(
-                size: 14,
-                color: Colors.white.withValues(alpha: 0.85),
+                size: 11.5,
+                weight: 700,
+                color: palette.onAccent,
               ),
             ),
           ],
         ),
       ),
-      const Gap(2),
-      Text(
-        '= ${summary.pesoValue}',
-        style: AppTypography.figtree(
-          size: 13,
-          color: Colors.white.withValues(alpha: 0.9),
-        ),
-      ),
-    ],
-  );
-}
-
-/// The mascot and its speech bubble, which is what stops the balance card from
-/// reading like a bank statement.
-class _MascotAside extends StatelessWidget {
-  const _MascotAside();
-
-  @override
-  Widget build(BuildContext context) => Row(
-    mainAxisSize: MainAxisSize.min,
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Padding(
-        padding: EdgeInsets.only(top: 2),
-        child: _SpeechBubble(message: PointsCard.mascotMessage),
-      ),
-      const Gap(6),
-      SizedBox(
-        width: 72,
-        height: 70,
-        child: FittedBox(fit: BoxFit.contain, child: const FaithMascot()),
-      ),
-    ],
-  );
-}
-
-class _SpeechBubble extends StatelessWidget {
-  const _SpeechBubble({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-    decoration: const BoxDecoration(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(14),
-        topRight: Radius.circular(14),
-        bottomLeft: Radius.circular(14),
-        bottomRight: Radius.circular(4),
-      ),
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          message,
-          style: AppTypography.figtree(
-            size: 12,
-            weight: 800,
-            color: AppColors.accentText,
-          ),
-        ),
-        const SizedBox(width: 2),
-        const _BlinkingCaret(),
-      ],
-    ),
-  );
-}
-
-/// The typing caret from the design — a small sign of life on a static card.
-class _BlinkingCaret extends StatefulWidget {
-  const _BlinkingCaret();
-
-  @override
-  State<_BlinkingCaret> createState() => _BlinkingCaretState();
-}
-
-class _BlinkingCaretState extends State<_BlinkingCaret>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _blink = AnimationController(
-    vsync: this,
-    duration: const Duration(seconds: 1),
-  )..repeat();
-
-  @override
-  void dispose() {
-    _blink.dispose();
-    super.dispose();
+    );
   }
-
-  @override
-  Widget build(BuildContext context) => AnimatedBuilder(
-    animation: _blink,
-    builder: (context, child) =>
-        Opacity(opacity: _blink.value < 0.5 ? 1 : 0, child: child),
-    child: const SizedBox(
-      width: 2,
-      height: 11,
-      child: ColoredBox(color: AppColors.accentText),
-    ),
-  );
-}
-
-class _CardAction extends StatelessWidget {
-  const _CardAction({
-    required this.label,
-    required this.onPressed,
-    required this.background,
-    required this.foreground,
-    this.outlined = false,
-  });
-
-  final String label;
-  final VoidCallback onPressed;
-  final Color background;
-  final Color foreground;
-  final bool outlined;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    button: true,
-    label: label,
-    child: PressableScale(
-      scale: 0.96,
-      onPressed: onPressed,
-      child: Container(
-        height: 46,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: background,
-          borderRadius: AppRadius.pill,
-          border: outlined
-              ? Border.all(
-                  color: Colors.white.withValues(alpha: 0.6),
-                  width: 1.5,
-                )
-              : null,
-        ),
-        child: Text(
-          label,
-          style: AppTypography.figtree(
-            size: 15,
-            weight: 700,
-            color: foreground,
-          ),
-        ),
-      ),
-    ),
-  );
 }

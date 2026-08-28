@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_typography.dart';
+import '../../app/theme/app_palette.dart';
 
 /// A centred sentence ending in a tappable phrase — "Already a member? Sign in".
 ///
@@ -24,7 +24,7 @@ class InlineActionText extends StatelessWidget {
     alignment: WrapAlignment.center,
     crossAxisAlignment: WrapCrossAlignment.center,
     children: [
-      Text(text, style: AppTypography.footnote),
+      Text(text, style: AppTypography.footnote(context.palette)),
       GestureDetector(
         onTap: onPressed,
         behavior: HitTestBehavior.opaque,
@@ -35,7 +35,7 @@ class InlineActionText extends StatelessWidget {
             style: AppTypography.figtree(
               size: 13,
               weight: 800,
-              color: AppColors.accentText,
+              color: context.palette.accentText,
             ),
           ),
         ),

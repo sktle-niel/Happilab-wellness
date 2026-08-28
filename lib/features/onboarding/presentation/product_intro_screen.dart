@@ -3,13 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../app/router/app_routes.dart';
-import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/domain/catalogue.dart';
 import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/rise_in.dart';
 import 'widgets/product_card.dart';
+import '../../../app/theme/app_palette.dart';
 
 /// The product showcase that plays between the loader and the onboarding pitch.
 ///
@@ -58,7 +58,7 @@ class _ProductIntroScreenState extends State<ProductIntroScreen>
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppColors.canvas,
+    backgroundColor: context.palette.canvas,
     body: SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 22),
@@ -99,12 +99,12 @@ class _ShowcaseHeading extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     children: [
       Text(
-        'FAITH WELLNESS',
+        'FALCON CREST VENTURES',
         style: AppTypography.figtree(
           size: 11,
           weight: 800,
           letterSpacing: 2.64,
-          color: AppColors.accentText,
+          color: context.palette.accentText,
         ),
       ),
       Text(

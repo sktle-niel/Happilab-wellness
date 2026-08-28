@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/divided_column.dart';
@@ -8,6 +7,7 @@ import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/screen_header.dart';
 import '../domain/support_content.dart';
 import 'widgets/prose_block.dart';
+import '../../../app/theme/app_palette.dart';
 
 /// The agreement, in the plainest wording the design allows.
 class TermsScreen extends StatelessWidget {
@@ -15,7 +15,7 @@ class TermsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppColors.canvas,
+    backgroundColor: context.palette.canvas,
     body: SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
@@ -34,7 +34,7 @@ class TermsScreen extends StatelessWidget {
                     SupportContent.lastUpdated,
                     style: AppTypography.figtree(
                       size: 12,
-                      color: AppColors.textFaint,
+                      color: context.palette.textFaint,
                     ),
                   ),
                 ),

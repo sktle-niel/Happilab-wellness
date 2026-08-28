@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_tokens.dart';
+import '../../app/theme/app_palette.dart';
 
 /// The white card the content screens are built from.
 ///
@@ -11,7 +11,7 @@ class AppCard extends StatelessWidget {
   const AppCard({
     required this.child,
     this.padding = const EdgeInsets.all(18),
-    this.color = AppColors.surface,
+    this.color,
     this.borderRadius = AppRadius.card,
     this.clip = false,
     super.key,
@@ -20,7 +20,7 @@ class AppCard extends StatelessWidget {
   /// Rows that run edge to edge (lists with dividers) need their own padding.
   const AppCard.flush({
     required this.child,
-    this.color = AppColors.surface,
+    this.color,
     this.borderRadius = AppRadius.hero,
     super.key,
   }) : padding = EdgeInsets.zero,
@@ -28,7 +28,9 @@ class AppCard extends StatelessWidget {
 
   final Widget child;
   final EdgeInsetsGeometry padding;
-  final Color color;
+
+  /// Defaults to the palette's surface.
+  final Color? color;
   final BorderRadius borderRadius;
 
   /// Clips children to the radius — needed when a child paints to the edge.
@@ -39,9 +41,9 @@ class AppCard extends StatelessWidget {
     padding: padding,
     clipBehavior: clip ? Clip.antiAlias : Clip.none,
     decoration: BoxDecoration(
-      color: color,
+      color: color ?? context.palette.surface,
       borderRadius: borderRadius,
-      boxShadow: AppShadows.soft,
+      boxShadow: context.palette.shadowSoft,
     ),
     child: child,
   );

@@ -5,7 +5,7 @@
          rules cover cloud backup and device-to-device transfer on 12+.
          See CLAUDE.md > Security. -->
     <application
-        android:label="happilab"
+        android:label="Falcon Crest"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"
@@ -47,6 +47,11 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Sharing opens store links in whichever app claims https URLs. -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
         </intent>
     </queries>
 </manifest>

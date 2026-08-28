@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '../../../app/theme/app_colors.dart';
-import '../../../app/theme/app_tokens.dart';
+import '../../../app/shell/app_shell_scope.dart';
+import '../../../app/shell/widgets/faith_nav_bar.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/domain/catalogue.dart';
 import '../../../shared/domain/member_summary.dart';
 import '../../../shared/domain/program_terms.dart';
-import '../../../shared/utils/share_actions.dart';
 import '../../../shared/widgets/gap.dart';
-import '../../../shared/widgets/product_share_tile.dart';
+import '../../../shared/widgets/product_share_grid.dart';
 import '../../../shared/widgets/screen_header.dart';
+import '../../../app/theme/app_palette.dart';
 
 /// The full catalogue, framed as what to send a friend next.
 class SuggestionsScreen extends StatelessWidget {
@@ -20,7 +20,7 @@ class SuggestionsScreen extends StatelessWidget {
     const summary = MemberSummary.placeholder;
 
     return Scaffold(
-      backgroundColor: AppColors.canvas,
+      backgroundColor: context.palette.canvas,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -30,7 +30,10 @@ class SuggestionsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const ScreenHeader(title: 'Products to share'),
+                    ScreenHeader(
+                      title: 'Products to share',
+                      showBack: !AppShellScope.contains(context),
+                    ),
                     const Gap(14),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -39,7 +42,7 @@ class SuggestionsScreen extends StatelessWidget {
                         '${ProgramTerms.earnRate} on each sale.',
                         style: AppTypography.figtree(
                           size: 14,
-                          color: AppColors.textMuted,
+                          color: context.palette.textMuted,
                         ),
                       ),
                     ),
@@ -48,25 +51,17 @@ class SuggestionsScreen extends StatelessWidget {
               ),
             ),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
-              sliver: SliverList.separated(
-                itemCount: Product.showcase.length,
-                separatorBuilder: (context, index) => const Gap(AppSpacing.md),
-                itemBuilder: (context, index) {
-                  final product = Product.showcase[index];
-                  return ProductShareTile(
-                    product: product,
-                    showDescription: true,
-                    onShare: () => ShareActions.copy(
-                      context,
-                      ShareActions.productMessage(
-                        product,
-                        summary.referralCode,
-                      ),
-                      confirmation: 'Message for ${product.name} copied.',
-                    ),
-                  );
-                },
+              padding: const EdgeInsets.fromLTRB(
+                20,
+                0,
+                20,
+                FaithNavBar.contentInset,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: ProductShareGrid(
+                  products: Product.showcase,
+                  referralCode: summary.referralCode,
+                ),
               ),
             ),
           ],

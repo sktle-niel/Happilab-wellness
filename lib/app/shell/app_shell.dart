@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../features/community/presentation/news_feed_screen.dart';
+import '../../features/community/presentation/suggestions_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/referrals/presentation/my_referrals_screen.dart';
-import '../../features/rewards/presentation/rewards_screen.dart';
-import '../theme/app_colors.dart';
 import 'app_shell_scope.dart';
 import 'app_tab.dart';
 import 'widgets/faith_nav_bar.dart';
+import '../theme/app_palette.dart';
 
 /// The signed-in app: five destinations under one floating bar.
 ///
@@ -34,7 +34,7 @@ class _AppShellState extends State<AppShell> {
     selectedTab: _selected,
     onSelect: _select,
     child: Scaffold(
-      backgroundColor: AppColors.canvas,
+      backgroundColor: context.palette.canvas,
       body: Stack(
         children: [
           IndexedStack(
@@ -43,7 +43,7 @@ class _AppShellState extends State<AppShell> {
               HomeScreen(),
               NewsFeedScreen(),
               MyReferralsScreen(),
-              RewardsScreen(),
+              SuggestionsScreen(),
               ProfileScreen(),
             ],
           ),

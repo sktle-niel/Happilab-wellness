@@ -24,7 +24,7 @@ void main() {
     ) async {
       await pumpShell(tester);
 
-      expect(find.text('Your referral code'.toUpperCase()), findsOneWidget);
+      expect(find.text('Your points'.toUpperCase()), findsOneWidget);
       for (final tab in AppTab.values) {
         expect(find.text(tab.label), findsWidgets, reason: tab.label);
       }
@@ -33,11 +33,11 @@ void main() {
     testWidgets('moves between destinations', (tester) async {
       await pumpShell(tester);
 
-      await tapTab(tester, AppTab.rewards);
-      expect(find.text('Available'), findsOneWidget);
+      await tapTab(tester, AppTab.products);
+      expect(find.textContaining('Suggested for your friends'), findsOneWidget);
 
       await tapTab(tester, AppTab.profile);
-      expect(find.text('Payout methods'), findsOneWidget);
+      expect(find.text('Log out'), findsOneWidget);
 
       await tapTab(tester, AppTab.refer);
       expect(find.text('YOUR CODE'), findsOneWidget);
@@ -45,20 +45,72 @@ void main() {
 
     testWidgets('a destination carries no back button', (tester) async {
       await pumpShell(tester);
-      await tapTab(tester, AppTab.rewards);
+      await tapTab(tester, AppTab.products);
 
       expect(find.byIcon(Icons.arrow_back), findsNothing);
     });
 
-    testWidgets('cash out on the points card opens the rewards tab', (
-      tester,
-    ) async {
+    testWidgets('cash out on the points card opens rewards', (tester) async {
       await pumpShell(tester);
 
       await tester.tap(find.text('Cash out').first);
+      // A pushed route builds on the frame after the tap, then animates in.
+      await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
 
       expect(find.text('Available'), findsOneWidget);
+    });
+
+    /// The reveal snapshots the screen before it flips, then animates; the
+    /// flip itself lands a frame or two after the tap.
+    Future<void> settleReveal(WidgetTester tester) async {
+      await tester.pump();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 700));
+    }
+
+    Brightness brightnessAt(WidgetTester tester, String text) =>
+        Theme.of(tester.element(find.text(text))).brightness;
+
+    testWidgets('the profile switch flips the whole app to the dark palette', (
+      tester,
+    ) async {
+      await pumpShell(tester);
+      await tapTab(tester, AppTab.profile);
+      expect(brightnessAt(tester, 'Dark mode'), Brightness.light);
+
+      // Notifications comes first in the settings list; dark mode is next.
+      await tester.tap(find.byType(Switch).at(1));
+      await settleReveal(tester);
+
+      expect(brightnessAt(tester, 'Dark mode'), Brightness.dark);
+    });
+
+    testWidgets('the home button flips the palette both ways', (tester) async {
+      await pumpShell(tester);
+
+      await tester.tap(find.bySemanticsLabel('Switch to dark mode'));
+      await settleReveal(tester);
+      expect(brightnessAt(tester, 'Welcome,'), Brightness.dark);
+
+      await tester.tap(find.bySemanticsLabel('Switch to light mode'));
+      await settleReveal(tester);
+      expect(brightnessAt(tester, 'Welcome,'), Brightness.light);
+    });
+
+    testWidgets('the profile rewards section opens rewards', (tester) async {
+      await pumpShell(tester);
+      await tapTab(tester, AppTab.profile);
+
+      // Home carries its own "Cash out" button and sits first in the stack;
+      // the profile's card is the last match.
+      await tester.tap(find.text('Cash out').last);
+      // A pushed route builds on the frame after the tap, then animates in.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.text('Available'), findsOneWidget);
+      expect(find.byIcon(Icons.arrow_back), findsOneWidget);
     });
 
     testWidgets('a screen pushed over the shell does carry one', (

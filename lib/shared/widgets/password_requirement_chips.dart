@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_tokens.dart';
 import '../../app/theme/app_typography.dart';
 import '../domain/password_policy.dart';
+import '../../app/theme/app_palette.dart';
 
 /// Live checklist under the password field.
 ///
@@ -37,14 +37,16 @@ class _Chip extends StatelessWidget {
     padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
     decoration: BoxDecoration(
       color: isMet
-          ? AppColors.accent.withValues(alpha: 0.16)
-          : AppColors.surface,
+          ? context.palette.accent.withValues(alpha: 0.16)
+          : context.palette.surface,
       borderRadius: AppRadius.pill,
     ),
     child: Text(
       label,
       style: AppTypography.chip.copyWith(
-        color: isMet ? AppColors.accentPressed : AppColors.textMuted,
+        color: isMet
+            ? context.palette.accentPressed
+            : context.palette.textMuted,
       ),
     ),
   );

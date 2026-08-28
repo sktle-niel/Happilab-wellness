@@ -8,9 +8,15 @@ import '../domain/cash_out.dart';
 /// The rules live here so the button's enabled state and the request summary
 /// can never disagree with what the screen shows.
 class RewardsController extends ChangeNotifier {
-  RewardsController({required this.availablePoints});
+  RewardsController({
+    required this.availablePoints,
+    this.accounts = PayoutAccount.placeholder,
+  });
 
   final int availablePoints;
+
+  /// The wallets the member can send to.
+  final List<PayoutAccount> accounts;
 
   int? _amount;
   PayoutAccount? _destination;

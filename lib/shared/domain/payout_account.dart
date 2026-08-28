@@ -1,12 +1,14 @@
 /// How money leaves the app.
 enum PayoutKind {
-  gcash('GCash'),
-  maya('Maya'),
-  bank('Bank transfer');
+  gcash('GCash', 'gcash'),
+  maya('Maya', 'maya');
 
-  const PayoutKind(this.label);
+  const PayoutKind(this.label, this._logo);
 
   final String label;
+  final String _logo;
+
+  String get logoAsset => 'assets/images/payout/$_logo.png';
 }
 
 /// A destination the member can cash out to.
@@ -20,10 +22,12 @@ class PayoutAccount {
   final PayoutKind kind;
   final String accountName;
 
-  /// Mobile number or account number, already masked for display.
+  /// Mobile number, already masked for display.
   final String reference;
 
   String get label => kind.label;
+
+  String get logoAsset => kind.logoAsset;
 
   static const List<PayoutAccount> placeholder = [
     PayoutAccount(
@@ -36,22 +40,5 @@ class PayoutAccount {
       accountName: 'Ivy Santos',
       reference: '0917 •••• 1234',
     ),
-  ];
-}
-
-/// Banks offered as a third payout destination.
-///
-/// A plain list for now; a real integration would fetch what the payment
-/// provider actually supports rather than hardcoding it.
-abstract final class PhilippineBanks {
-  static const List<String> all = [
-    'BDO Unibank',
-    'BPI',
-    'Metrobank',
-    'Landbank',
-    'Security Bank',
-    'UnionBank',
-    'PNB',
-    'RCBC',
   ];
 }

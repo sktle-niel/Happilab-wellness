@@ -23,7 +23,7 @@ class FeedPost {
   final int likes;
   final int comments;
 
-  static const String _brand = 'Faith Wellness';
+  static const String _brand = 'Falcon Crest Ventures';
 
   static const List<FeedPost> placeholder = [
     FeedPost(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
-import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/app_palette.dart';
 
 /// A looping, muted clip inside a feed post.
 ///
@@ -60,7 +60,7 @@ class _PostVideoState extends State<PostVideo> {
       height: widget.height,
       width: double.infinity,
       child: controller == null
-          ? const ColoredBox(color: AppColors.cream)
+          ? ColoredBox(color: context.palette.tint)
           : FittedBox(
               fit: BoxFit.cover,
               child: SizedBox(

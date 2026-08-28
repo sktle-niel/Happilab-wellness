@@ -43,6 +43,10 @@ dependencies:
   # video surface.
   video_player: ^2.14.0
 
+  # Sharing hands a product link to the store's app or the browser; the SDK
+  # has no way to open an external URL.
+  url_launcher: ^6.3.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -70,6 +74,8 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/images/payout/
+    - assets/images/share/
     - assets/video/
 
   # Variable fonts: one file per family, weights selected at runtime through
@@ -115,12 +121,13 @@ flutter:
 
 # Launcher icons, generated with: dart run flutter_launcher_icons
 flutter_launcher_icons:
-  image_path: assets/images/faith-mark.png
+  image_path: assets/images/brand-mark.png
   android: true
   ios: true
   remove_alpha_ios: true
-  adaptive_icon_background: "#FDF4E6"
-  adaptive_icon_foreground: assets/images/faith-mark.png
+  background_color_ios: "#FBFCF8"
+  adaptive_icon_background: "#FBFCF8"
+  adaptive_icon_foreground: assets/images/brand-mark.png
   # The mark fills its square, and Android crops an adaptive icon to a safe
   # circle; the inset keeps the ring from being clipped.
   adaptive_icon_foreground_inset: 18

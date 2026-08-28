@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'app_colors.dart';
+import 'app_palette.dart';
 
 abstract final class AppFonts {
   /// UI and body copy.
@@ -16,13 +16,17 @@ abstract final class AppFonts {
 /// [FontWeight] drives layout and fallback selection, [FontVariation] drives the
 /// actual `wght` axis. Going through [figtree] and [cormorant] keeps that pair
 /// in sync — a raw `TextStyle` would silently render at the default weight.
+///
+/// A style without a colour inherits the theme's text colour, which is what
+/// lets the same widget tree render in either palette. Styles that need a
+/// specific tone take the palette.
 abstract final class AppTypography {
   static TextStyle figtree({
     required double size,
     int weight = 600,
     double? letterSpacing,
     double? height,
-    Color color = AppColors.textPrimary,
+    Color? color,
   }) => _style(
     family: AppFonts.body,
     size: size,
@@ -37,7 +41,7 @@ abstract final class AppTypography {
     int weight = 600,
     double? letterSpacing,
     double? height,
-    Color color = AppColors.brandGold,
+    Color? color,
   }) => _style(
     family: AppFonts.display,
     size: size,
@@ -51,64 +55,74 @@ abstract final class AppTypography {
   static TextStyle get screenTitle =>
       figtree(size: 23, weight: 800, letterSpacing: -0.23);
 
-  static TextStyle get screenSubtitle =>
-      figtree(size: 13.5, color: AppColors.textMuted);
+  static TextStyle screenSubtitle(AppPalette palette) =>
+      figtree(size: 13.5, color: palette.textMuted);
 
-  static TextStyle get fieldLabel => figtree(
+  static TextStyle fieldLabel(AppPalette palette) => figtree(
     size: 11,
     weight: 800,
     letterSpacing: 0.66,
-    color: AppColors.textMuted,
+    color: palette.textMuted,
   );
 
   static TextStyle get input => figtree(size: 14.5);
 
-  static TextStyle get helper =>
-      figtree(size: 11.5, color: AppColors.textFaint);
+  static TextStyle helper(AppPalette palette) =>
+      figtree(size: 11.5, color: palette.textFaint);
 
-  static TextStyle get footnote =>
-      figtree(size: 13, color: AppColors.textMuted);
+  static TextStyle footnote(AppPalette palette) =>
+      figtree(size: 13, color: palette.textMuted);
 
   static TextStyle get chip => figtree(size: 10.5, weight: 700);
 
-  static TextStyle get buttonPrimary =>
-      figtree(size: 16, weight: 700, color: AppColors.surface);
+  static TextStyle buttonPrimary(AppPalette palette) =>
+      figtree(size: 16, weight: 700, color: palette.onAccent);
 
   static TextStyle get buttonSecondary => figtree(size: 15, weight: 700);
 
-  /// FAITH — the large serif wordmark on the loader.
-  static TextStyle get wordmark =>
-      cormorant(size: 46, letterSpacing: 9.2, height: 1.1);
-
-  /// WELLNESS — the ruled line beneath the wordmark.
-  static TextStyle get wordmarkSub =>
-      cormorant(size: 17, weight: 500, letterSpacing: 8.5);
-
-  static TextStyle get tagline => figtree(
-    size: 10.5,
-    weight: 700,
-    letterSpacing: 3.36,
-    color: AppColors.textMuted,
+  /// FALCON CREST — the large serif wordmark on the loader.
+  static TextStyle wordmark(AppPalette palette) => cormorant(
+    size: 34,
+    weight: 600,
+    letterSpacing: 6.8,
+    height: 1.1,
+    color: palette.brand,
   );
 
-  /// Feeds the Material [TextTheme] so stock widgets inherit the brand.
-  static TextTheme textTheme() => TextTheme(
+  /// VENTURES — the ruled line beneath the wordmark.
+  static TextStyle wordmarkSub(AppPalette palette) => cormorant(
+    size: 15,
+    weight: 500,
+    letterSpacing: 6.5,
+    color: palette.brand,
+  );
+
+  static TextStyle tagline(AppPalette palette) => figtree(
+    size: 10,
+    weight: 700,
+    letterSpacing: 2.2,
+    color: palette.textMuted,
+  );
+
+  /// Feeds the Material [TextTheme] so stock widgets inherit the brand, and
+  /// every uncoloured style above inherits [AppPalette.textPrimary].
+  static TextTheme textTheme(AppPalette palette) => TextTheme(
     displaySmall: figtree(size: 34, weight: 800, letterSpacing: -0.34),
     headlineMedium: figtree(size: 26, weight: 800, letterSpacing: -0.26),
     titleLarge: screenTitle,
     titleMedium: figtree(size: 16, weight: 700),
     bodyLarge: figtree(size: 14.5),
     bodyMedium: figtree(size: 13.5),
-    bodySmall: helper,
+    bodySmall: helper(palette),
     labelLarge: buttonSecondary,
-    labelSmall: fieldLabel,
-  );
+    labelSmall: fieldLabel(palette),
+  ).apply(bodyColor: palette.textPrimary, displayColor: palette.textPrimary);
 
   static TextStyle _style({
     required String family,
     required double size,
     required int weight,
-    required Color color,
+    Color? color,
     double? letterSpacing,
     double? height,
   }) => TextStyle(

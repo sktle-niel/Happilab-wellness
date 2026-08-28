@@ -3,10 +3,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/faith_mascot.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_tokens.dart';
 import '../../theme/app_typography.dart';
 import '../app_tab.dart';
+import '../../theme/app_palette.dart';
 
 /// The floating bar the signed-in app navigates from.
 ///
@@ -45,9 +44,9 @@ class FaithNavBar extends StatelessWidget {
             child: Container(
               height: height,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.95),
+                color: context.palette.surface.withValues(alpha: 0.95),
                 borderRadius: _shape,
-                boxShadow: AppShadows.card,
+                boxShadow: context.palette.shadowCard,
               ),
               child: Row(
                 children: [
@@ -68,15 +67,26 @@ class FaithNavBar extends StatelessWidget {
             ),
           ),
         ),
+        // Mirrors the bar's slots so the raised button lands over the width
+        // its tab reserved, wherever that tab sits in the order.
         Positioned(
           left: 0,
           right: 0,
           top: -20,
-          child: Center(
-            child: _FeatureTab(
-              tab: AppTab.refer,
-              onPressed: () => onSelect(AppTab.refer),
-            ),
+          child: Row(
+            children: [
+              for (final tab in AppTab.values)
+                Expanded(
+                  child: tab.isFeature
+                      ? Center(
+                          child: _FeatureTab(
+                            tab: tab,
+                            onPressed: () => onSelect(tab),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+            ],
           ),
         ),
       ],
@@ -97,7 +107,9 @@ class _NavTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isSelected ? AppColors.accentText : AppColors.textFaint;
+    final color = isSelected
+        ? context.palette.accentText
+        : context.palette.textFaint;
 
     return Semantics(
       button: true,
@@ -148,10 +160,10 @@ class _FeatureTab extends StatelessWidget {
             height: 54,
             padding: const EdgeInsets.all(7),
             decoration: BoxDecoration(
-              color: AppColors.accent,
+              color: context.palette.accent,
               shape: BoxShape.circle,
-              border: Border.all(color: AppColors.canvas, width: 4),
-              boxShadow: AppShadows.card,
+              border: Border.all(color: context.palette.canvas, width: 4),
+              boxShadow: context.palette.shadowCard,
             ),
             child: const FittedBox(fit: BoxFit.contain, child: FaithMascot()),
           ),
@@ -161,7 +173,7 @@ class _FeatureTab extends StatelessWidget {
             style: AppTypography.figtree(
               size: 10.5,
               weight: 800,
-              color: AppColors.accentText,
+              color: context.palette.accentText,
             ),
           ),
         ],

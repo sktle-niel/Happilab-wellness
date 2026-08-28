@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../core/security/input_validator.dart';
@@ -13,6 +12,7 @@ import '../../../shared/widgets/avatar_circle.dart';
 import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/password_requirement_chips.dart';
 import '../../../shared/widgets/screen_header.dart';
+import '../../../app/theme/app_palette.dart';
 
 /// Change the details on the account, and the password that guards it.
 class EditProfileScreen extends StatefulWidget {
@@ -88,7 +88,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppColors.canvas,
+    backgroundColor: context.palette.canvas,
     body: SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
@@ -113,7 +113,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   textAlign: TextAlign.center,
                   style: AppTypography.figtree(
                     size: 11.5,
-                    color: AppColors.textFaint,
+                    color: context.palette.textFaint,
                   ),
                 ),
                 const Gap(12),

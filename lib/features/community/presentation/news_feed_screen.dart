@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../app/shell/app_shell_scope.dart';
 import '../../../app/shell/widgets/faith_nav_bar.dart';
-import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../shared/domain/member_summary.dart';
 import '../../../shared/utils/share_actions.dart';
@@ -11,6 +10,7 @@ import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/screen_header.dart';
 import '../domain/feed_post.dart';
 import 'widgets/feed_post_card.dart';
+import '../../../app/theme/app_palette.dart';
 
 /// What the brand is telling members, newest first.
 class NewsFeedScreen extends StatelessWidget {
@@ -22,7 +22,7 @@ class NewsFeedScreen extends StatelessWidget {
     const posts = FeedPost.placeholder;
 
     return Scaffold(
-      backgroundColor: AppColors.canvas,
+      backgroundColor: context.palette.canvas,
       body: SafeArea(
         child: ListView.separated(
           padding: const EdgeInsets.fromLTRB(
@@ -44,7 +44,7 @@ class NewsFeedScreen extends StatelessWidget {
                     onPressed: () =>
                         Navigator.of(context).pushNamed(AppRoutes.testimonials),
                     icon: const Icon(Icons.auto_stories_outlined),
-                    color: AppColors.accentText,
+                    color: context.palette.accentText,
                     tooltip: 'Member stories',
                   ),
                 ),

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../app/theme/app_colors.dart';
 import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/screen_header.dart';
 import '../domain/testimonial.dart';
 import 'widgets/testimonial_card.dart';
+import '../../../app/theme/app_palette.dart';
 
 /// What earning actually looked like for other members.
 class TestimonialsScreen extends StatelessWidget {
@@ -12,7 +12,7 @@ class TestimonialsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppColors.canvas,
+    backgroundColor: context.palette.canvas,
     body: SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),

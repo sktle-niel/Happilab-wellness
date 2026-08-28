@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../app/shell/app_shell_scope.dart';
 import '../../../app/shell/app_tab.dart';
-import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/domain/program_terms.dart';
@@ -14,6 +13,7 @@ import '../../../shared/widgets/screen_header.dart';
 import '../../../shared/widgets/section_header.dart';
 import '../domain/program_guide.dart';
 import 'widgets/program_step_card.dart';
+import '../../../app/theme/app_palette.dart';
 
 /// The programme explained: the three steps, what a point is worth, and a
 /// worked example.
@@ -22,7 +22,7 @@ class HowItWorksScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppColors.canvas,
+    backgroundColor: context.palette.canvas,
     body: SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
@@ -64,10 +64,10 @@ class _ConversionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(22),
-    decoration: const BoxDecoration(
-      color: AppColors.accent,
+    decoration: BoxDecoration(
+      color: context.palette.accent,
       borderRadius: AppRadius.hero,
-      boxShadow: AppShadows.soft,
+      boxShadow: context.palette.shadowSoft,
     ),
     child: Column(
       children: [
@@ -78,7 +78,7 @@ class _ConversionCard extends StatelessWidget {
             size: 11.5,
             weight: 800,
             letterSpacing: 1.15,
-            color: Colors.white.withValues(alpha: 0.85),
+            color: context.palette.onAccent.withValues(alpha: 0.75),
           ),
         ),
         const Gap(4),
@@ -89,7 +89,7 @@ class _ConversionCard extends StatelessWidget {
             size: 31,
             weight: 800,
             letterSpacing: -0.31,
-            color: AppColors.surface,
+            color: context.palette.onAccent,
           ),
         ),
         const Gap(4),
@@ -98,7 +98,7 @@ class _ConversionCard extends StatelessWidget {
           textAlign: TextAlign.center,
           style: AppTypography.figtree(
             size: 13.5,
-            color: Colors.white.withValues(alpha: 0.9),
+            color: context.palette.onAccent.withValues(alpha: 0.85),
           ),
         ),
       ],
@@ -122,7 +122,7 @@ class _ExampleCard extends StatelessWidget {
             style: AppTypography.figtree(
               size: 14.5,
               height: 1.55,
-              color: AppColors.textMuted,
+              color: context.palette.textMuted,
             ),
             children: [
               TextSpan(
@@ -137,7 +137,7 @@ class _ExampleCard extends StatelessWidget {
                   size: 14.5,
                   weight: 800,
                   height: 1.55,
-                  color: AppColors.accentText,
+                  color: context.palette.accentText,
                 ),
               ),
               const TextSpan(
@@ -181,14 +181,14 @@ class _BenefitRow extends StatelessWidget {
           width: 22,
           height: 22,
           margin: const EdgeInsets.only(top: 1),
-          decoration: const BoxDecoration(
-            color: AppColors.cream,
+          decoration: BoxDecoration(
+            color: context.palette.tint,
             shape: BoxShape.circle,
           ),
-          child: const Icon(
+          child: Icon(
             Icons.check_rounded,
             size: 13,
-            color: AppColors.accentText,
+            color: context.palette.accentText,
           ),
         ),
         const Gap(10),
