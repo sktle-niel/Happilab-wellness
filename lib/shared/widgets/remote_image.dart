@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/app_colors.dart';
+import '../../app/theme/app_palette.dart';
 
 /// Network image with the two states a photo actually has on a phone: still
 /// loading, and failed.
@@ -43,6 +43,6 @@ class RemoteImage extends StatelessWidget {
   Widget get _placeholder => SizedBox(
     width: width,
     height: height,
-    child: const ColoredBox(color: AppColors.mascotBody),
+    child: const ColoredBox(color: AppPalette.mascotBody),
   );
 }

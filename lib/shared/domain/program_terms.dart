@@ -12,5 +12,5 @@ abstract final class ProgramTerms {
   static const String pointsConversionShort = '1,000 pts = ₱1,000';
 
   /// Ways a member can take their money out.
-  static const List<String> payoutMethods = ['GCash', 'Maya', 'Bank transfer'];
+  static const List<String> payoutMethods = ['GCash', 'Maya'];
 }

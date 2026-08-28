@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_tokens.dart';
 import '../../app/theme/app_typography.dart';
+import '../../app/theme/app_palette.dart';
 
 /// How a field sits on the page.
 enum AppTextFieldStyle {
@@ -82,10 +82,10 @@ class _AppTextFieldState extends State<AppTextField> {
   bool get _isInset => widget.style == AppTextFieldStyle.inset;
 
   Color get _borderColor {
-    if (widget.errorText != null) return AppColors.danger;
-    if (_hasFocus) return AppColors.focus;
+    if (widget.errorText != null) return context.palette.danger;
+    if (_hasFocus) return context.palette.focus;
     return _isInset
-        ? AppColors.accent.withValues(alpha: 0.18)
+        ? context.palette.accent.withValues(alpha: 0.18)
         : Colors.transparent;
   }
 
@@ -101,11 +101,11 @@ class _AppTextFieldState extends State<AppTextField> {
         Container(
           height: AppSpacing.inputHeight,
           decoration: BoxDecoration(
-            color: _isInset ? AppColors.canvas : AppColors.surface,
+            color: _isInset ? context.palette.canvas : context.palette.surface,
             borderRadius: _isInset
                 ? const BorderRadius.all(Radius.circular(14))
                 : AppRadius.input,
-            boxShadow: _isInset ? null : AppShadows.input,
+            boxShadow: _isInset ? null : context.palette.shadowInput,
             border: Border.all(
               color: _borderColor,
               width: _hasFocus || hasError ? 2 : 1.5,
@@ -121,7 +121,7 @@ class _AppTextFieldState extends State<AppTextField> {
                   textInputAction: widget.textInputAction,
                   obscureText: widget.obscureText,
                   style: AppTypography.input,
-                  cursorColor: AppColors.accent,
+                  cursorColor: context.palette.accent,
                   onChanged: widget.onChanged,
                   onSubmitted: widget.onSubmitted,
                   decoration: InputDecoration(
@@ -129,7 +129,7 @@ class _AppTextFieldState extends State<AppTextField> {
                     border: InputBorder.none,
                     hintText: widget.hint,
                     hintStyle: AppTypography.input.copyWith(
-                      color: AppColors.textFaint,
+                      color: context.palette.textFaint,
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.md,
@@ -146,8 +146,9 @@ class _AppTextFieldState extends State<AppTextField> {
           Text(
             widget.errorText ?? widget.helperText!,
             style: hasError
-                ? AppTypography.helper.copyWith(color: AppColors.danger)
-                : AppTypography.helper,
+                ? AppTypography.helper(context.palette)
+                      .copyWith(color: context.palette.danger)
+                : AppTypography.helper(context.palette),
           ),
         ],
       ],
@@ -165,7 +166,7 @@ class _FieldLabel extends StatelessWidget {
   Widget build(BuildContext context) => Text.rich(
     TextSpan(
       text: label.toUpperCase(),
-      style: AppTypography.fieldLabel,
+      style: AppTypography.fieldLabel(context.palette),
       children: [
         if (requiredNote != null)
           TextSpan(
@@ -173,7 +174,7 @@ class _FieldLabel extends StatelessWidget {
             style: AppTypography.figtree(
               size: 11,
               weight: 800,
-              color: AppColors.danger,
+              color: context.palette.danger,
             ),
           ),
       ],

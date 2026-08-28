@@ -6,7 +6,7 @@ class AppNotification {
     required this.isUnread,
   });
 
-  static const String sender = 'Faith Wellness';
+  static const String sender = 'Falcon Crest Ventures';
 
   final String body;
   final String when;

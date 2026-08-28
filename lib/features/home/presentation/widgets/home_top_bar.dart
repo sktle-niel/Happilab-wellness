@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme/app_colors.dart';
+import '../../../../app/di/app_scope.dart';
+import '../../../../app/theme/theme_reveal.dart';
+
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../shared/domain/member_summary.dart';
 import '../../../../shared/widgets/avatar_circle.dart';
 import '../../../../shared/widgets/circle_icon_button.dart';
 import '../../../../shared/widgets/gap.dart';
+import '../../../../app/theme/app_palette.dart';
 
 /// Who is signed in, and the way to their notifications.
 class HomeTopBar extends StatelessWidget {
@@ -25,18 +28,51 @@ class HomeTopBar extends StatelessWidget {
       AvatarCircle(name: summary.name, size: 46, bordered: true),
       const Gap(12),
       Expanded(
-        child: Text(
-          summary.name,
-          style: AppTypography.figtree(size: 15, weight: 800),
-          overflow: TextOverflow.ellipsis,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Welcome,',
+              style: AppTypography.figtree(
+                size: 12.5,
+                color: context.palette.textMuted,
+              ),
+            ),
+            Text(
+              summary.name,
+              style: AppTypography.figtree(size: 16, weight: 800),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
+      const _ThemeToggle(),
+      const Gap.sm(),
       _NotificationBell(
         unreadCount: summary.unreadNotifications,
         onPressed: onNotifications,
       ),
     ],
   );
+}
+
+/// Sun or moon, whichever the member can switch to. No caption: the icon is
+/// the whole message, and the reveal starts from this very button.
+class _ThemeToggle extends StatelessWidget {
+  const _ThemeToggle();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = AppScope.of(context).themeController.isDark;
+
+    return CircleIconButton(
+      icon: isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+      semanticLabel: isDark ? 'Switch to light mode' : 'Switch to dark mode',
+      color: context.palette.accentText,
+      onPressed: () => ThemeReveal.of(context).toggle(from: context),
+    );
+  }
 }
 
 class _NotificationBell extends StatelessWidget {
@@ -52,7 +88,7 @@ class _NotificationBell extends StatelessWidget {
       CircleIconButton(
         icon: Icons.notifications_none_rounded,
         semanticLabel: 'Notifications',
-        color: AppColors.accentText,
+        color: context.palette.accentText,
         onPressed: onPressed,
       ),
       if (unreadCount > 0)
@@ -73,16 +109,16 @@ class _UnreadBadge extends StatelessWidget {
     alignment: Alignment.center,
     padding: const EdgeInsets.symmetric(horizontal: 4),
     decoration: BoxDecoration(
-      color: AppColors.danger,
+      color: context.palette.danger,
       borderRadius: AppRadius.pill,
-      border: Border.all(color: AppColors.canvas, width: 2),
+      border: Border.all(color: context.palette.canvas, width: 2),
     ),
     child: Text(
       '$count',
       style: AppTypography.figtree(
         size: 10.5,
         weight: 800,
-        color: AppColors.surface,
+        color: Colors.white,
       ),
     ),
   );

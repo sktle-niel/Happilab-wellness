@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../shared/utils/number_format.dart';
 import '../../../../shared/widgets/pressable_scale.dart';
+import '../../../../app/theme/app_palette.dart';
 
 /// The preset cash-out amounts, laid out three to a row as the design does.
 class AmountChipRow extends StatelessWidget {
@@ -58,16 +58,18 @@ class _AmountChip extends StatelessWidget {
         height: 52,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.accent : AppColors.surface,
+          color: isSelected ? context.palette.accent : context.palette.surface,
           borderRadius: AppRadius.pill,
-          boxShadow: isSelected ? null : AppShadows.soft,
+          boxShadow: isSelected ? null : context.palette.shadowSoft,
         ),
         child: Text(
           NumberFormat.peso(points),
           style: AppTypography.figtree(
             size: 15,
             weight: 700,
-            color: isSelected ? AppColors.surface : AppColors.textPrimary,
+            color: isSelected
+                ? context.palette.surface
+                : context.palette.textPrimary,
           ),
         ),
       ),

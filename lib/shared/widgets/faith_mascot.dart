@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../app/theme/app_colors.dart';
+import '../../app/theme/app_palette.dart';
 
 /// The waving mascot. It draws at its natural 96x92; callers that want it
 /// smaller wrap it in a [FittedBox], as the points card does.
@@ -20,7 +20,7 @@ class FaithMascot extends StatefulWidget {
 
 class _FaithMascotState extends State<FaithMascot>
     with TickerProviderStateMixin {
-  static const Color _outline = AppColors.textPrimary;
+  static const Color _outline = AppPalette.mascotOutline;
 
   late final AnimationController _bob = _loop(1100, reverse: true);
   late final AnimationController _wave = _loop(550, reverse: true);
@@ -130,8 +130,8 @@ class _Body extends StatelessWidget {
     width: 80,
     height: 72,
     decoration: BoxDecoration(
-      color: AppColors.mascotBody,
-      border: Border.all(color: AppColors.textPrimary, width: 2.5),
+      color: AppPalette.mascotBody,
+      border: Border.all(color: _FaithMascotState._outline, width: 2.5),
       borderRadius: const BorderRadius.only(
         topLeft: Radius.circular(38),
         topRight: Radius.circular(38),
@@ -152,8 +152,8 @@ class _Ear extends StatelessWidget {
       width: 18,
       height: 14,
       decoration: BoxDecoration(
-        color: AppColors.petalLight,
-        border: Border.all(color: AppColors.textPrimary, width: 2),
+        color: AppPalette.petalLight,
+        border: Border.all(color: _FaithMascotState._outline, width: 2),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.elliptical(10.8, 8.4),
           topRight: Radius.elliptical(7.2, 5.6),
@@ -176,7 +176,7 @@ class _Cheek extends StatelessWidget {
       height: 6,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: AppColors.blush,
+          color: AppPalette.blush,
           borderRadius: BorderRadius.all(Radius.circular(999)),
         ),
       ),
@@ -195,8 +195,8 @@ class _Limb extends StatelessWidget {
     width: width,
     height: height,
     decoration: BoxDecoration(
-      color: AppColors.mascotBody,
-      border: Border.all(color: AppColors.textPrimary, width: 2.5),
+      color: AppPalette.mascotBody,
+      border: Border.all(color: _FaithMascotState._outline, width: 2.5),
       borderRadius: const BorderRadius.all(Radius.circular(999)),
     ),
   );
@@ -236,7 +236,7 @@ class _MouthPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.5
       ..strokeCap = StrokeCap.round
-      ..color = AppColors.textPrimary,
+      ..color = AppPalette.mascotOutline,
   );
 
   @override

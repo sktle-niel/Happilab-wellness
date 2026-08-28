@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../shared/utils/number_format.dart';
 import '../../../../shared/widgets/avatar_circle.dart';
 import '../../../../shared/widgets/gap.dart';
 import '../../../../shared/widgets/status_pill.dart';
 import '../../domain/referral.dart';
+import '../../../../app/theme/app_palette.dart';
 
 /// One referred person: who they are, where they got to, what they earned.
 class ReferralRow extends StatelessWidget {
@@ -16,15 +16,15 @@ class ReferralRow extends StatelessWidget {
 
   /// Someone who has bought is worth more than someone who has only signed up,
   /// and the badge says so at a glance.
-  (Color, Color) get _stageColors => switch (referral.stage) {
-    ReferralStage.repeat => (AppColors.accent, AppColors.surface),
-    ReferralStage.purchased => (AppColors.cream, AppColors.accentText),
-    ReferralStage.joined => (AppColors.divider, AppColors.textMuted),
+  (Color, Color) _stageColors(AppPalette palette) => switch (referral.stage) {
+    ReferralStage.repeat => (palette.accent, palette.onAccent),
+    ReferralStage.purchased => (palette.tint, palette.accentText),
+    ReferralStage.joined => (palette.divider, palette.textMuted),
   };
 
   @override
   Widget build(BuildContext context) {
-    final (background, foreground) = _stageColors;
+    final (background, foreground) = _stageColors(context.palette);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
@@ -46,7 +46,7 @@ class ReferralRow extends StatelessWidget {
                   referral.when,
                   style: AppTypography.figtree(
                     size: 12,
-                    color: AppColors.textFaint,
+                    color: context.palette.textFaint,
                   ),
                 ),
               ],
@@ -71,8 +71,8 @@ class ReferralRow extends StatelessWidget {
                   size: 14,
                   weight: 800,
                   color: referral.pointsEarned == 0
-                      ? AppColors.textFaint
-                      : AppColors.accentText,
+                      ? context.palette.textFaint
+                      : context.palette.accentText,
                 ),
               ),
             ],

@@ -23,7 +23,6 @@ abstract final class AppRoutes {
 
   // Rewards
   static const String rewards = '/rewards';
-  static const String addPayoutMethod = '/rewards/payout-method';
   static const String editPayoutNumber = '/rewards/payout-number';
 
   // Community

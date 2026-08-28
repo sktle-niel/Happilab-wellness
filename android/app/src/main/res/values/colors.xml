@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Keep in step with AppColors.canvas so the Android launch screen hands
+    <!-- Keep in step with AppPalette.light.canvas so the Android launch screen hands
          over to the Flutter loader without a white flash. -->
-    <color name="brand_canvas">#FDF4E6</color>
-	<color name="ic_launcher_background">#FDF4E6</color>
+    <color name="brand_canvas">#FBFCF8</color>
+	<color name="ic_launcher_background">#FBFCF8</color>
 </resources>

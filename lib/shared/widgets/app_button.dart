@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_tokens.dart';
 import '../../app/theme/app_typography.dart';
 import 'gap.dart';
 import 'pressable_scale.dart';
+import '../../app/theme/app_palette.dart';
 
 enum AppButtonVariant {
   /// Gold pill — the single primary action on a screen.
@@ -55,7 +55,9 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isEnabled = onPressed != null && !isLoading;
-    final foreground = _isPrimary ? AppColors.surface : AppColors.textPrimary;
+    final foreground = _isPrimary
+        ? context.palette.onAccent
+        : context.palette.textPrimary;
 
     return Semantics(
       button: true,
@@ -69,9 +71,11 @@ class AppButton extends StatelessWidget {
             height: AppSpacing.buttonHeight,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: _isPrimary ? AppColors.accent : AppColors.surface,
+              color: _isPrimary
+                  ? context.palette.accent
+                  : context.palette.surface,
               borderRadius: AppRadius.pill,
-              boxShadow: _isPrimary ? null : AppShadows.raised,
+              boxShadow: _isPrimary ? null : context.palette.shadowRaised,
             ),
             child: isLoading
                 ? _ButtonProgress(color: foreground)
@@ -80,7 +84,7 @@ class AppButton extends StatelessWidget {
                     icon: icon,
                     leading: leading,
                     style: _isPrimary
-                        ? AppTypography.buttonPrimary
+                        ? AppTypography.buttonPrimary(context.palette)
                         : AppTypography.buttonSecondary,
                   ),
           ),

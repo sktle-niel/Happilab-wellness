@@ -1,83 +1,50 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_tokens.dart';
 import '../../app/theme/app_typography.dart';
 import '../domain/catalogue.dart';
 import 'pressable_scale.dart';
 import 'remote_image.dart';
 import 'status_pill.dart';
+import '../../app/theme/app_palette.dart';
 
-/// A product card: inset photo with its badge, then the name, the money, and
-/// the one action — share.
+/// A product card for the two-column grids: inset photo with its badge, the
+/// name, two lines of blurb, then the money with the one action — share —
+/// beside it.
 ///
-/// The share button sits in the bottom-right corner with a ring of page colour
-/// around it, so it reads as sitting on the card rather than inside it.
-/// [showDescription] is what separates the two grids that use this: the home
-/// preview is a glance, the suggestions list is a decision.
+/// The column spreads its ends apart, so when a grid row stretches the card to
+/// match its neighbour the money stays on the bottom edge instead of floating.
 class ProductShareTile extends StatelessWidget {
   const ProductShareTile({
     required this.product,
     required this.onShare,
-    this.showDescription = false,
     super.key,
   });
 
-  static const double _cardRadius = 28;
-  static const double _imageRadius = 20;
-  static const double _inset = 12;
-
-  /// How far the share button sits past the card's corner. Kept under the
-  /// column gap so it never lands on the card beside it.
-  static const double _overhang = 8;
-
-  /// The button reads as an accent on the card, not a second subject, so it
-  /// stays around a fifth of the card's width.
-  static const double _buttonSize = 42;
-
-  /// Ring of page colour that cuts the notch.
-  static const double _buttonRing = 7;
-
-  /// What the money block leaves free for the button.
-  static const double _buttonClearance =
-      _buttonSize + _buttonRing * 2 - _overhang;
+  static const double _inset = 10;
 
   final Product product;
   final VoidCallback onShare;
-  final bool showDescription;
 
   @override
-  Widget build(BuildContext context) => Stack(
-    clipBehavior: Clip.none,
-    children: [
-      Container(
-        padding: const EdgeInsets.all(_inset),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.all(Radius.circular(_cardRadius)),
-          boxShadow: AppShadows.soft,
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(_inset),
+    decoration: BoxDecoration(
+      color: context.palette.surface,
+      borderRadius: AppRadius.card,
+      boxShadow: context.palette.shadowSoft,
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _Photo(product: product),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(6, 10, 6, 4),
+          child: _Details(product: product, onShare: onShare),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _Photo(product: product),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(6, 12, 6, 4),
-              child: _Details(
-                product: product,
-                showDescription: showDescription,
-              ),
-            ),
-          ],
-        ),
-      ),
-      Positioned(
-        right: -_overhang,
-        bottom: -_overhang,
-        child: _ShareButton(onPressed: onShare, label: product.name),
-      ),
-    ],
+      ],
+    ),
   );
 }
 
@@ -87,40 +54,59 @@ class _Photo extends StatelessWidget {
   final Product product;
 
   @override
-  Widget build(BuildContext context) => AspectRatio(
-    aspectRatio: 1,
-    child: Stack(
-      children: [
-        Positioned.fill(
-          child: RemoteImage(
-            url: product.imageUrl,
-            width: double.infinity,
-            height: double.infinity,
-            borderRadius: const BorderRadius.all(
-              Radius.circular(ProductShareTile._imageRadius),
+  Widget build(BuildContext context) {
+    final badge = product.badge;
+
+    return AspectRatio(
+      aspectRatio: 1,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: RemoteImage(
+              url: product.imageUrl,
+              width: double.infinity,
+              height: double.infinity,
+              borderRadius: AppRadius.input,
             ),
           ),
-        ),
-        if (product.tag != null)
-          Positioned(
-            top: 10,
-            left: 10,
-            child: StatusPill(
-              label: product.tag!,
-              background: AppColors.accent,
-              foreground: AppColors.surface,
-            ),
-          ),
-      ],
-    ),
-  );
+          if (badge != null)
+            Positioned(top: 10, left: 10, child: _Badge(badge: badge)),
+        ],
+      ),
+    );
+  }
+}
+
+/// Each badge has its own colour in the design; the mapping lives here rather
+/// than in the catalogue because it is presentation, not product data.
+class _Badge extends StatelessWidget {
+  const _Badge({required this.badge});
+
+  final ProductBadge badge;
+
+  (Color, Color) _colors(AppPalette palette) => switch (badge) {
+    ProductBadge.topSale => (palette.accent, palette.onAccent),
+    ProductBadge.newArrival => (palette.danger, Colors.white),
+    ProductBadge.comingSoon => (palette.textPrimary, palette.canvas),
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final (background, foreground) = _colors(context.palette);
+
+    return StatusPill(
+      label: badge.label,
+      background: background,
+      foreground: foreground,
+    );
+  }
 }
 
 class _Details extends StatelessWidget {
-  const _Details({required this.product, required this.showDescription});
+  const _Details({required this.product, required this.onShare});
 
   final Product product;
-  final bool showDescription;
+  final VoidCallback onShare;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -129,56 +115,62 @@ class _Details extends StatelessWidget {
     children: [
       Text(
         product.name,
-        style: AppTypography.figtree(size: 17, weight: 800, height: 1.2),
+        style: AppTypography.figtree(size: 15, weight: 800, height: 1.2),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      const SizedBox(height: 3),
+      Text(
+        product.blurb,
+        style: AppTypography.figtree(
+          size: 12.5,
+          height: 1.35,
+          color: context.palette.textMuted,
+        ),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),
-      if (showDescription) ...[
-        const SizedBox(height: 6),
-        Text(
-          product.blurb,
-          style: AppTypography.figtree(
-            size: 13,
-            height: 1.45,
-            color: AppColors.textMuted,
-          ),
-          maxLines: 3,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
-      const SizedBox(height: 10),
-      // The share button overhangs this corner, so the money keeps clear of it.
-      Padding(
-        padding: const EdgeInsets.only(
-          right: ProductShareTile._buttonClearance,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              product.price,
-              style: AppTypography.figtree(size: 18, weight: 800),
-            ),
-            Text(
-              product.earnShort,
-              style: AppTypography.figtree(
-                size: 12,
-                weight: 800,
-                color: AppColors.accentText,
-              ),
-            ),
-          ],
+      const SizedBox(height: AppSpacing.sm),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(child: _Money(product: product)),
+          _ShareButton(onPressed: onShare, label: product.name),
+        ],
+      ),
+    ],
+  );
+}
+
+class _Money extends StatelessWidget {
+  const _Money({required this.product});
+
+  final Product product;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Text(product.price, style: AppTypography.figtree(size: 17, weight: 800)),
+      Text(
+        product.earnShort,
+        style: AppTypography.figtree(
+          size: 11.5,
+          weight: 800,
+          color: context.palette.accentText,
         ),
       ),
     ],
   );
 }
 
-/// The corner action. The ring is painted in the page colour so the button
-/// looks notched into the card, as the reference layout does.
+/// The cream disc beside the price. Flat on purpose — a shadow here would make
+/// it read as a second card.
 class _ShareButton extends StatelessWidget {
   const _ShareButton({required this.onPressed, required this.label});
+
+  static const double _size = 38;
 
   final VoidCallback onPressed;
   final String label;
@@ -191,27 +183,16 @@ class _ShareButton extends StatelessWidget {
       scale: 0.9,
       onPressed: onPressed,
       child: Container(
-        // The ring is page colour, so where it crosses the card it reads as a
-        // notch cut out of the corner, and where it crosses the page it
-        // disappears.
-        padding: const EdgeInsets.all(ProductShareTile._buttonRing),
-        decoration: const BoxDecoration(
-          color: AppColors.canvas,
-          borderRadius: BorderRadius.all(Radius.circular(24)),
+        width: _size,
+        height: _size,
+        decoration: BoxDecoration(
+          color: context.palette.tint,
+          shape: BoxShape.circle,
         ),
-        child: Container(
-          width: ProductShareTile._buttonSize,
-          height: ProductShareTile._buttonSize,
-          decoration: const BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.all(Radius.circular(15)),
-            boxShadow: AppShadows.input,
-          ),
-          child: const Icon(
-            Icons.share_outlined,
-            size: 18,
-            color: AppColors.textPrimary,
-          ),
+        child: Icon(
+          Icons.share_outlined,
+          size: 17,
+          color: context.palette.textPrimary,
         ),
       ),
     ),

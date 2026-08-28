@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../shared/widgets/app_card.dart';
@@ -10,6 +9,7 @@ import '../../../../shared/widgets/remote_image.dart';
 import '../../../../shared/widgets/status_pill.dart';
 import '../../domain/feed_post.dart';
 import 'post_video.dart';
+import '../../../../app/theme/app_palette.dart';
 
 /// One post: who wrote it, what it shows, and the two things a member does
 /// with it.
@@ -59,14 +59,16 @@ class _FeedPostCardState extends State<FeedPostCard> {
                         ? Icons.favorite_rounded
                         : Icons.favorite_border_rounded,
                     label: '$_likes',
-                    color: _isLiked ? AppColors.danger : AppColors.textMuted,
+                    color: _isLiked
+                        ? context.palette.danger
+                        : context.palette.textMuted,
                     onPressed: () => setState(() => _isLiked = !_isLiked),
                   ),
                   const Gap(18),
                   _PostAction(
                     icon: Icons.share_outlined,
                     label: 'Share',
-                    color: AppColors.textMuted,
+                    color: context.palette.textMuted,
                     onPressed: widget.onShare,
                   ),
                   const Spacer(),
@@ -74,7 +76,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
                     '${widget.post.comments} comments',
                     style: AppTypography.figtree(
                       size: 12.5,
-                      color: AppColors.textFaint,
+                      color: context.palette.textFaint,
                     ),
                   ),
                 ],
@@ -107,9 +109,9 @@ class _PostHeader extends StatelessWidget {
           height: 38,
           padding: const EdgeInsets.all(5),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: context.palette.surface,
             shape: BoxShape.circle,
-            border: Border.all(color: AppColors.cream, width: 1.5),
+            border: Border.all(color: context.palette.tint, width: 1.5),
           ),
           child: const BrandMark(size: 28),
         ),
@@ -127,17 +129,17 @@ class _PostHeader extends StatelessWidget {
                 post.when,
                 style: AppTypography.figtree(
                   size: 12,
-                  color: AppColors.textFaint,
+                  color: context.palette.textFaint,
                 ),
               ),
             ],
           ),
         ),
         if (post.media == PostMedia.video)
-          const StatusPill(
+          StatusPill(
             label: 'Video',
-            background: AppColors.danger,
-            foreground: AppColors.surface,
+            background: context.palette.danger,
+            foreground: Colors.white,
           ),
       ],
     ),

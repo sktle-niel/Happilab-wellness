@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'app_colors.dart';
-
 /// Spacing scale. Every gap and padding comes from here — magic numbers
 /// scattered across screens are what makes a UI drift out of rhythm.
 abstract final class AppSpacing {
@@ -40,26 +38,6 @@ abstract final class AppRadius {
   static const BorderRadius pill = BorderRadius.all(Radius.circular(999));
 }
 
-/// The design uses one warm shadow at three depths.
-abstract final class AppShadows {
-  static const List<BoxShadow> input = [
-    BoxShadow(color: Color(0x14966414), blurRadius: 14, offset: Offset(0, 4)),
-  ];
-
-  static const List<BoxShadow> raised = [
-    BoxShadow(color: Color(0x1F966414), blurRadius: 18, offset: Offset(0, 6)),
-  ];
-
-  /// The lift under content cards on the cream canvas.
-  static const List<BoxShadow> soft = [
-    BoxShadow(color: Color(0x14966414), blurRadius: 22, offset: Offset(0, 8)),
-  ];
-
-  static const List<BoxShadow> card = [
-    BoxShadow(color: Color(0x1A966414), blurRadius: 26, offset: Offset(0, 10)),
-  ];
-}
-
 /// Motion tokens, matching the canvas timings.
 abstract final class AppDuration {
   static const Duration fast = Duration(milliseconds: 150);
@@ -73,6 +51,9 @@ abstract final class AppDuration {
   /// Default debounce for user-driven work. Pairs with the network rate limiter
   /// to keep request volume predictable.
   static const Duration debounce = Duration(milliseconds: 350);
+
+  /// The circular reveal that swaps light and dark.
+  static const Duration themeReveal = Duration(milliseconds: 540);
 }
 
 /// Easing shared with the design canvas.
@@ -80,20 +61,8 @@ abstract final class AppCurves {
   /// cubic-bezier(.22, 1, .36, 1) — the entrance easing used by every
   /// rise-in and pop-in on the canvas.
   static const Curve entrance = Cubic(0.22, 1, 0.36, 1);
-}
 
-/// Semantic surface decoration reused by inputs and white buttons.
-abstract final class AppDecoration {
-  static BoxDecoration get field => const BoxDecoration(
-    color: AppColors.surface,
-    borderRadius: AppRadius.input,
-    boxShadow: AppShadows.input,
-  );
-
-  static BoxDecoration get fieldFocused => BoxDecoration(
-    color: AppColors.surface,
-    borderRadius: AppRadius.input,
-    boxShadow: AppShadows.input,
-    border: Border.all(color: AppColors.focus, width: 2),
-  );
+  /// cubic-bezier(.32, .08, .24, 1) — a quick start that settles softly, the
+  /// pace of the theme wipe.
+  static const Curve themeReveal = Cubic(0.32, 0.08, 0.24, 1);
 }

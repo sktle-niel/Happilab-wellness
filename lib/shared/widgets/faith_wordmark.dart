@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_tokens.dart';
 import '../../app/theme/app_typography.dart';
 import 'rise_in.dart';
+import '../../app/theme/app_palette.dart';
 
-/// FAITH over a ruled WELLNESS, with the optional tagline beneath — the brand
-/// lockup used by the loader and the onboarding cover.
+/// FALCON CREST over a ruled VENTURES, with the optional tagline beneath — the
+/// brand lockup used by the loader and the onboarding cover.
 ///
 /// Pass [entrance] to stagger it in; leave it null and everything renders at
 /// rest, which is what a still preview or a test wants.
@@ -18,7 +18,7 @@ class FaithWordmark extends StatelessWidget {
     super.key,
   });
 
-  static const String tagline = 'BEAUTY BEGINS WITH FAITH.';
+  static const String tagline = 'BUILDING OPPORTUNITIES. CREATING LEGACIES.';
 
   final Animation<double>? entrance;
   final bool showTagline;
@@ -28,8 +28,8 @@ class FaithWordmark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = AppTypography.wordmark;
-    final sub = AppTypography.wordmarkSub;
+    final title = AppTypography.wordmark(context.palette);
+    final sub = AppTypography.wordmarkSub(context.palette);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -42,7 +42,7 @@ class FaithWordmark extends StatelessWidget {
             // the wordmark optically centred.
             padding: EdgeInsets.only(left: (title.letterSpacing ?? 0) / 2),
             child: Text(
-              'FAITH',
+              'FALCON CREST',
               style: title.copyWith(fontSize: title.fontSize! * scale),
             ),
           ),
@@ -60,7 +60,7 @@ class FaithWordmark extends StatelessWidget {
                   right: AppSpacing.sm + 2 + (sub.letterSpacing ?? 0),
                 ),
                 child: Text(
-                  'WELLNESS',
+                  'VENTURES',
                   style: sub.copyWith(fontSize: sub.fontSize! * scale),
                 ),
               ),
@@ -74,7 +74,10 @@ class FaithWordmark extends StatelessWidget {
             end: 1,
             child: Padding(
               padding: const EdgeInsets.only(top: AppSpacing.sm),
-              child: Text(FaithWordmark.tagline, style: AppTypography.tagline),
+              child: Text(
+                FaithWordmark.tagline,
+                style: AppTypography.tagline(context.palette),
+              ),
             ),
           ),
       ],
@@ -96,9 +99,9 @@ class _Rule extends StatelessWidget {
   const _Rule();
 
   @override
-  Widget build(BuildContext context) => const SizedBox(
+  Widget build(BuildContext context) => SizedBox(
     width: 42,
     height: 1.5,
-    child: ColoredBox(color: AppColors.brandGold),
+    child: ColoredBox(color: context.palette.brand),
   );
 }

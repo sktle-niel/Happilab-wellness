@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_tokens.dart';
 import '../../app/theme/app_typography.dart';
+import '../../app/theme/app_palette.dart';
 
 /// The rule-OR-rule separator between provider sign-in and the manual form.
 class OrDivider extends StatelessWidget {
@@ -21,7 +21,7 @@ class OrDivider extends StatelessWidget {
           style: AppTypography.figtree(
             size: 12,
             weight: 700,
-            color: AppColors.textFaint,
+            color: context.palette.textFaint,
           ),
         ),
       ),
@@ -35,5 +35,5 @@ class _Rule extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      const SizedBox(height: 1, child: ColoredBox(color: AppColors.divider));
+      SizedBox(height: 1, child: ColoredBox(color: context.palette.divider));
 }

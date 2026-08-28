@@ -33,7 +33,7 @@ class MemberSummary {
 
   static const MemberSummary placeholder = MemberSummary(
     name: 'Ivy Santos',
-    referralCode: 'FAITH-IVY24',
+    referralCode: 'FCV-IVY24',
     points: 1240,
     referredPeople: 8,
     referredBuyers: 5,

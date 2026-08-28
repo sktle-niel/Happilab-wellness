@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 
 import '../../../app/shell/app_shell_scope.dart';
 import '../../../app/shell/widgets/faith_nav_bar.dart';
-import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/domain/member_summary.dart';
@@ -14,6 +13,7 @@ import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/screen_header.dart';
 import '../domain/referral.dart';
 import 'widgets/referral_row.dart';
+import '../../../app/theme/app_palette.dart';
 
 /// The member's code and everyone who has used it.
 class MyReferralsScreen extends StatelessWidget {
@@ -24,7 +24,7 @@ class MyReferralsScreen extends StatelessWidget {
     const summary = MemberSummary.placeholder;
 
     return Scaffold(
-      backgroundColor: AppColors.canvas,
+      backgroundColor: context.palette.canvas,
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(
@@ -41,18 +41,7 @@ class MyReferralsScreen extends StatelessWidget {
             const Gap(AppSpacing.md),
             _CodeCard(code: summary.referralCode),
             const Gap(14),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: Text(
-                summary.referralSummary.toUpperCase(),
-                style: AppTypography.figtree(
-                  size: 13,
-                  weight: 800,
-                  letterSpacing: 0.65,
-                  color: AppColors.textMuted,
-                ),
-              ),
-            ),
+            _ReferralSummary(text: summary.referralSummary),
             const Gap(AppSpacing.sm),
             AppCard.flush(
               child: DividedColumn(
@@ -67,6 +56,35 @@ class MyReferralsScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The headline count, marked with the people it counts.
+class _ReferralSummary extends StatelessWidget {
+  const _ReferralSummary({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 6),
+    child: Row(
+      children: [
+        Icon(Icons.group_outlined, size: 18, color: context.palette.accentText),
+        const Gap.sm(),
+        Expanded(
+          child: Text(
+            text.toUpperCase(),
+            style: AppTypography.figtree(
+              size: 12.5,
+              weight: 800,
+              letterSpacing: 0.6,
+              color: context.palette.textMuted,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 /// The code, with the two ways a member passes it on.
@@ -102,40 +120,47 @@ class _CodeCardState extends State<_CodeCard> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
           children: [
-            Text(
-              'YOUR CODE',
-              style: AppTypography.figtree(
-                size: 11.5,
-                weight: 700,
-                letterSpacing: 0.69,
-                color: AppColors.textMuted,
-              ),
-            ),
-            const Gap(10),
             Expanded(
-              child: Text(
-                widget.code,
-                style: AppTypography.figtree(
-                  size: 22,
-                  weight: 800,
-                  letterSpacing: 0.66,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'YOUR CODE',
+                    style: AppTypography.figtree(
+                      size: 11.5,
+                      weight: 700,
+                      letterSpacing: 0.69,
+                      color: context.palette.textMuted,
+                    ),
+                  ),
+                  const Gap(4),
+                  Text(
+                    widget.code,
+                    style: AppTypography.figtree(
+                      size: 26,
+                      weight: 800,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
               ),
             ),
+            const Gap(12),
+            const _GiftBadge(),
           ],
         ),
-        const Gap(12),
+        const Gap(14),
         Row(
           children: [
             Expanded(
               child: _CodeAction(
                 label: _hasCopied ? 'Copied' : 'Copy code',
+                icon: _hasCopied ? Icons.check_rounded : Icons.copy_rounded,
                 onPressed: _copyCode,
-                background: AppColors.accent,
-                foreground: AppColors.surface,
+                background: context.palette.accent,
+                foreground: context.palette.onAccent,
               ),
             ),
             const Gap(10),
@@ -144,13 +169,33 @@ class _CodeCardState extends State<_CodeCard> {
                 label: 'Share',
                 icon: Icons.share_outlined,
                 onPressed: _shareInvite,
-                background: AppColors.cream,
-                foreground: AppColors.accentText,
+                background: context.palette.tint,
+                foreground: context.palette.accentText,
               ),
             ),
           ],
         ),
       ],
+    ),
+  );
+}
+
+/// The gift in the corner of the code card — what a shared code is.
+class _GiftBadge extends StatelessWidget {
+  const _GiftBadge();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 56,
+    height: 56,
+    decoration: BoxDecoration(
+      color: context.palette.tint,
+      shape: BoxShape.circle,
+    ),
+    child: Icon(
+      Icons.card_giftcard_rounded,
+      size: 26,
+      color: context.palette.accent,
     ),
   );
 }
@@ -189,14 +234,17 @@ class _CodeAction extends StatelessWidget {
           children: [
             if (icon != null) ...[
               Icon(icon, size: 16, color: foreground),
-              const Gap.sm(),
+              const Gap(6),
             ],
-            Text(
-              label,
-              style: AppTypography.figtree(
-                size: 15,
-                weight: 700,
-                color: foreground,
+            Flexible(
+              child: Text(
+                label,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.figtree(
+                  size: 14.5,
+                  weight: 700,
+                  color: foreground,
+                ),
               ),
             ),
           ],

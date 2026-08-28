@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../app/shell/app_shell_scope.dart';
-import '../../../app/shell/widgets/faith_nav_bar.dart';
-import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/domain/member_summary.dart';
-import '../../../shared/domain/payout_account.dart';
 import '../../../shared/utils/number_format.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_card.dart';
@@ -19,6 +15,7 @@ import 'rewards_controller.dart';
 import 'widgets/amount_chip_row.dart';
 import 'widgets/cash_out_success_card.dart';
 import 'widgets/payout_method_picker.dart';
+import '../../../app/theme/app_palette.dart';
 
 /// Turn points into money: how much, where to, and what has already been sent.
 class RewardsScreen extends StatefulWidget {
@@ -43,20 +40,12 @@ class _RewardsScreenState extends State<RewardsScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppColors.canvas,
+    backgroundColor: context.palette.canvas,
     body: SafeArea(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          20,
-          12,
-          20,
-          FaithNavBar.contentInset,
-        ),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
         children: [
-          ScreenHeader(
-            showBack: !AppShellScope.contains(context),
-            title: 'Cash out',
-          ),
+          const ScreenHeader(title: 'Cash out'),
           const Gap(AppSpacing.md),
           const _BalanceStrip(summary: _summary),
           const Gap(AppSpacing.md),
@@ -97,7 +86,7 @@ class _BalanceStrip extends StatelessWidget {
           style: AppTypography.figtree(
             size: 12.5,
             weight: 700,
-            color: AppColors.textMuted,
+            color: context.palette.textMuted,
           ),
         ),
         Text(
@@ -109,7 +98,7 @@ class _BalanceStrip extends StatelessWidget {
           style: AppTypography.figtree(
             size: 13.5,
             weight: 700,
-            color: AppColors.accentText,
+            color: context.palette.accentText,
           ),
         ),
       ],
@@ -137,7 +126,7 @@ class _CashOutForm extends StatelessWidget {
       const SectionHeader(title: 'Send to'),
       const Gap(AppSpacing.sm),
       PayoutMethodPicker(
-        accounts: PayoutAccount.placeholder,
+        accounts: controller.accounts,
         selected: controller.destination,
         onSelect: controller.selectDestination,
       ),
@@ -152,7 +141,10 @@ class _CashOutForm extends StatelessWidget {
       Text(
         CashOutTerms.feeNote,
         textAlign: TextAlign.center,
-        style: AppTypography.figtree(size: 13, color: AppColors.textFaint),
+        style: AppTypography.figtree(
+          size: 13,
+          color: context.palette.textFaint,
+        ),
       ),
     ],
   );
@@ -196,7 +188,7 @@ class _HistoryRow extends StatelessWidget {
                 record.when,
                 style: AppTypography.figtree(
                   size: 12,
-                  color: AppColors.textFaint,
+                  color: context.palette.textFaint,
                 ),
               ),
             ],

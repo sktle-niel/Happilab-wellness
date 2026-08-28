@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/domain/activity_entry.dart';
@@ -8,6 +7,7 @@ import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/divided_column.dart';
 import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/screen_header.dart';
+import '../../../app/theme/app_palette.dart';
 
 /// Every movement on the account, not just the recent few on home.
 class AccountActivityScreen extends StatelessWidget {
@@ -15,7 +15,7 @@ class AccountActivityScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppColors.canvas,
+    backgroundColor: context.palette.canvas,
     body: SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
@@ -43,10 +43,10 @@ class _ActivityRow extends StatelessWidget {
 
   final ActivityEntry entry;
 
-  Color get _amountColor => switch (entry.kind) {
-    ActivityKind.earned => AppColors.accentText,
-    ActivityKind.cashOut => AppColors.textMuted,
-    ActivityKind.joined => AppColors.textFaint,
+  Color _amountColor(AppPalette palette) => switch (entry.kind) {
+    ActivityKind.earned => palette.accentText,
+    ActivityKind.cashOut => palette.textMuted,
+    ActivityKind.joined => palette.textFaint,
   };
 
   @override
@@ -68,7 +68,7 @@ class _ActivityRow extends StatelessWidget {
                 style: AppTypography.figtree(
                   size: 12,
                   weight: 700,
-                  color: AppColors.textFaint,
+                  color: context.palette.textFaint,
                 ),
               ),
             ],
@@ -79,7 +79,7 @@ class _ActivityRow extends StatelessWidget {
           style: AppTypography.figtree(
             size: 14.5,
             weight: 800,
-            color: _amountColor,
+            color: _amountColor(context.palette),
           ),
         ),
       ],
@@ -99,7 +99,7 @@ class _EndOfList extends StatelessWidget {
       style: AppTypography.figtree(
         size: 12,
         weight: 700,
-        color: AppColors.textFaint,
+        color: context.palette.textFaint,
       ),
     ),
   );

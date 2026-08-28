@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../shared/domain/catalogue.dart';
 import '../../../../shared/widgets/gap.dart';
 import '../../../../shared/widgets/remote_image.dart';
+import '../../../../app/theme/app_palette.dart';
 
 /// One product in the intro showcase.
 ///
@@ -22,10 +22,10 @@ class ProductCard extends StatelessWidget {
     angle: tiltDegrees * 3.1415926535 / 180,
     child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
+      decoration: BoxDecoration(
+        color: context.palette.surface,
         borderRadius: AppRadius.card,
-        boxShadow: AppShadows.card,
+        boxShadow: context.palette.shadowCard,
       ),
       child: Row(
         children: [
@@ -65,7 +65,10 @@ class _ProductDetails extends StatelessWidget {
       const Gap(4),
       Text(
         product.blurb,
-        style: AppTypography.figtree(size: 12.5, color: AppColors.textMuted),
+        style: AppTypography.figtree(
+          size: 12.5,
+          color: context.palette.textMuted,
+        ),
       ),
       const Gap(4),
       Text(
@@ -73,7 +76,7 @@ class _ProductDetails extends StatelessWidget {
         style: AppTypography.figtree(
           size: 12.5,
           weight: 800,
-          color: AppColors.accentText,
+          color: context.palette.accentText,
         ),
       ),
     ],

@@ -6,6 +6,7 @@ import '../../core/network/io_http_transport.dart';
 import '../../core/network/rate_limiter.dart';
 import '../../core/security/secure_token_store.dart';
 import '../../core/security/token_store.dart';
+import '../theme/theme_controller.dart';
 
 /// Composition root.
 ///
@@ -18,7 +19,8 @@ class AppDependencies {
     required this.logger,
     required this.tokenStore,
     required this.apiClient,
-  });
+    ThemeController? themeController,
+  }) : themeController = themeController ?? ThemeController();
 
   factory AppDependencies.production() {
     final config = AppConfig.fromEnvironment();
@@ -69,5 +71,11 @@ class AppDependencies {
   final TokenStore tokenStore;
   final ApiClient apiClient;
 
-  void dispose() => apiClient.close();
+  /// Light or dark, chosen by the member for the session.
+  final ThemeController themeController;
+
+  void dispose() {
+    themeController.dispose();
+    apiClient.close();
+  }
 }

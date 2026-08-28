@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../app/router/app_routes.dart';
-import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/domain/program_terms.dart';
@@ -11,6 +10,7 @@ import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/gap.dart';
 import 'widgets/onboarding_backdrop.dart';
 import 'widgets/stage_dots.dart';
+import '../../../app/theme/app_palette.dart';
 
 /// The pitch: what the programme pays, and the way in.
 ///
@@ -68,7 +68,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppColors.canvas,
+    backgroundColor: context.palette.canvas,
     body: Stack(
       fit: StackFit.expand,
       children: [
@@ -126,14 +126,15 @@ class _OnboardingPitch extends StatelessWidget {
           weight: 800,
           height: 1.25,
           letterSpacing: -0.3,
-          color: AppColors.surface,
+          // Always white: this sits on dark footage, not on the canvas.
+          color: Colors.white,
         ),
       ),
       const Gap(12),
       ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 300),
         child: Text(
-          'Invite friends to Faith Wellness — earn ${ProgramTerms.earnRate} of '
+          'Invite friends to Falcon Crest Ventures — earn ${ProgramTerms.earnRate} of '
           'every product they buy. ${ProgramTerms.pointsConversion}.',
           textAlign: TextAlign.center,
           style: AppTypography.figtree(
@@ -156,9 +157,6 @@ class _OnboardingPitch extends StatelessWidget {
 
 class _AlreadyAMember extends StatelessWidget {
   const _AlreadyAMember({required this.onPressed});
-
-  /// The link tint the design uses over dark photography.
-  static const Color _linkOnDark = Color(0xFFFFB84D);
 
   final VoidCallback onPressed;
 
@@ -184,7 +182,7 @@ class _AlreadyAMember extends StatelessWidget {
             style: AppTypography.figtree(
               size: 13.5,
               weight: 700,
-              color: _linkOnDark,
+              color: context.palette.accent,
             ),
           ),
         ),

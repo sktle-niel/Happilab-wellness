@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
-import '../../../../app/theme/app_colors.dart';
 import '../../../../shared/widgets/brand_mark.dart';
 import '../../../../shared/widgets/faith_wordmark.dart';
 import '../../../../shared/widgets/floating_petals.dart';
+import '../../../../app/theme/app_palette.dart';
 
 /// What the onboarding pitch sits on top of: the brand cover, then the brand
 /// clips, one stage at a time.
@@ -124,7 +124,7 @@ class _OnboardingBackdropState extends State<OnboardingBackdrop> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        const ColoredBox(color: AppColors.canvas),
+        ColoredBox(color: context.palette.canvas),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 600),
           // AnimatedSwitcher sizes to its child, so the stage has to claim the
@@ -167,8 +167,8 @@ class _BrandCover extends StatelessWidget {
   const _BrandCover();
 
   @override
-  Widget build(BuildContext context) => const ColoredBox(
-    color: AppColors.canvas,
+  Widget build(BuildContext context) => ColoredBox(
+    color: context.palette.canvas,
     child: Stack(
       children: [
         Positioned.fill(child: FloatingPetals()),
@@ -198,7 +198,7 @@ class _ReadabilityScrim extends StatelessWidget {
       gradient: LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [Color(0x0D1E1408), Color(0xD11E1408), Color(0xEB1E1408)],
+        colors: [Color(0x0D000000), Color(0xD1000000), Color(0xEB000000)],
         stops: [0.3, 0.78, 1],
       ),
     ),

@@ -5,6 +5,7 @@ import 'di/app_scope.dart';
 import 'router/app_router.dart';
 import 'router/app_routes.dart';
 import 'theme/app_theme.dart';
+import 'theme/theme_reveal.dart';
 
 /// Application shell: dependency scope, theme and routing. It holds no feature
 /// logic — that belongs in `features/`.
@@ -16,15 +17,23 @@ class HappilabApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AppScope(
     dependencies: dependencies,
-    child: MaterialApp(
-      title: 'Faith Wellness',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      // The design canvas has no dark variant yet; pinning light keeps the app
-      // matching it instead of half-rendering an undesigned theme.
-      themeMode: ThemeMode.light,
-      initialRoute: AppRoutes.splash,
-      onGenerateRoute: AppRouter.onGenerateRoute,
+    child: ThemeReveal(
+      controller: dependencies.themeController,
+      child: ListenableBuilder(
+        listenable: dependencies.themeController,
+        builder: (context, _) => MaterialApp(
+          title: 'Falcon Crest Ventures',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light(),
+          darkTheme: AppTheme.dark(),
+          themeMode: dependencies.themeController.mode,
+          // The reveal does the transition; a cross-fade underneath it would
+          // only bleed the old palette through the hole.
+          themeAnimationDuration: Duration.zero,
+          initialRoute: AppRoutes.splash,
+          onGenerateRoute: AppRouter.onGenerateRoute,
+        ),
+      ),
     ),
   );
 }

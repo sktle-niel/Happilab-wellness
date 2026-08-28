@@ -1,56 +1,61 @@
 import 'package:flutter/material.dart';
 
-import 'app_colors.dart';
+import 'app_palette.dart';
 import 'app_tokens.dart';
 import 'app_typography.dart';
 
-/// Single source of truth for the app's look.
+/// Single source of truth for the app's look, one [ThemeData] per palette.
 ///
-/// The design canvas defines one warm, light palette; there is no dark variant
-/// yet, so `HappilabApp` pins [ThemeMode.light]. When a dark canvas exists, add
-/// `dark()` here rather than branching on brightness inside screens.
+/// Screens never branch on brightness: they read `context.palette` and the
+/// palette carries the difference.
 abstract final class AppTheme {
-  static ThemeData light() {
-    const scheme = ColorScheme.light(
-      primary: AppColors.accent,
-      onPrimary: AppColors.surface,
-      secondary: AppColors.brandGold,
-      onSecondary: AppColors.surface,
-      surface: AppColors.canvas,
-      onSurface: AppColors.textPrimary,
-      surfaceContainerHighest: AppColors.surface,
-      error: AppColors.danger,
-      onError: AppColors.surface,
-      outline: AppColors.textFaint,
-      shadow: AppColors.shadow,
+  static ThemeData light() => _from(AppPalette.light);
+
+  static ThemeData dark() => _from(AppPalette.dark);
+
+  static ThemeData _from(AppPalette palette) {
+    final scheme = ColorScheme(
+      brightness: palette.brightness,
+      primary: palette.accent,
+      onPrimary: palette.onAccent,
+      secondary: palette.accentText,
+      onSecondary: palette.onAccent,
+      surface: palette.canvas,
+      onSurface: palette.textPrimary,
+      surfaceContainerHighest: palette.surface,
+      error: palette.danger,
+      onError: palette.surface,
+      outline: palette.textFaint,
+      shadow: palette.shadow,
     );
 
     return ThemeData(
       colorScheme: scheme,
-      scaffoldBackgroundColor: AppColors.canvas,
-      textTheme: AppTypography.textTheme(),
-      splashColor: AppColors.accent.withValues(alpha: 0.08),
-      highlightColor: AppColors.accent.withValues(alpha: 0.04),
-      appBarTheme: const AppBarThemeData(
-        backgroundColor: AppColors.canvas,
-        foregroundColor: AppColors.textPrimary,
+      extensions: [palette],
+      scaffoldBackgroundColor: palette.canvas,
+      textTheme: AppTypography.textTheme(palette),
+      splashColor: palette.accent.withValues(alpha: 0.08),
+      highlightColor: palette.accent.withValues(alpha: 0.04),
+      appBarTheme: AppBarThemeData(
+        backgroundColor: palette.canvas,
+        foregroundColor: palette.textPrimary,
         elevation: 0,
         centerTitle: false,
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.accent,
-          foregroundColor: AppColors.surface,
+          backgroundColor: palette.accent,
+          foregroundColor: palette.onAccent,
           minimumSize: const Size.fromHeight(AppSpacing.buttonHeight),
           shape: const RoundedRectangleBorder(borderRadius: AppRadius.pill),
-          textStyle: AppTypography.buttonPrimary,
+          textStyle: AppTypography.buttonPrimary(palette),
           elevation: 0,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.textPrimary,
-          backgroundColor: AppColors.surface,
+          foregroundColor: palette.textPrimary,
+          backgroundColor: palette.surface,
           minimumSize: const Size.fromHeight(AppSpacing.buttonHeight),
           shape: const RoundedRectangleBorder(borderRadius: AppRadius.pill),
           side: BorderSide.none,
@@ -59,12 +64,17 @@ abstract final class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.accentText,
+          foregroundColor: palette.accentText,
           textStyle: AppTypography.figtree(size: 13, weight: 800),
         ),
       ),
-      snackBarTheme: const SnackBarThemeData(
+      snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
+        backgroundColor: palette.textPrimary,
+        contentTextStyle: AppTypography.figtree(
+          size: 14,
+          color: palette.canvas,
+        ),
       ),
     );
   }

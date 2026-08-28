@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../shared/widgets/app_card.dart';
 import '../../../../shared/widgets/gap.dart';
 import '../../domain/program_guide.dart';
+import '../../../../app/theme/app_palette.dart';
 
 /// A numbered step in the programme explainer.
 class ProgramStepCard extends StatelessWidget {
@@ -21,8 +21,8 @@ class ProgramStepCard extends StatelessWidget {
           width: 42,
           height: 42,
           alignment: Alignment.center,
-          decoration: const BoxDecoration(
-            color: AppColors.cream,
+          decoration: BoxDecoration(
+            color: context.palette.tint,
             shape: BoxShape.circle,
           ),
           child: Text(
@@ -30,7 +30,7 @@ class ProgramStepCard extends StatelessWidget {
             style: AppTypography.figtree(
               size: 18,
               weight: 800,
-              color: AppColors.accentText,
+              color: context.palette.accentText,
             ),
           ),
         ),
@@ -49,7 +49,7 @@ class ProgramStepCard extends StatelessWidget {
                 style: AppTypography.figtree(
                   size: 14,
                   height: 1.5,
-                  color: AppColors.textMuted,
+                  color: context.palette.textMuted,
                 ),
               ),
             ],

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/router/app_routes.dart';
-import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/widgets/app_button.dart';
@@ -13,6 +12,7 @@ import '../../../shared/widgets/google_mark.dart';
 import '../../../shared/widgets/inline_action_text.dart';
 import '../../../shared/widgets/or_divider.dart';
 import 'sign_in_controller.dart';
+import '../../../app/theme/app_palette.dart';
 
 /// Sign in with a provider or with an identifier and password.
 class SignInScreen extends StatefulWidget {
@@ -34,8 +34,10 @@ class _SignInScreenState extends State<SignInScreen> {
   void _submit() {
     if (!_controller.validate()) return;
     // No auth backend yet: a valid form goes straight through. Swap this for a
-    // repository call once the API exists.
-    Navigator.of(context).pushReplacementNamed(AppRoutes.home);
+    // repository call once the API exists. The first-run stack goes with it:
+    // an onboarding route left underneath keeps cycling its video clips.
+    Navigator.of(context)
+        .pushNamedAndRemoveUntil(AppRoutes.home, (route) => false);
   }
 
   void _showProviderUnavailable() => ScaffoldMessenger.of(context).showSnackBar(
@@ -44,7 +46,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppColors.canvas,
+    backgroundColor: context.palette.canvas,
     body: SafeArea(
       child: CenteredScrollView(
         padding: const EdgeInsets.fromLTRB(
@@ -92,7 +94,10 @@ class _SignInHeader extends StatelessWidget {
       const Gap(6),
       Text('Welcome back', style: AppTypography.screenTitle),
       const Gap(2),
-      Text('Sign in to keep earning', style: AppTypography.screenSubtitle),
+      Text(
+        'Sign in to keep earning',
+        style: AppTypography.screenSubtitle(context.palette),
+      ),
     ],
   );
 }
@@ -147,7 +152,7 @@ class _PasswordVisibilityToggle extends StatelessWidget {
           ? Icons.visibility_outlined
           : Icons.visibility_off_outlined,
       size: 17,
-      color: AppColors.textFaint,
+      color: context.palette.textFaint,
     ),
     tooltip: controller.isPasswordHidden ? 'Show password' : 'Hide password',
     splashRadius: 20,

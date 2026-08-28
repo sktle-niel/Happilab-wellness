@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../shared/widgets/app_card.dart';
 import '../../../../shared/widgets/avatar_circle.dart';
 import '../../../../shared/widgets/gap.dart';
 import '../../domain/testimonial.dart';
+import '../../../../app/theme/app_palette.dart';
 
 /// One member story.
 class TestimonialCard extends StatelessWidget {
@@ -46,7 +46,7 @@ class TestimonialCard extends StatelessWidget {
                     testimonial.detail,
                     style: AppTypography.figtree(
                       size: 12,
-                      color: AppColors.textFaint,
+                      color: context.palette.textFaint,
                     ),
                   ),
                 ],
@@ -71,9 +71,13 @@ class _Stars extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         for (var index = 0; index < count; index++)
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(right: 3),
-            child: Icon(Icons.star_rounded, size: 17, color: AppColors.focus),
+            child: Icon(
+              Icons.star_rounded,
+              size: 17,
+              color: context.palette.focus,
+            ),
           ),
       ],
     ),

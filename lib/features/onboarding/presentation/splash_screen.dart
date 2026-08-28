@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../app/router/app_routes.dart';
-import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../shared/widgets/brand_mark.dart';
 import '../../../shared/widgets/faith_mascot.dart';
 import '../../../shared/widgets/faith_wordmark.dart';
 import '../../../shared/widgets/floating_petals.dart';
+import '../../../app/theme/app_palette.dart';
 
 /// The loader: brand lockup, drifting petals and the mascot, then a hand-off to
 /// the product showcase.
@@ -51,7 +51,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppColors.canvas,
+    backgroundColor: context.palette.canvas,
     body: Stack(
       children: [
         const Positioned.fill(child: FloatingPetals()),

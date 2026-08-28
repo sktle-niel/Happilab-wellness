@@ -17,7 +17,7 @@ class TermsSection {
 /// Support copy, kept as data so it can be reviewed without reading Dart.
 abstract final class SupportContent {
   static const String lastUpdated =
-      'Last updated: August 2026 · Faith Wellness PH';
+      'Last updated: August 2026 · Falcon Crest Ventures';
 
   static const List<FaqEntry> faqs = [
     FaqEntry(

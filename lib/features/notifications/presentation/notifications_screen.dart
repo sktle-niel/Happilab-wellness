@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../../app/theme/app_colors.dart';
-import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/widgets/brand_mark.dart';
 import '../../../shared/widgets/circle_icon_button.dart';
 import '../../../shared/widgets/gap.dart';
 import '../domain/app_notification.dart';
+import '../../../app/theme/app_palette.dart';
 
 /// Everything the brand has told this member, newest first.
 class NotificationsScreen extends StatefulWidget {
@@ -27,7 +26,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppColors.canvas,
+    backgroundColor: context.palette.canvas,
     body: SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
@@ -53,7 +52,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               CircleIconButton(
                 icon: Icons.done_all_rounded,
                 semanticLabel: 'Mark all read',
-                color: AppColors.accentText,
+                color: context.palette.accentText,
                 onPressed: _hasUnread ? _markAllRead : null,
               ),
             ],
@@ -68,7 +67,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 style: AppTypography.figtree(
                   size: 12,
                   weight: 700,
-                  color: AppColors.textFaint,
+                  color: context.palette.textFaint,
                 ),
               ),
             ),
@@ -92,9 +91,11 @@ class _NotificationTile extends StatelessWidget {
     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
     decoration: BoxDecoration(
       // Unread sits on cream so the eye finds it without a badge.
-      color: notification.isUnread ? AppColors.cream : AppColors.surface,
+      color: notification.isUnread
+          ? context.palette.tint
+          : context.palette.surface,
       borderRadius: const BorderRadius.all(Radius.circular(18)),
-      boxShadow: AppShadows.input,
+      boxShadow: context.palette.shadowInput,
     ),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,8 +104,8 @@ class _NotificationTile extends StatelessWidget {
           width: 38,
           height: 38,
           padding: const EdgeInsets.all(6),
-          decoration: const BoxDecoration(
-            color: AppColors.cream,
+          decoration: BoxDecoration(
+            color: context.palette.tint,
             shape: BoxShape.circle,
           ),
           child: const BrandMark(size: 26),
@@ -129,7 +130,7 @@ class _NotificationTile extends StatelessWidget {
                     style: AppTypography.figtree(
                       size: 11.5,
                       weight: 700,
-                      color: AppColors.textFaint,
+                      color: context.palette.textFaint,
                     ),
                   ),
                   if (notification.isUnread) ...[
@@ -159,12 +160,12 @@ class _UnreadDot extends StatelessWidget {
   const _UnreadDot();
 
   @override
-  Widget build(BuildContext context) => const SizedBox(
+  Widget build(BuildContext context) => SizedBox(
     width: 8,
     height: 8,
     child: DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.accent,
+        color: context.palette.accent,
         shape: BoxShape.circle,
       ),
     ),

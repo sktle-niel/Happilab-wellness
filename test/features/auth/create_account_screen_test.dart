@@ -59,7 +59,7 @@ void main() {
 
     testWidgets('blocks a password that misses a requirement', (tester) async {
       await pumpCreateAccount(tester);
-      await fillValidForm(tester, referralCode: 'FAITH-MARIA24');
+      await fillValidForm(tester, referralCode: 'FCV-MARIA24');
       await tester.enterText(passwordField(), 'sakura99');
 
       await tapVisible(tester, submitButton());
@@ -82,7 +82,7 @@ void main() {
 
     testWidgets('a complete form leaves the screen', (tester) async {
       await pumpCreateAccount(tester);
-      await fillValidForm(tester, referralCode: 'FAITH-MARIA24');
+      await fillValidForm(tester, referralCode: 'FCV-MARIA24');
 
       await tapVisible(tester, submitButton());
       // Explicit pumps, not pumpAndSettle: home animates its mascot caret

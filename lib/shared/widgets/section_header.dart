@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_typography.dart';
+import '../../app/theme/app_palette.dart';
 
 /// A titled section, optionally with an action on the right ("See all").
 class SectionHeader extends StatelessWidget {
@@ -40,7 +40,7 @@ class SectionHeader extends StatelessWidget {
                 style: AppTypography.figtree(
                   size: 13.5,
                   weight: 700,
-                  color: AppColors.accentText,
+                  color: context.palette.accentText,
                 ),
               ),
             ),

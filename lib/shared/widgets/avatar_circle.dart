@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_typography.dart';
 import 'remote_image.dart';
+import '../../app/theme/app_palette.dart';
 
 /// Round avatar that falls back to initials when there is no photo — which is
 /// most of the time in a referral list.
@@ -37,10 +37,10 @@ class AvatarCircle extends StatelessWidget {
       height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: AppColors.cream,
+        color: context.palette.tint,
         shape: BoxShape.circle,
         border: bordered
-            ? Border.all(color: AppColors.surface, width: 2)
+            ? Border.all(color: context.palette.surface, width: 2)
             : null,
       ),
       clipBehavior: Clip.antiAlias,
@@ -50,7 +50,7 @@ class AvatarCircle extends StatelessWidget {
               style: AppTypography.figtree(
                 size: size * 0.37,
                 weight: 800,
-                color: AppColors.accentText,
+                color: context.palette.accentText,
               ),
             )
           : RemoteImage(url: url, width: size, height: size),

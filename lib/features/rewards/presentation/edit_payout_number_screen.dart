@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../core/security/input_validator.dart';
@@ -10,6 +9,7 @@ import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/screen_header.dart';
+import '../../../app/theme/app_palette.dart';
 
 /// Update the account a payout method sends to.
 ///
@@ -28,12 +28,13 @@ class _EditPayoutNumberScreenState extends State<EditPayoutNumberScreen> {
   final TextEditingController _accountName = TextEditingController();
   final TextEditingController _reference = TextEditingController();
 
+  static const String _referenceLabel = 'Mobile number';
+
+  /// A Philippine mobile number: 09XX XXX XXXX.
+  static const int _mobileNumberLength = 11;
+
   String? _accountNameError;
   String? _referenceError;
-
-  bool get _isBank => widget.kind == PayoutKind.bank;
-
-  String get _referenceLabel => _isBank ? 'Account number' : 'Mobile number';
 
   @override
   void dispose() {
@@ -50,7 +51,7 @@ class _EditPayoutNumberScreenState extends State<EditPayoutNumberScreen> {
       _accountNameError = InputValidator.notEmpty(name, field: 'Account name');
       _referenceError = InputValidator.minLength(
         reference,
-        _isBank ? 8 : 11,
+        _mobileNumberLength,
         field: _referenceLabel,
       );
     });
@@ -61,7 +62,7 @@ class _EditPayoutNumberScreenState extends State<EditPayoutNumberScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppColors.canvas,
+    backgroundColor: context.palette.canvas,
     body: SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
@@ -85,7 +86,7 @@ class _EditPayoutNumberScreenState extends State<EditPayoutNumberScreen> {
                 AppTextField(
                   label: _referenceLabel,
                   controller: _reference,
-                  hint: _isBank ? '0000 0000 0000' : '09XX XXX XXXX',
+                  hint: '09XX XXX XXXX',
                   keyboardType: TextInputType.phone,
                   style: AppTextFieldStyle.inset,
                   textInputAction: TextInputAction.done,
@@ -98,7 +99,7 @@ class _EditPayoutNumberScreenState extends State<EditPayoutNumberScreen> {
                   'accounts belonging to other people are not allowed.',
                   style: AppTypography.figtree(
                     size: 11.5,
-                    color: AppColors.textFaint,
+                    color: context.palette.textFaint,
                   ),
                 ),
                 const Gap(12),
