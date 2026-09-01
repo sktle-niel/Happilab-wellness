@@ -28,6 +28,8 @@ class _FeedPostCardState extends State<FeedPostCard> {
 
   int get _likes => widget.post.likes + (_isLiked ? 1 : 0);
 
+  void _toggleLike() => setState(() => _isLiked = !_isLiked);
+
   @override
   Widget build(BuildContext context) => AppCard(
     padding: EdgeInsets.zero,
@@ -62,7 +64,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
                     color: _isLiked
                         ? context.palette.danger
                         : context.palette.textMuted,
-                    onPressed: () => setState(() => _isLiked = !_isLiked),
+                    onPressed: _toggleLike,
                   ),
                   const Gap(18),
                   _PostAction(

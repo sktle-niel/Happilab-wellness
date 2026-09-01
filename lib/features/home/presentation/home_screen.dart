@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../shared/widgets/app_scaffold.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../app/shell/app_shell_scope.dart';
 import '../../../app/shell/app_tab.dart';
@@ -13,7 +14,6 @@ import '../../../shared/widgets/section_header.dart';
 import 'widgets/affiliate_banner.dart';
 import 'widgets/home_top_bar.dart';
 import 'widgets/points_card.dart';
-import '../../../app/theme/app_palette.dart';
 
 /// The member's landing screen: what they have earned, and the products worth
 /// sharing next.
@@ -39,56 +39,53 @@ class HomeScreen extends StatelessWidget {
     const summary = MemberSummary.placeholder;
     final featured = Product.showcase.take(_featuredCount).toList();
 
-    return Scaffold(
-      backgroundColor: context.palette.canvas,
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.only(
-            top: 12,
-            bottom: FaithNavBar.contentInset,
-          ),
-          children: [
-            _Inset(
-              child: HomeTopBar(
-                summary: summary,
-                onNotifications: () =>
-                    Navigator.of(context).pushNamed(AppRoutes.notifications),
-              ),
-            ),
-            const Gap(AppSpacing.md),
-            _Inset(
-              child: PointsCard(
-                summary: summary,
-                onCashOut: () =>
-                    Navigator.of(context).pushNamed(AppRoutes.rewards),
-                onShareCode: () =>
-                    _open(context, AppTab.refer, AppRoutes.myReferrals),
-              ),
-            ),
-            const Gap(AppSpacing.lg),
-            _Inset(
-              child: SectionHeader(
-                title: 'Products to share',
-                actionLabel: 'See all',
-                onAction: () =>
-                    _open(context, AppTab.products, AppRoutes.suggestions),
-              ),
-            ),
-            const Gap(12),
-            ProductShareCarousel(
-              products: featured,
-              referralCode: summary.referralCode,
-              edgeInset: _inset,
-            ),
-            const Gap(AppSpacing.lg),
-            _Inset(
-              child: AffiliateBanner(
-                onHowItWorks: () =>
-                    Navigator.of(context).pushNamed(AppRoutes.howItWorks),
-              ),
-            ),
-          ],
+    return AppScaffold(
+      child: ListView(
+        padding: const EdgeInsets.only(
+          top: 12,
+          bottom: FaithNavBar.contentInset,
         ),
+        children: [
+          _Inset(
+            child: HomeTopBar(
+              summary: summary,
+              onNotifications: () =>
+                  Navigator.of(context).pushNamed(AppRoutes.notifications),
+            ),
+          ),
+          const Gap(AppSpacing.md),
+          _Inset(
+            child: PointsCard(
+              summary: summary,
+              onCashOut: () =>
+                  Navigator.of(context).pushNamed(AppRoutes.rewards),
+              onShareCode: () =>
+                  _open(context, AppTab.refer, AppRoutes.myReferrals),
+            ),
+          ),
+          const Gap(AppSpacing.lg),
+          _Inset(
+            child: SectionHeader(
+              title: 'Products to share',
+              actionLabel: 'See all',
+              onAction: () =>
+                  _open(context, AppTab.products, AppRoutes.suggestions),
+            ),
+          ),
+          const Gap(12),
+          ProductShareCarousel(
+            products: featured,
+            referralCode: summary.referralCode,
+            edgeInset: _inset,
+          ),
+          const Gap(AppSpacing.lg),
+          _Inset(
+            child: AffiliateBanner(
+              onHowItWorks: () =>
+                  Navigator.of(context).pushNamed(AppRoutes.howItWorks),
+            ),
+          ),
+        ],
       ),
     );
   }

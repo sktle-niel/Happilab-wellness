@@ -9,6 +9,10 @@ abstract final class CashOutTerms {
 
   static const String feeNote = 'Minimum cash out: 500 pts · No fees';
 
+  /// Stands in for the amounts when the balance cannot be sent yet.
+  static String get belowMinimumNote =>
+      'You need at least ${NumberFormat.points(minimumPoints)} to cash out.';
+
   static const String arrivalNote = 'It usually arrives within 24 hours.';
 }
 

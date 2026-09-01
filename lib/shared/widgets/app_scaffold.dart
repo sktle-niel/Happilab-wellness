@@ -1,35 +1,21 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/app_tokens.dart';
+import '../../app/theme/app_palette.dart';
 
-/// Standard page frame: app bar, safe area and screen padding in one place.
+/// The frame every screen shares: the canvas behind it, and a safe area.
 ///
-/// Screens describe their content, not their chrome — so a change to page
-/// padding or app bar behaviour lands in one file instead of every screen.
+/// Screens describe their content, not their chrome, so the page background and
+/// the safe-area rules live here instead of being retyped in each of them.
+/// Padding stays with the caller because a scrollable has to own its own — the
+/// list must reach the edges for the scroll to look right.
 class AppScaffold extends StatelessWidget {
-  const AppScaffold({
-    required this.body,
-    this.title,
-    this.actions,
-    this.floatingActionButton,
-    this.padding = AppSpacing.screenPadding,
-    super.key,
-  });
+  const AppScaffold({required this.child, super.key});
 
-  final Widget body;
-  final String? title;
-  final List<Widget>? actions;
-  final Widget? floatingActionButton;
-  final EdgeInsetsGeometry padding;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: title == null
-        ? null
-        : AppBar(title: Text(title!), actions: actions),
-    body: SafeArea(
-      child: Padding(padding: padding, child: body),
-    ),
-    floatingActionButton: floatingActionButton,
+    backgroundColor: context.palette.canvas,
+    body: SafeArea(child: child),
   );
 }

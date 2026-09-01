@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../shared/widgets/app_scaffold.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
@@ -45,41 +46,38 @@ class _SignInScreenState extends State<SignInScreen> {
   );
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: context.palette.canvas,
-    body: SafeArea(
-      child: CenteredScrollView(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.screenInset,
-          56,
-          AppSpacing.screenInset,
-          50,
-        ),
-        children: [
-          const _SignInHeader(),
-          const Gap(22),
-          AppButton.secondary(
-            label: 'Continue with Google',
-            leading: const GoogleMark(),
-            onPressed: _showProviderUnavailable,
-          ),
-          const Gap(18),
-          const OrDivider(),
-          const Gap(18),
-          ListenableBuilder(
-            listenable: _controller,
-            builder: (context, _) =>
-                _SignInForm(controller: _controller, onSubmit: _submit),
-          ),
-          const Gap.sm(),
-          InlineActionText(
-            text: 'No account yet?',
-            actionLabel: 'Join with a referral code',
-            onPressed: () =>
-                Navigator.of(context).pushNamed(AppRoutes.createAccount),
-          ),
-        ],
+  Widget build(BuildContext context) => AppScaffold(
+    child: CenteredScrollView(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.screenInset,
+        56,
+        AppSpacing.screenInset,
+        50,
       ),
+      children: [
+        const _SignInHeader(),
+        const Gap(22),
+        AppButton.secondary(
+          label: 'Continue with Google',
+          leading: const GoogleMark(),
+          onPressed: _showProviderUnavailable,
+        ),
+        const Gap(18),
+        const OrDivider(),
+        const Gap(18),
+        ListenableBuilder(
+          listenable: _controller,
+          builder: (context, _) =>
+              _SignInForm(controller: _controller, onSubmit: _submit),
+        ),
+        const Gap.sm(),
+        InlineActionText(
+          text: 'No account yet?',
+          actionLabel: 'Join with a referral code',
+          onPressed: () =>
+              Navigator.of(context).pushNamed(AppRoutes.createAccount),
+        ),
+      ],
     ),
   );
 }

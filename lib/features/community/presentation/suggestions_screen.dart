@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../shared/widgets/app_scaffold.dart';
 import '../../../app/shell/app_shell_scope.dart';
 import '../../../app/shell/widgets/faith_nav_bar.dart';
 import '../../../app/theme/app_typography.dart';
@@ -19,53 +20,50 @@ class SuggestionsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     const summary = MemberSummary.placeholder;
 
-    return Scaffold(
-      backgroundColor: context.palette.canvas,
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
-              sliver: SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ScreenHeader(
-                      title: 'Products to share',
-                      showBack: !AppShellScope.contains(context),
-                    ),
-                    const Gap(14),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
-                      child: Text(
-                        'Suggested for your friends — you earn '
-                        '${ProgramTerms.earnRate} on each sale.',
-                        style: AppTypography.figtree(
-                          size: 14,
-                          color: context.palette.textMuted,
-                        ),
+    return AppScaffold(
+      child: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ScreenHeader(
+                    title: 'Products to share',
+                    showBack: !AppShellScope.contains(context),
+                  ),
+                  const Gap(14),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: Text(
+                      'Suggested for your friends — you earn '
+                      '${ProgramTerms.earnRate} on each sale.',
+                      style: AppTypography.figtree(
+                        size: 14,
+                        color: context.palette.textMuted,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(
-                20,
-                0,
-                20,
-                FaithNavBar.contentInset,
-              ),
-              sliver: SliverToBoxAdapter(
-                child: ProductShareGrid(
-                  products: Product.showcase,
-                  referralCode: summary.referralCode,
-                ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(
+              20,
+              0,
+              20,
+              FaithNavBar.contentInset,
+            ),
+            sliver: SliverToBoxAdapter(
+              child: ProductShareGrid(
+                products: Product.showcase,
+                referralCode: summary.referralCode,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

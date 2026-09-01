@@ -20,15 +20,35 @@ void main() {
     test('offers the presets the member can afford, plus their balance', () {
       expect(build().amountOptions, [500, 1000, 1240]);
       expect(build(points: 700).amountOptions, [500, 700]);
-      expect(build(points: 400).amountOptions, [400]);
     });
 
     test('does not offer the balance twice when it is already a preset', () {
       expect(build(points: 1000).amountOptions, [500, 1000]);
     });
 
-    test('offers nothing to a member with no points', () {
+    test('offers nothing until the balance reaches the minimum', () {
+      const minimum = CashOutTerms.minimumPoints;
+
       expect(build(points: 0).amountOptions, isEmpty);
+      expect(build(points: minimum - 1).amountOptions, isEmpty);
+      expect(build(points: minimum).amountOptions, [minimum]);
+    });
+
+    test('offers only amounts the form will actually send', () {
+      // A chip the member can tap that leaves the button disabled, with
+      // nothing on screen to explain it, is the gap this closes.
+      for (final points in [0, 400, 500, 700, 1240, 5000]) {
+        final controller = build(points: points)..selectDestination(gcash);
+
+        for (final amount in controller.amountOptions) {
+          controller.selectAmount(amount);
+          expect(
+            controller.canSubmit,
+            isTrue,
+            reason: '$amount offered on a balance of $points',
+          );
+        }
+      }
     });
 
     test('needs both an amount and a destination before it will send', () {
@@ -39,10 +59,10 @@ void main() {
       expect(controller.canSubmit, isTrue);
     });
 
-    test('will not send a balance below the minimum', () {
+    test('refuses an amount below the minimum, however it was chosen', () {
       expect(400, lessThan(CashOutTerms.minimumPoints));
 
-      final controller = build(points: 400)
+      final controller = build()
         ..selectAmount(400)
         ..selectDestination(gcash);
 

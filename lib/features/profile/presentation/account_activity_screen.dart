@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../shared/widgets/app_scaffold.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/domain/activity_entry.dart';
@@ -14,26 +15,23 @@ class AccountActivityScreen extends StatelessWidget {
   const AccountActivityScreen({super.key});
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: context.palette.canvas,
-    body: SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
-        children: [
-          const ScreenHeader(title: 'Account activity'),
-          const Gap(14),
-          AppCard.flush(
-            borderRadius: AppRadius.card,
-            child: DividedColumn(
-              children: [
-                for (final entry in ActivityEntry.placeholder)
-                  _ActivityRow(entry: entry),
-                const _EndOfList(),
-              ],
-            ),
+  Widget build(BuildContext context) => AppScaffold(
+    child: ListView(
+      padding: AppSpacing.pageInset,
+      children: [
+        const ScreenHeader(title: 'Account activity'),
+        const Gap(14),
+        AppCard.flush(
+          borderRadius: AppRadius.card,
+          child: DividedColumn(
+            children: [
+              for (final entry in ActivityEntry.placeholder)
+                _ActivityRow(entry: entry),
+              const _EndOfList(),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     ),
   );
 }

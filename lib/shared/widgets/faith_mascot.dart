@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/app_palette.dart';
 
+/// The mascot's ink. It is drawn rather than themed, so it stays put when the
+/// palette flips.
+const Color _outline = AppPalette.mascotOutline;
+
 /// The waving mascot. It draws at its natural 96x92; callers that want it
 /// smaller wrap it in a [FittedBox], as the points card does.
 ///
@@ -20,8 +24,6 @@ class FaithMascot extends StatefulWidget {
 
 class _FaithMascotState extends State<FaithMascot>
     with TickerProviderStateMixin {
-  static const Color _outline = AppPalette.mascotOutline;
-
   late final AnimationController _bob = _loop(1100, reverse: true);
   late final AnimationController _wave = _loop(550, reverse: true);
   late final AnimationController _blink = _loop(3400);
@@ -39,13 +41,6 @@ class _FaithMascotState extends State<FaithMascot>
     _blink.dispose();
     super.dispose();
   }
-
-  /// Open eyes for most of the cycle, one quick squash near the end.
-  double _eyeScale(double t) => switch (t) {
-    < 0.90 => 1,
-    < 0.94 => 1 - (t - 0.90) / 0.04 * 0.92,
-    _ => 0.08 + (t - 0.94) / 0.06 * 0.92,
-  };
 
   @override
   Widget build(BuildContext context) => Column(
@@ -65,12 +60,12 @@ class _FaithMascotState extends State<FaithMascot>
             children: [
               const Positioned(left: 8, top: 10, child: _Body()),
               const Positioned(left: 26, top: -2, child: _Ear()),
-              Positioned(left: 30, top: 36, child: _buildEye()),
-              Positioned(left: 57, top: 36, child: _buildEye()),
+              Positioned(left: 30, top: 36, child: _Eye(blink: _blink)),
+              Positioned(left: 57, top: 36, child: _Eye(blink: _blink)),
               const Positioned(left: 22, top: 48, child: _Cheek()),
               const Positioned(left: 64, top: 48, child: _Cheek()),
               const Positioned(left: 41, top: 50, child: _Mouth()),
-              Positioned(left: -5, top: 38, child: _buildWavingArm()),
+              Positioned(left: -5, top: 38, child: _WavingArm(wave: _wave)),
               const Positioned(right: -3, top: 52, child: _RestingArm()),
             ],
           ),
@@ -98,24 +93,46 @@ class _FaithMascotState extends State<FaithMascot>
       ),
     ],
   );
+}
 
-  Widget _buildEye() => AnimatedBuilder(
-    animation: _blink,
+/// One eye, squashing shut on the blink rhythm it is handed.
+class _Eye extends StatelessWidget {
+  const _Eye({required this.blink});
+
+  final Animation<double> blink;
+
+  /// Open for most of the cycle, then one quick squash near the end.
+  static double _scale(double t) => switch (t) {
+    < 0.90 => 1,
+    < 0.94 => 1 - (t - 0.90) / 0.04 * 0.92,
+    _ => 0.08 + (t - 0.94) / 0.06 * 0.92,
+  };
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: blink,
     builder: (context, child) =>
-        Transform.scale(scaleY: _eyeScale(_blink.value), child: child),
+        Transform.scale(scaleY: _scale(blink.value), child: child),
     child: const DecoratedBox(
       decoration: BoxDecoration(color: _outline, shape: BoxShape.circle),
       child: SizedBox(width: 9, height: 11),
     ),
   );
+}
 
-  Widget _buildWavingArm() => AnimatedBuilder(
-    animation: _wave,
+/// The arm that waves, on its own faster rhythm.
+class _WavingArm extends StatelessWidget {
+  const _WavingArm({required this.wave});
+
+  final Animation<double> wave;
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: wave,
     builder: (context, child) => Transform.rotate(
       // The arm pivots at the shoulder, which is its right edge.
       alignment: Alignment.centerRight,
-      angle:
-          (14 - 42 * Curves.easeInOut.transform(_wave.value)) * math.pi / 180,
+      angle: (14 - 42 * Curves.easeInOut.transform(wave.value)) * math.pi / 180,
       child: child,
     ),
     child: const _Limb(width: 22, height: 9),
@@ -131,7 +148,7 @@ class _Body extends StatelessWidget {
     height: 72,
     decoration: BoxDecoration(
       color: AppPalette.mascotBody,
-      border: Border.all(color: _FaithMascotState._outline, width: 2.5),
+      border: Border.all(color: _outline, width: 2.5),
       borderRadius: const BorderRadius.only(
         topLeft: Radius.circular(38),
         topRight: Radius.circular(38),
@@ -153,7 +170,7 @@ class _Ear extends StatelessWidget {
       height: 14,
       decoration: BoxDecoration(
         color: AppPalette.petalLight,
-        border: Border.all(color: _FaithMascotState._outline, width: 2),
+        border: Border.all(color: _outline, width: 2),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.elliptical(10.8, 8.4),
           topRight: Radius.elliptical(7.2, 5.6),
@@ -196,7 +213,7 @@ class _Limb extends StatelessWidget {
     height: height,
     decoration: BoxDecoration(
       color: AppPalette.mascotBody,
-      border: Border.all(color: _FaithMascotState._outline, width: 2.5),
+      border: Border.all(color: _outline, width: 2.5),
       borderRadius: const BorderRadius.all(Radius.circular(999)),
     ),
   );

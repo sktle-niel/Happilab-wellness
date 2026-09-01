@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../shared/widgets/app_scaffold.dart';
 import '../../../app/di/app_scope.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../app/shell/widgets/faith_nav_bar.dart';
@@ -32,82 +33,73 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _notificationsEnabled = true;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: context.palette.canvas,
-    body: SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          20,
-          12,
-          20,
-          FaithNavBar.contentInset,
+  Widget build(BuildContext context) => AppScaffold(
+    child: ListView(
+      padding: FaithNavBar.pageInset,
+      children: [
+        _ProfileHeader(
+          summary: _summary,
+          onEdit: () => Navigator.of(context).pushNamed(AppRoutes.editProfile),
         ),
-        children: [
-          _ProfileHeader(
-            summary: _summary,
-            onEdit: () =>
-                Navigator.of(context).pushNamed(AppRoutes.editProfile),
+        const Gap(AppSpacing.lg),
+        _RewardsCard(
+          summary: _summary,
+          onCashOut: () => Navigator.of(context).pushNamed(AppRoutes.rewards),
+        ),
+        const Gap(AppSpacing.sm),
+        AppCard.flush(
+          borderRadius: AppRadius.card,
+          child: DividedColumn(
+            children: [
+              SettingsToggleRow(
+                icon: Icons.notifications_none_rounded,
+                label: 'Notifications',
+                value: _notificationsEnabled,
+                onChanged: (value) =>
+                    setState(() => _notificationsEnabled = value),
+              ),
+              const _DarkModeRow(),
+              const SettingsValueRow(
+                icon: Icons.language_rounded,
+                label: 'Language',
+                value: 'English',
+              ),
+            ],
           ),
-          const Gap(AppSpacing.lg),
-          _RewardsCard(
-            summary: _summary,
-            onCashOut: () => Navigator.of(context).pushNamed(AppRoutes.rewards),
+        ),
+        const Gap(AppSpacing.sm),
+        AppCard.flush(
+          borderRadius: AppRadius.card,
+          child: DividedColumn(
+            children: [
+              SettingsLinkRow(
+                icon: Icons.history_rounded,
+                label: 'Account activity',
+                onPressed: () =>
+                    Navigator.of(context).pushNamed(AppRoutes.accountActivity),
+              ),
+              SettingsLinkRow(
+                icon: Icons.help_outline_rounded,
+                label: 'Help center',
+                onPressed: () =>
+                    Navigator.of(context).pushNamed(AppRoutes.helpCenter),
+              ),
+              SettingsLinkRow(
+                icon: Icons.shield_outlined,
+                label: 'Terms & privacy',
+                onPressed: () =>
+                    Navigator.of(context).pushNamed(AppRoutes.terms),
+              ),
+            ],
           ),
-          const Gap(AppSpacing.sm),
-          AppCard.flush(
-            borderRadius: AppRadius.card,
-            child: DividedColumn(
-              children: [
-                SettingsToggleRow(
-                  icon: Icons.notifications_none_rounded,
-                  label: 'Notifications',
-                  value: _notificationsEnabled,
-                  onChanged: (value) =>
-                      setState(() => _notificationsEnabled = value),
-                ),
-                const _DarkModeRow(),
-                const SettingsValueRow(
-                  icon: Icons.language_rounded,
-                  label: 'Language',
-                  value: 'English',
-                ),
-              ],
-            ),
-          ),
-          const Gap(AppSpacing.sm),
-          AppCard.flush(
-            borderRadius: AppRadius.card,
-            child: DividedColumn(
-              children: [
-                SettingsLinkRow(
-                  icon: Icons.history_rounded,
-                  label: 'Account activity',
-                  onPressed: () =>
-                      Navigator.of(context)
-                          .pushNamed(AppRoutes.accountActivity),
-                ),
-                SettingsLinkRow(
-                  icon: Icons.help_outline_rounded,
-                  label: 'Help center',
-                  onPressed: () =>
-                      Navigator.of(context).pushNamed(AppRoutes.helpCenter),
-                ),
-                SettingsLinkRow(
-                  icon: Icons.shield_outlined,
-                  label: 'Terms & privacy',
-                  onPressed: () =>
-                      Navigator.of(context).pushNamed(AppRoutes.terms),
-                ),
-              ],
-            ),
-          ),
-          const Gap(AppSpacing.md),
-          _LogOutButton(
-            onPressed: () => Navigator.of(context)
-                .pushNamedAndRemoveUntil(AppRoutes.signIn, (route) => false),
-          ),
-        ],
-      ),
+        ),
+        const Gap(AppSpacing.md),
+        _LogOutButton(
+          onPressed: () =>
+              Navigator.of(context)
+                  .pushNamedAndRemoveUntil(AppRoutes.signIn, (route) => false),
+        ),
+      ],
     ),
   );
 }

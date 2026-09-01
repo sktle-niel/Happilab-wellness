@@ -38,6 +38,27 @@ void main() {
       );
     });
 
+    test('masks a mobile number, however it is written', () {
+      // A payout number is the most sensitive thing the app holds after the
+      // token, and at eleven digits it is one short of the card-number rule.
+      const numbers = [
+        '09171234567',
+        '0917 123 4567',
+        '0917-123-4567',
+        '+639171234567',
+        '+63 917 123 4567',
+        '639171234567',
+      ];
+
+      for (final number in numbers) {
+        expect(
+          redactor.redact('payout number: $number'),
+          'payout number: $mask',
+          reason: number,
+        );
+      }
+    });
+
     test('masks a card or account number', () {
       expect(
         redactor.redact('card 4111111111111111 declined'),
