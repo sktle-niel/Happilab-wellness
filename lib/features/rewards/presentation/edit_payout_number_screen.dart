@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../shared/widgets/app_scaffold.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../core/security/input_validator.dart';
@@ -61,54 +62,51 @@ class _EditPayoutNumberScreenState extends State<EditPayoutNumberScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: context.palette.canvas,
-    body: SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
-        children: [
-          ScreenHeader(title: 'Update ${widget.kind.label}'),
-          const Gap(AppSpacing.md),
-          AppCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                AppTextField(
-                  label: 'Account name',
-                  controller: _accountName,
-                  hint: 'Full name on the account',
-                  style: AppTextFieldStyle.inset,
-                  textInputAction: TextInputAction.next,
-                  errorText: _accountNameError,
+  Widget build(BuildContext context) => AppScaffold(
+    child: ListView(
+      padding: AppSpacing.pageInset,
+      children: [
+        ScreenHeader(title: 'Update ${widget.kind.label}'),
+        const Gap(AppSpacing.md),
+        AppCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AppTextField(
+                label: 'Account name',
+                controller: _accountName,
+                hint: 'Full name on the account',
+                style: AppTextFieldStyle.inset,
+                textInputAction: TextInputAction.next,
+                errorText: _accountNameError,
+              ),
+              const Gap(12),
+              AppTextField(
+                label: _referenceLabel,
+                controller: _reference,
+                hint: '09XX XXX XXXX',
+                keyboardType: TextInputType.phone,
+                style: AppTextFieldStyle.inset,
+                textInputAction: TextInputAction.done,
+                errorText: _referenceError,
+                onSubmitted: (_) => _save(),
+              ),
+              const Gap(12),
+              Text(
+                'Make sure the account is under your name — payouts to '
+                'accounts belonging to other people are not allowed.',
+                style: AppTypography.figtree(
+                  size: 11.5,
+                  color: context.palette.textFaint,
                 ),
-                const Gap(12),
-                AppTextField(
-                  label: _referenceLabel,
-                  controller: _reference,
-                  hint: '09XX XXX XXXX',
-                  keyboardType: TextInputType.phone,
-                  style: AppTextFieldStyle.inset,
-                  textInputAction: TextInputAction.done,
-                  errorText: _referenceError,
-                  onSubmitted: (_) => _save(),
-                ),
-                const Gap(12),
-                Text(
-                  'Make sure the account is under your name — payouts to '
-                  'accounts belonging to other people are not allowed.',
-                  style: AppTypography.figtree(
-                    size: 11.5,
-                    color: context.palette.textFaint,
-                  ),
-                ),
-                const Gap(12),
-                AppButton(label: 'Save number', onPressed: _save),
-              ],
-            ),
+              ),
+              const Gap(12),
+              AppButton(label: 'Save number', onPressed: _save),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     ),
   );
 }

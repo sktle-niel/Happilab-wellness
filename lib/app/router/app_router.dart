@@ -19,6 +19,8 @@ import '../../features/rewards/presentation/rewards_screen.dart';
 import '../../features/support/presentation/help_center_screen.dart';
 import '../../features/support/presentation/terms_screen.dart';
 import '../../shared/widgets/app_scaffold.dart';
+import '../../shared/widgets/screen_header.dart';
+import '../theme/app_tokens.dart';
 import '../shell/app_shell.dart';
 import 'app_routes.dart';
 
@@ -60,8 +62,17 @@ class _RouteNotFoundScreen extends StatelessWidget {
   const _RouteNotFoundScreen();
 
   @override
-  Widget build(BuildContext context) => const AppScaffold(
-    title: 'Not found',
-    body: Center(child: Text('This screen does not exist.')),
+  Widget build(BuildContext context) => AppScaffold(
+    child: Padding(
+      padding: AppSpacing.pageInset,
+      child: Column(
+        children: [
+          const ScreenHeader(title: 'Not found'),
+          const Expanded(
+            child: Center(child: Text('This screen does not exist.')),
+          ),
+        ],
+      ),
+    ),
   );
 }

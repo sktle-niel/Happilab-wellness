@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../shared/widgets/app_scaffold.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/domain/member_summary.dart';
@@ -39,31 +40,28 @@ class _RewardsScreenState extends State<RewardsScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: context.palette.canvas,
-    body: SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
-        children: [
-          const ScreenHeader(title: 'Cash out'),
-          const Gap(AppSpacing.md),
-          const _BalanceStrip(summary: _summary),
-          const Gap(AppSpacing.md),
-          ListenableBuilder(
-            listenable: _controller,
-            builder: (context, _) => _controller.isSubmitted
-                ? CashOutSuccessCard(
-                    message: _controller.confirmation,
-                    onDone: _controller.reset,
-                  )
-                : _CashOutForm(controller: _controller),
-          ),
-          const Gap(AppSpacing.md),
-          const SectionHeader(title: 'History'),
-          const Gap(AppSpacing.sm),
-          const _HistoryCard(),
-        ],
-      ),
+  Widget build(BuildContext context) => AppScaffold(
+    child: ListView(
+      padding: AppSpacing.pageInset,
+      children: [
+        const ScreenHeader(title: 'Cash out'),
+        const Gap(AppSpacing.md),
+        const _BalanceStrip(summary: _summary),
+        const Gap(AppSpacing.md),
+        ListenableBuilder(
+          listenable: _controller,
+          builder: (context, _) => _controller.isSubmitted
+              ? CashOutSuccessCard(
+                  message: _controller.confirmation,
+                  onDone: _controller.reset,
+                )
+              : _CashOutForm(controller: _controller),
+        ),
+        const Gap(AppSpacing.md),
+        const SectionHeader(title: 'History'),
+        const Gap(AppSpacing.sm),
+        const _HistoryCard(),
+      ],
     ),
   );
 }

@@ -100,6 +100,29 @@ scaffolding behind.
 - Screens compose `AppScaffold`; failures render `ErrorView`; async reads render `AsyncView`.
 - Any control the user can tap must go inert while its action is in flight — double submits are bugs.
 
+### Logic never lives in the widget tree
+
+A `build()` describes what the screen looks like. It does not compute, validate, format, decide or
+fetch on the way past. **UI code and function code are separate files, or at minimum separate
+members — never the same expression.**
+
+- **No function bodies inline in the tree.** A callback in the tree is a reference
+  (`onPressed: _saveDetails`), never a block of statements typed into the argument. The moment it
+  needs more than forwarding a value, it becomes a named method on the controller or the `State`.
+- **No business rules inside a widget.** Thresholds, eligibility, formatting and validation belong in
+  `domain/` or the controller. `canSubmit` is a getter on the controller — never an `&&` chain typed
+  into an `onPressed`.
+- **No nested ternaries, no `switch` over state, no hand-rolled loops building children** inside the
+  tree. Use collection-`if` / collection-`for`, or lift the branch into a named widget.
+- **Extract to a widget class, never to a `Widget _buildX()` method.** A class gets `const`, a
+  narrower rebuild scope, and a name that says what it is.
+- **A `build()` past ~50 lines is a smell; past ~80 it is a defect.** Split it into named widgets that
+  read like the design — `_DetailsCard`, `_PasswordCard`, `_NotEnoughToSend`.
+- **Chrome is never retyped.** Page frame, padding, headers, cards and buttons come from `shared/`
+  and the theme tokens. Two screens spelling out the same `Scaffold` is a bug, not a style.
+
+The test: if a rule cannot be unit-tested without pumping a widget, it is in the wrong file.
+
 ## State management
 
 - One `ChangeNotifier` controller per screen, owned by the screen's `State` and disposed in

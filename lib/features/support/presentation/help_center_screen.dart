@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/theme/app_tokens.dart';
+import '../../../shared/widgets/app_scaffold.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/divided_column.dart';
@@ -15,27 +17,24 @@ class HelpCenterScreen extends StatelessWidget {
   const HelpCenterScreen({super.key});
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: context.palette.canvas,
-    body: SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
-        children: [
-          const ScreenHeader(title: 'Help center'),
-          const Gap(14),
-          AppCard(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
-            child: DividedColumn(
-              children: [
-                for (final faq in SupportContent.faqs)
-                  ProseBlock(heading: faq.question, body: faq.answer),
-              ],
-            ),
+  Widget build(BuildContext context) => AppScaffold(
+    child: ListView(
+      padding: AppSpacing.pageInset,
+      children: [
+        const ScreenHeader(title: 'Help center'),
+        const Gap(14),
+        AppCard(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+          child: DividedColumn(
+            children: [
+              for (final faq in SupportContent.faqs)
+                ProseBlock(heading: faq.question, body: faq.answer),
+            ],
           ),
-          const Gap(14),
-          const _ContactCard(),
-        ],
-      ),
+        ),
+        const Gap(14),
+        const _ContactCard(),
+      ],
     ),
   );
 }

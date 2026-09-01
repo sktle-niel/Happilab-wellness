@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/theme/app_tokens.dart';
+import '../../../shared/widgets/app_scaffold.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/widgets/brand_mark.dart';
 import '../../../shared/widgets/circle_icon_button.dart';
+import '../../../shared/widgets/screen_header.dart';
 import '../../../shared/widgets/gap.dart';
 import '../domain/app_notification.dart';
 import '../../../app/theme/app_palette.dart';
@@ -25,58 +28,38 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   );
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: context.palette.canvas,
-    body: SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
-        children: [
-          Row(
-            children: [
-              CircleIconButton(
-                icon: Icons.arrow_back,
-                semanticLabel: 'Back',
-                onPressed: Navigator.of(context).pop,
-              ),
-              Expanded(
-                child: Text(
-                  'Notifications',
-                  textAlign: TextAlign.center,
-                  style: AppTypography.figtree(
-                    size: 22,
-                    weight: 800,
-                    letterSpacing: -0.44,
-                  ),
-                ),
-              ),
-              CircleIconButton(
-                icon: Icons.done_all_rounded,
-                semanticLabel: 'Mark all read',
-                color: context.palette.accentText,
-                onPressed: _hasUnread ? _markAllRead : null,
-              ),
-            ],
+  Widget build(BuildContext context) => AppScaffold(
+    child: ListView(
+      padding: AppSpacing.pageInset,
+      children: [
+        ScreenHeader(
+          title: 'Notifications',
+          trailing: CircleIconButton(
+            icon: Icons.done_all_rounded,
+            semanticLabel: 'Mark all read',
+            color: context.palette.accentText,
+            onPressed: _hasUnread ? _markAllRead : null,
           ),
-          const Gap(14),
-          if (!_hasUnread)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 14),
-              child: Text(
-                'You are all caught up',
-                textAlign: TextAlign.center,
-                style: AppTypography.figtree(
-                  size: 12,
-                  weight: 700,
-                  color: context.palette.textFaint,
-                ),
+        ),
+        const Gap(14),
+        if (!_hasUnread)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: Text(
+              'You are all caught up',
+              textAlign: TextAlign.center,
+              style: AppTypography.figtree(
+                size: 12,
+                weight: 700,
+                color: context.palette.textFaint,
               ),
             ),
-          for (final entry in _notifications) ...[
-            _NotificationTile(notification: entry),
-            const Gap(12),
-          ],
+          ),
+        for (final entry in _notifications) ...[
+          _NotificationTile(notification: entry),
+          const Gap(12),
         ],
-      ),
+      ],
     ),
   );
 }

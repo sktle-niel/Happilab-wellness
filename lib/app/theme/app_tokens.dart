@@ -21,10 +21,9 @@ abstract final class AppSpacing {
   /// Circular icon buttons — also the minimum tap target.
   static const double iconButtonSize = 44;
 
-  static const EdgeInsets screenPadding = EdgeInsets.symmetric(
-    horizontal: screenInset,
-    vertical: lg,
-  );
+  /// The page inset every pushed content screen sits in. The generous bottom
+  /// keeps the last row clear of the gesture bar.
+  static const EdgeInsets pageInset = EdgeInsets.fromLTRB(20, 12, 20, 40);
 }
 
 abstract final class AppRadius {

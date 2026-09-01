@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../shared/widgets/app_scaffold.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../app/shell/app_shell_scope.dart';
 import '../../../app/shell/app_tab.dart';
@@ -20,39 +21,38 @@ import '../../../app/theme/app_palette.dart';
 class HowItWorksScreen extends StatelessWidget {
   const HowItWorksScreen({super.key});
 
+  /// Pops back to the shell before switching tabs: the explainer was pushed on
+  /// top of it, so a tab change underneath would be invisible.
+  static void _startReferring(BuildContext context) {
+    Navigator.of(context).pop();
+    if (AppShellScope.open(context, AppTab.refer)) return;
+    Navigator.of(context).pushNamed(AppRoutes.myReferrals);
+  }
+
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: context.palette.canvas,
-    body: SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
-        children: [
-          const ScreenHeader(title: 'How it works'),
-          const Gap(AppSpacing.md),
-          for (final step in ProgramGuide.steps) ...[
-            ProgramStepCard(step: step),
-            const Gap(14),
-          ],
-          const _ConversionCard(),
+  Widget build(BuildContext context) => AppScaffold(
+    child: ListView(
+      padding: AppSpacing.pageInset,
+      children: [
+        const ScreenHeader(title: 'How it works'),
+        const Gap(AppSpacing.md),
+        for (final step in ProgramGuide.steps) ...[
+          ProgramStepCard(step: step),
           const Gap(14),
-          const _ExampleCard(),
-          const Gap(AppSpacing.md),
-          const SectionHeader(title: 'Benefits when they buy'),
-          const Gap(AppSpacing.sm),
-          const _BenefitsCard(),
-          const Gap(AppSpacing.lg),
-          AppButton(
-            label: 'Start referring',
-            onPressed: () {
-              // Pop back to the shell first: the explainer was pushed on top
-              // of it, so switching tabs underneath would be invisible.
-              Navigator.of(context).pop();
-              if (AppShellScope.open(context, AppTab.refer)) return;
-              Navigator.of(context).pushNamed(AppRoutes.myReferrals);
-            },
-          ),
         ],
-      ),
+        const _ConversionCard(),
+        const Gap(14),
+        const _ExampleCard(),
+        const Gap(AppSpacing.md),
+        const SectionHeader(title: 'Benefits when they buy'),
+        const Gap(AppSpacing.sm),
+        const _BenefitsCard(),
+        const Gap(AppSpacing.lg),
+        AppButton(
+          label: 'Start referring',
+          onPressed: () => _startReferring(context),
+        ),
+      ],
     ),
   );
 }

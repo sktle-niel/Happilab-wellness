@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../shared/widgets/app_scaffold.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../app/shell/app_shell_scope.dart';
 import '../../../app/shell/widgets/faith_nav_bar.dart';
@@ -21,47 +22,44 @@ class NewsFeedScreen extends StatelessWidget {
     const summary = MemberSummary.placeholder;
     const posts = FeedPost.placeholder;
 
-    return Scaffold(
-      backgroundColor: context.palette.canvas,
-      body: SafeArea(
-        child: ListView.separated(
-          padding: const EdgeInsets.fromLTRB(
-            16,
-            12,
-            16,
-            FaithNavBar.contentInset,
-          ),
-          itemCount: posts.length + 1,
-          separatorBuilder: (context, index) => const Gap(AppSpacing.md),
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: ScreenHeader(
-                  showBack: !AppShellScope.contains(context),
-                  title: 'News feed',
-                  trailing: IconButton(
-                    onPressed: () =>
-                        Navigator.of(context).pushNamed(AppRoutes.testimonials),
-                    icon: const Icon(Icons.auto_stories_outlined),
-                    color: context.palette.accentText,
-                    tooltip: 'Member stories',
-                  ),
+    return AppScaffold(
+      child: ListView.separated(
+        padding: const EdgeInsets.fromLTRB(
+          16,
+          12,
+          16,
+          FaithNavBar.contentInset,
+        ),
+        itemCount: posts.length + 1,
+        separatorBuilder: (context, index) => const Gap(AppSpacing.md),
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: ScreenHeader(
+                showBack: !AppShellScope.contains(context),
+                title: 'News feed',
+                trailing: IconButton(
+                  onPressed: () =>
+                      Navigator.of(context).pushNamed(AppRoutes.testimonials),
+                  icon: const Icon(Icons.auto_stories_outlined),
+                  color: context.palette.accentText,
+                  tooltip: 'Member stories',
                 ),
-              );
-            }
-
-            final post = posts[index - 1];
-            return FeedPostCard(
-              post: post,
-              onShare: () => ShareActions.copy(
-                context,
-                ShareActions.inviteMessage(summary.referralCode),
-                confirmation: 'Invite message copied.',
               ),
             );
-          },
-        ),
+          }
+
+          final post = posts[index - 1];
+          return FeedPostCard(
+            post: post,
+            onShare: () => ShareActions.copy(
+              context,
+              ShareActions.inviteMessage(summary.referralCode),
+              confirmation: 'Invite message copied.',
+            ),
+          );
+        },
       ),
     );
   }

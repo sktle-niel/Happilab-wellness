@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../shared/widgets/app_scaffold.dart';
+
 import 'package:flutter/services.dart';
 
 import '../../../app/shell/app_shell_scope.dart';
@@ -23,36 +26,28 @@ class MyReferralsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     const summary = MemberSummary.placeholder;
 
-    return Scaffold(
-      backgroundColor: context.palette.canvas,
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            20,
-            12,
-            20,
-            FaithNavBar.contentInset,
+    return AppScaffold(
+      child: ListView(
+        padding: FaithNavBar.pageInset,
+        children: [
+          ScreenHeader(
+            showBack: !AppShellScope.contains(context),
+            title: 'My referrals',
           ),
-          children: [
-            ScreenHeader(
-              showBack: !AppShellScope.contains(context),
-              title: 'My referrals',
+          const Gap(AppSpacing.md),
+          _CodeCard(code: summary.referralCode),
+          const Gap(14),
+          _ReferralSummary(text: summary.referralSummary),
+          const Gap(AppSpacing.sm),
+          AppCard.flush(
+            child: DividedColumn(
+              children: [
+                for (final referral in Referral.placeholder)
+                  ReferralRow(referral: referral),
+              ],
             ),
-            const Gap(AppSpacing.md),
-            _CodeCard(code: summary.referralCode),
-            const Gap(14),
-            _ReferralSummary(text: summary.referralSummary),
-            const Gap(AppSpacing.sm),
-            AppCard.flush(
-              child: DividedColumn(
-                children: [
-                  for (final referral in Referral.placeholder)
-                    ReferralRow(referral: referral),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

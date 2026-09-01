@@ -26,6 +26,14 @@ class FaithNavBar extends StatelessWidget {
   /// stranded under the bar.
   static const double contentInset = height + 14 + 16;
 
+  /// The page inset with that clearance — what a tab screen scrolls in.
+  static const EdgeInsets pageInset = EdgeInsets.fromLTRB(
+    20,
+    12,
+    20,
+    contentInset,
+  );
+
   static const BorderRadius _shape = BorderRadius.all(Radius.circular(28));
 
   final AppTab selected;

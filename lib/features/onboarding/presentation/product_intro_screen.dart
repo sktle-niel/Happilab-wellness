@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../shared/widgets/app_scaffold.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
@@ -57,34 +58,31 @@ class _ProductIntroScreenState extends State<ProductIntroScreen>
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: context.palette.canvas,
-    body: SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 22),
-        child: Center(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const _ShowcaseHeading(),
-                const Gap(AppSpacing.md),
-                for (final (index, product) in Product.showcase.indexed) ...[
-                  if (index > 0) const Gap(12),
-                  RiseIn(
-                    animation: _entrance,
-                    // Each card starts a beat after the one above it.
-                    begin: index * 0.18,
-                    end: 0.55 + index * 0.15,
-                    offset: 120 + index * 20,
-                    child: ProductCard(
-                      product: product,
-                      tiltDegrees: _tilts[index % _tilts.length],
-                    ),
+  Widget build(BuildContext context) => AppScaffold(
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 22),
+      child: Center(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const _ShowcaseHeading(),
+              const Gap(AppSpacing.md),
+              for (final (index, product) in Product.showcase.indexed) ...[
+                if (index > 0) const Gap(12),
+                RiseIn(
+                  animation: _entrance,
+                  // Each card starts a beat after the one above it.
+                  begin: index * 0.18,
+                  end: 0.55 + index * 0.15,
+                  offset: 120 + index * 20,
+                  child: ProductCard(
+                    product: product,
+                    tiltDegrees: _tilts[index % _tilts.length],
                   ),
-                ],
+                ),
               ],
-            ),
+            ],
           ),
         ),
       ),
