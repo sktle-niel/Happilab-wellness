@@ -112,41 +112,60 @@ class _CashOutForm extends StatelessWidget {
   final RewardsController controller;
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      const SectionHeader(title: 'Amount'),
-      const Gap(AppSpacing.sm),
-      AmountChipRow(
-        options: controller.amountOptions,
-        selected: controller.amount,
-        onSelect: controller.selectAmount,
-      ),
-      const Gap(AppSpacing.md),
-      const SectionHeader(title: 'Send to'),
-      const Gap(AppSpacing.sm),
-      PayoutMethodPicker(
-        accounts: controller.accounts,
-        selected: controller.destination,
-        onSelect: controller.selectDestination,
-      ),
-      const Gap(AppSpacing.md),
-      AppButton(
-        label: controller.amount == null
-            ? 'Choose an amount'
-            : 'Cash out ${NumberFormat.peso(controller.amount!)}',
-        onPressed: controller.canSubmit ? controller.submit : null,
-      ),
-      const Gap(AppSpacing.sm),
-      Text(
-        CashOutTerms.feeNote,
-        textAlign: TextAlign.center,
-        style: AppTypography.figtree(
-          size: 13,
-          color: context.palette.textFaint,
+  Widget build(BuildContext context) {
+    final amounts = controller.amountOptions;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SectionHeader(title: 'Amount'),
+        const Gap(AppSpacing.sm),
+        if (amounts.isEmpty)
+          const _NotEnoughToSend()
+        else
+          AmountChipRow(
+            options: amounts,
+            selected: controller.amount,
+            onSelect: controller.selectAmount,
+          ),
+        const Gap(AppSpacing.md),
+        const SectionHeader(title: 'Send to'),
+        const Gap(AppSpacing.sm),
+        PayoutMethodPicker(
+          accounts: controller.accounts,
+          selected: controller.destination,
+          onSelect: controller.selectDestination,
         ),
-      ),
-    ],
+        const Gap(AppSpacing.md),
+        AppButton(
+          label: controller.amount == null
+              ? 'Choose an amount'
+              : 'Cash out ${NumberFormat.peso(controller.amount!)}',
+          onPressed: controller.canSubmit ? controller.submit : null,
+        ),
+        const Gap(AppSpacing.sm),
+        Text(
+          CashOutTerms.feeNote,
+          textAlign: TextAlign.center,
+          style: AppTypography.figtree(
+            size: 13,
+            color: context.palette.textFaint,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Stands in for the amount chips when the balance is below the minimum. An
+/// empty row under the heading reads as a screen that failed to load.
+class _NotEnoughToSend extends StatelessWidget {
+  const _NotEnoughToSend();
+
+  @override
+  Widget build(BuildContext context) => Text(
+    CashOutTerms.belowMinimumNote,
+    style: AppTypography.figtree(size: 13.5, color: context.palette.textMuted),
   );
 }
 

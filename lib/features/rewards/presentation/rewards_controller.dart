@@ -26,18 +26,22 @@ class RewardsController extends ChangeNotifier {
   PayoutAccount? get destination => _destination;
   bool get isSubmitted => _isSubmitted;
 
-  /// Presets the member can actually afford, plus their whole balance.
+  /// The presets the member can send, plus their whole balance.
+  ///
+  /// Offering an amount the form would then refuse leaves the member tapping a
+  /// chip that never enables the button, so both sides ask [_isSendable].
   List<int> get amountOptions => [
-    ...CashOutTerms.presets.where((preset) => preset <= availablePoints),
-    if (availablePoints > 0 && !CashOutTerms.presets.contains(availablePoints))
+    ...CashOutTerms.presets.where(_isSendable),
+    if (_isSendable(availablePoints) &&
+        !CashOutTerms.presets.contains(availablePoints))
       availablePoints,
   ];
 
   bool get canSubmit =>
-      _amount != null &&
-      _destination != null &&
-      _amount! >= CashOutTerms.minimumPoints &&
-      _amount! <= availablePoints;
+      _amount != null && _destination != null && _isSendable(_amount!);
+
+  bool _isSendable(int points) =>
+      points >= CashOutTerms.minimumPoints && points <= availablePoints;
 
   /// What the confirmation reads back to the member.
   String get confirmation {
