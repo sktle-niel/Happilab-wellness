@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/app_scaffold.dart';
-import '../../../app/di/app_scope.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../app/shell/widgets/faith_nav_bar.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
-import '../../../app/theme/theme_reveal.dart';
 import '../../../shared/domain/member_summary.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/avatar_circle.dart';
 import '../../../shared/widgets/circle_icon_button.dart';
 import '../../../shared/widgets/divided_column.dart';
-import '../../../shared/widgets/faith_mascot.dart';
 import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/pressable_scale.dart';
 import 'widgets/settings_row.dart';
@@ -47,52 +44,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           onCashOut: () => Navigator.of(context).pushNamed(AppRoutes.rewards),
         ),
         const Gap(AppSpacing.sm),
-        AppCard.flush(
-          borderRadius: AppRadius.card,
-          child: DividedColumn(
-            children: [
-              SettingsToggleRow(
-                icon: Icons.notifications_none_rounded,
-                label: 'Notifications',
-                value: _notificationsEnabled,
-                onChanged: (value) =>
-                    setState(() => _notificationsEnabled = value),
-              ),
-              const _DarkModeRow(),
-              const SettingsValueRow(
-                icon: Icons.language_rounded,
-                label: 'Language',
-                value: 'English',
-              ),
-            ],
-          ),
+        _PreferencesGroup(
+          notificationsEnabled: _notificationsEnabled,
+          onNotificationsChanged: (value) =>
+              setState(() => _notificationsEnabled = value),
         ),
         const Gap(AppSpacing.sm),
-        AppCard.flush(
-          borderRadius: AppRadius.card,
-          child: DividedColumn(
-            children: [
-              SettingsLinkRow(
-                icon: Icons.history_rounded,
-                label: 'Account activity',
-                onPressed: () =>
-                    Navigator.of(context).pushNamed(AppRoutes.accountActivity),
-              ),
-              SettingsLinkRow(
-                icon: Icons.help_outline_rounded,
-                label: 'Help center',
-                onPressed: () =>
-                    Navigator.of(context).pushNamed(AppRoutes.helpCenter),
-              ),
-              SettingsLinkRow(
-                icon: Icons.shield_outlined,
-                label: 'Terms & privacy',
-                onPressed: () =>
-                    Navigator.of(context).pushNamed(AppRoutes.terms),
-              ),
-            ],
-          ),
-        ),
+        const _SupportGroup(),
         const Gap(AppSpacing.md),
         _LogOutButton(
           onPressed: () =>
@@ -104,18 +62,65 @@ class _ProfileScreenState extends State<ProfileScreen> {
   );
 }
 
-/// Flips the app between its two palettes, revealed from this row. The whole
-/// app rebuilds on the change, so the switch reads its state straight from the
-/// controller.
-class _DarkModeRow extends StatelessWidget {
-  const _DarkModeRow();
+/// What the member can switch on and off.
+class _PreferencesGroup extends StatelessWidget {
+  const _PreferencesGroup({
+    required this.notificationsEnabled,
+    required this.onNotificationsChanged,
+  });
+
+  final bool notificationsEnabled;
+  final ValueChanged<bool> onNotificationsChanged;
 
   @override
-  Widget build(BuildContext context) => SettingsToggleRow(
-    icon: Icons.dark_mode_outlined,
-    label: 'Dark mode',
-    value: AppScope.of(context).themeController.isDark,
-    onChanged: (_) => ThemeReveal.of(context).toggle(from: context),
+  Widget build(BuildContext context) => AppCard.flush(
+    borderRadius: AppRadius.card,
+    child: DividedColumn(
+      children: [
+        SettingsToggleRow(
+          icon: Icons.notifications_none_rounded,
+          label: 'Notifications',
+          value: notificationsEnabled,
+          onChanged: onNotificationsChanged,
+        ),
+        const SettingsValueRow(
+          icon: Icons.language_rounded,
+          label: 'Language',
+          value: 'English',
+        ),
+      ],
+    ),
+  );
+}
+
+/// Where the member goes for their history, for help, and for the agreement.
+class _SupportGroup extends StatelessWidget {
+  const _SupportGroup();
+
+  @override
+  Widget build(BuildContext context) => AppCard.flush(
+    borderRadius: AppRadius.card,
+    child: DividedColumn(
+      children: [
+        SettingsLinkRow(
+          icon: Icons.history_rounded,
+          label: 'Account activity',
+          onPressed: () =>
+              Navigator.of(context).pushNamed(AppRoutes.accountActivity),
+        ),
+        SettingsLinkRow(
+          icon: Icons.help_outline_rounded,
+          label: 'Help center',
+          onPressed: () =>
+              Navigator.of(context).pushNamed(AppRoutes.helpCenter),
+        ),
+        SettingsLinkRow(
+          icon: Icons.shield_outlined,
+          label: 'Terms & privacy',
+          onPressed: () => Navigator.of(context).pushNamed(AppRoutes.terms),
+        ),
+      ],
+    ),
   );
 }
 
@@ -170,11 +175,13 @@ class _ProfileHeader extends StatelessWidget {
 }
 
 /// The highlight card: the balance, and the tap that turns it into money. The
-/// mascot on the right is what lifts it above the plain lists below.
+/// falcon banner behind it is what lifts it above the plain lists below.
 class _RewardsCard extends StatelessWidget {
   const _RewardsCard({required this.summary, required this.onCashOut});
 
-  static const double _mascotSize = 78;
+  /// Short enough that the banner, held at its own proportions, leaves the
+  /// left third of the card to the wording.
+  static const double _height = 96;
 
   final MemberSummary summary;
   final VoidCallback onCashOut;
@@ -187,6 +194,7 @@ class _RewardsCard extends StatelessWidget {
       scale: 0.99,
       onPressed: onCashOut,
       child: Container(
+        height: _height,
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: context.palette.surface,
@@ -194,43 +202,12 @@ class _RewardsCard extends StatelessWidget {
           boxShadow: context.palette.shadowSoft,
         ),
         child: Stack(
+          fit: StackFit.expand,
           children: [
-            const Positioned.fill(child: _AccentWash()),
+            const _CashOutBanner(),
             Padding(
-              padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
-              child: Row(
-                children: [
-                  const SettingsIcon(
-                    icon: Icons.account_balance_wallet_outlined,
-                  ),
-                  const Gap(12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Cash out',
-                          style: AppTypography.figtree(size: 14.5, weight: 700),
-                        ),
-                        Text(
-                          '${summary.pointsFormatted} pts · '
-                          '${summary.pesoValue}',
-                          style: AppTypography.figtree(
-                            size: 12.5,
-                            color: context.palette.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    width: _mascotSize,
-                    height: _mascotSize,
-                    child: FittedBox(child: FaithMascot()),
-                  ),
-                ],
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              child: _CashOutLabel(summary: summary),
             ),
           ],
         ),
@@ -239,23 +216,46 @@ class _RewardsCard extends StatelessWidget {
   );
 }
 
-/// The brand tint that fades in behind the mascot.
-class _AccentWash extends StatelessWidget {
-  const _AccentWash();
+/// The falcon artwork, hung off the right edge at its own proportions rather
+/// than stretched to the card.
+///
+/// The picture was painted on black. That black is keyed out of the asset and
+/// the glow left translucent, so what stands behind the bird is whatever the
+/// card is — white in the light theme, charcoal in the dark one — instead of a
+/// slab that belongs to neither.
+class _CashOutBanner extends StatelessWidget {
+  const _CashOutBanner();
 
   @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.centerLeft,
-        end: Alignment.centerRight,
-        stops: const [0.45, 1],
-        colors: [
-          context.palette.accent.withValues(alpha: 0),
-          context.palette.accent.withValues(alpha: 0.28),
-        ],
+  Widget build(BuildContext context) => Image.asset(
+    'assets/images/cash-out-card.png',
+    fit: BoxFit.fitHeight,
+    alignment: Alignment.centerRight,
+    filterQuality: FilterQuality.medium,
+    semanticLabel: 'A falcon looking on',
+  );
+}
+
+/// The wording on the rewards card: what the action is, and what it is worth.
+class _CashOutLabel extends StatelessWidget {
+  const _CashOutLabel({required this.summary});
+
+  final MemberSummary summary;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Text('Cash out', style: AppTypography.figtree(size: 15, weight: 800)),
+      Text(
+        '${summary.pointsFormatted} pts · ${summary.pesoValue}',
+        style: AppTypography.figtree(
+          size: 12.5,
+          color: context.palette.textMuted,
+        ),
       ),
-    ),
+    ],
   );
 }
 

@@ -72,20 +72,6 @@ void main() {
     Brightness brightnessAt(WidgetTester tester, String text) =>
         Theme.of(tester.element(find.text(text))).brightness;
 
-    testWidgets('the profile switch flips the whole app to the dark palette', (
-      tester,
-    ) async {
-      await pumpShell(tester);
-      await tapTab(tester, AppTab.profile);
-      expect(brightnessAt(tester, 'Dark mode'), Brightness.light);
-
-      // Notifications comes first in the settings list; dark mode is next.
-      await tester.tap(find.byType(Switch).at(1));
-      await settleReveal(tester);
-
-      expect(brightnessAt(tester, 'Dark mode'), Brightness.dark);
-    });
-
     testWidgets('the home button flips the palette both ways', (tester) async {
       await pumpShell(tester);
 

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/app_scaffold.dart';
+import '../../../shared/widgets/app_toast.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_text_field.dart';
-import '../../../shared/widgets/brand_mark.dart';
+import '../../../shared/widgets/faith_wordmark.dart';
 import '../../../shared/widgets/centered_scroll_view.dart';
 import '../../../shared/widgets/circle_icon_button.dart';
 import '../../../shared/widgets/gap.dart';
@@ -52,8 +53,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     navigator.pushReplacementNamed(AppRoutes.signIn);
   }
 
-  void _showProviderUnavailable() => ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text('Google sign-up is not connected yet.')),
+  void _showProviderUnavailable() => AppToast.info(
+    context,
+    'Google sign-up is not connected yet',
+    detail: 'Fill the form below to join with your referral code.',
   );
 
   @override
@@ -107,8 +110,8 @@ class _CreateAccountHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      const BrandMark(size: 72),
-      const Gap(4),
+      const FaithWordmark(showTagline: false, scale: 0.62),
+      const Gap(12),
       Text('Create account', style: AppTypography.screenTitle),
       const Gap(2),
       Text(

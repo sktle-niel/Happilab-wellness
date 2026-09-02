@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/app_scaffold.dart';
+import '../../../shared/widgets/app_toast.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../core/security/input_validator.dart';
@@ -82,10 +83,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return null;
   }
 
-  void _confirm(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
-  }
+  void _confirm(String message) => AppToast.success(context, message);
 
   @override
   Widget build(BuildContext context) => AppScaffold(

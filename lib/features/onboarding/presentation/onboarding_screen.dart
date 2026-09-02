@@ -22,9 +22,6 @@ class OnboardingScreen extends StatefulWidget {
   static const String headline =
       'Share Wellness, Earn Real Money with Every Referral!';
 
-  /// How long the brand cover holds before the first clip.
-  static const Duration coverHold = Duration(milliseconds: 3600);
-
   /// Ceiling on a clip stage. Playback normally advances the stage when the
   /// clip ends; this is the guard for a clip that never starts or never
   /// finishes, so the backdrop can never strand on one frame.
@@ -52,12 +49,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _scheduleStageTimeout() {
     _stageTimer?.cancel();
-    _stageTimer = Timer(
-      _stageIndex == 0
-          ? OnboardingScreen.coverHold
-          : OnboardingScreen.clipTimeout,
-      _advanceStage,
-    );
+    _stageTimer = Timer(OnboardingScreen.clipTimeout, _advanceStage);
   }
 
   void _advanceStage() {

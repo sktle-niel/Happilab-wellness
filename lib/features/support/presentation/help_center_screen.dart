@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_tokens.dart';
 import '../../../shared/widgets/app_scaffold.dart';
+import '../../../shared/widgets/app_toast.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/divided_column.dart';
@@ -64,8 +65,10 @@ class _ContactCard extends StatelessWidget {
           icon: Icons.chat_bubble_outline_rounded,
           background: context.palette.accent,
           foreground: context.palette.onAccent,
-          onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Support chat is not connected yet.')),
+          onPressed: () => AppToast.info(
+            context,
+            'Support chat is not connected yet',
+            detail: 'Email us in the meantime and we will pick it up there.',
           ),
         ),
       ],

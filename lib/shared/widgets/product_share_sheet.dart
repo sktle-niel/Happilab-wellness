@@ -86,37 +86,51 @@ class ProductShareSheet extends StatelessWidget {
             ),
           ),
           const Gap(20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _ShareOption(
-                label: 'Copy link',
-                onPressed: () => _choose(context, onCopy),
-                child: Icon(
-                  Icons.link_rounded,
-                  size: 24,
-                  color: context.palette.accentText,
-                ),
-              ),
-              for (final platform in SharePlatform.values)
-                _ShareOption(
-                  label: platform.label,
-                  onPressed: () => _choose(context, () => onOpen(platform)),
-                  // The store's app icon fills the disc, as it does on a
-                  // phone's home screen.
-                  child: Image.asset(
-                    platform.logoAsset,
-                    fit: BoxFit.cover,
-                    cacheWidth: 174,
-                  ),
-                ),
-            ],
+          _ShareOptions(
+            onCopy: () => _choose(context, onCopy),
+            onOpen: (platform) => _choose(context, () => onOpen(platform)),
           ),
           const Gap(20),
           _CancelButton(onPressed: () => Navigator.of(context).pop()),
         ],
       ),
     ),
+  );
+}
+
+/// Where a share can go: the link itself, then every storefront.
+class _ShareOptions extends StatelessWidget {
+  const _ShareOptions({required this.onCopy, required this.onOpen});
+
+  final VoidCallback onCopy;
+  final ValueChanged<SharePlatform> onOpen;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    children: [
+      _ShareOption(
+        label: 'Copy link',
+        onPressed: onCopy,
+        child: Icon(
+          Icons.link_rounded,
+          size: 24,
+          color: context.palette.accentText,
+        ),
+      ),
+      for (final platform in SharePlatform.values)
+        _ShareOption(
+          label: platform.label,
+          onPressed: () => onOpen(platform),
+          // The store's app icon fills the disc, as it does on a phone's
+          // home screen.
+          child: Image.asset(
+            platform.logoAsset,
+            fit: BoxFit.cover,
+            cacheWidth: 174,
+          ),
+        ),
+    ],
   );
 }
 

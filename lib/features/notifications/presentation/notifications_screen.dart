@@ -83,45 +83,14 @@ class _NotificationTile extends StatelessWidget {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 38,
-          height: 38,
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: context.palette.tint,
-            shape: BoxShape.circle,
-          ),
-          child: const BrandMark(size: 26),
-        ),
+        const _SenderAvatar(),
         const Gap(12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      AppNotification.sender,
-                      style: AppTypography.figtree(size: 13.5, weight: 800),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Text(
-                    notification.when,
-                    style: AppTypography.figtree(
-                      size: 11.5,
-                      weight: 700,
-                      color: context.palette.textFaint,
-                    ),
-                  ),
-                  if (notification.isUnread) ...[
-                    const Gap.sm(),
-                    const _UnreadDot(),
-                  ],
-                ],
-              ),
+              _TileHeading(notification: notification),
               const Gap(2),
               Text(
                 notification.body,
@@ -136,6 +105,52 @@ class _NotificationTile extends StatelessWidget {
         ),
       ],
     ),
+  );
+}
+
+/// The brand mark every notification comes from.
+class _SenderAvatar extends StatelessWidget {
+  const _SenderAvatar();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 38,
+    height: 38,
+    padding: const EdgeInsets.all(6),
+    decoration: BoxDecoration(
+      color: context.palette.tint,
+      shape: BoxShape.circle,
+    ),
+    child: const BrandMark(size: 26),
+  );
+}
+
+/// Who sent it, when, and whether it has been read.
+class _TileHeading extends StatelessWidget {
+  const _TileHeading({required this.notification});
+
+  final AppNotification notification;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Expanded(
+        child: Text(
+          AppNotification.sender,
+          style: AppTypography.figtree(size: 13.5, weight: 800),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+      Text(
+        notification.when,
+        style: AppTypography.figtree(
+          size: 11.5,
+          weight: 700,
+          color: context.palette.textFaint,
+        ),
+      ),
+      if (notification.isUnread) ...[const Gap.sm(), const _UnreadDot()],
+    ],
   );
 }
 

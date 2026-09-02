@@ -12,7 +12,7 @@ void main() {
       await tester.pumpWidget(testApp(initialRoute: AppRoutes.splash));
       await tester.pump(const Duration(milliseconds: 900));
 
-      expect(find.text('FALCON CREST'), findsOneWidget);
+      expect(find.text('AC FALCON CREST'), findsOneWidget);
       expect(find.text('VENTURES'), findsOneWidget);
       expect(find.text(FaithWordmark.tagline), findsOneWidget);
     });
@@ -27,7 +27,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Our Products'), findsOneWidget);
-      expect(find.text('FALCON CREST'), findsNothing);
+      expect(find.text('AC FALCON CREST'), findsNothing);
     });
   });
 }

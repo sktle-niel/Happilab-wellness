@@ -1,22 +1,35 @@
 import 'package:flutter/material.dart';
 
-/// The Falcon Crest Ventures emblem.
+import '../../app/theme/app_palette.dart';
+import '../../app/theme/app_typography.dart';
+
+/// The brand's monogram: the two letters the name is built on.
 ///
-/// One widget so the asset path lives in a single place — screens ask for a
-/// size, not for a file.
+/// One widget so the mark lives in a single place — callers ask for a size and
+/// get letters that fit it, the way they asked the emblem for one before. It
+/// carries no circle of its own: the rows that use it already draw theirs.
 class BrandMark extends StatelessWidget {
-  const BrandMark({this.size = 84, super.key});
+  const BrandMark({this.size = 40, super.key});
 
-  static const String _asset = 'assets/images/brand-mark.png';
-
+  /// The square the letters are fitted into.
   final double size;
 
   @override
-  Widget build(BuildContext context) => Image.asset(
-    _asset,
+  Widget build(BuildContext context) => SizedBox(
     width: size,
     height: size,
-    fit: BoxFit.contain,
-    semanticLabel: 'Falcon Crest Ventures',
+    child: FittedBox(
+      fit: BoxFit.contain,
+      child: Text(
+        'AC',
+        style: AppTypography.figtree(
+          size: 40,
+          weight: 800,
+          letterSpacing: -1,
+          color: context.palette.brand,
+        ),
+        semanticsLabel: 'AC Falcon Crest Ventures',
+      ),
+    ),
   );
 }

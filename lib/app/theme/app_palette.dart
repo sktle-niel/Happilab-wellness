@@ -20,6 +20,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.textMuted,
     required this.textFaint,
     required this.danger,
+    required this.info,
     required this.tint,
     required this.divider,
     required this.shadow,
@@ -41,6 +42,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     textMuted: Color(0xFF5C6853),
     textFaint: Color(0xFF98A28E),
     danger: Color(0xFFE0563E),
+    info: Color(0xFF2F86C5),
     tint: Color(0xFFEFF8DC),
     divider: Color(0x1A141A0E),
     shadow: Color(0xFF1B2A10),
@@ -62,6 +64,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     textMuted: Color(0xFFA9B29E),
     textFaint: Color(0xFF6F7866),
     danger: Color(0xFFFF6B54),
+    info: Color(0xFF6BB8E8),
     tint: Color(0xFF2C3320),
     divider: Color(0x24FFFFFF),
     shadow: Color(0xFF000000),
@@ -97,13 +100,19 @@ class AppPalette extends ThemeExtension<AppPalette> {
   /// Small uppercase labels on [tint].
   final Color accentDeep;
 
-  /// The serif wordmark — the emblem's gold, in both palettes.
+  /// The emblem's gold, in both palettes. The wordmark left it for the accent
+  /// green; what stays gold is what should not read as an action — the rating
+  /// stars and the caution toast.
   final Color brand;
 
   final Color textPrimary;
   final Color textMuted;
   final Color textFaint;
   final Color danger;
+
+  /// Neutral notice. The one status colour outside the brand family — green is
+  /// spoken for by the accent, so information needs its own voice.
+  final Color info;
 
   /// Soft tint behind chips, avatars and secondary buttons.
   final Color tint;
@@ -153,6 +162,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
       textMuted: mix(textMuted, other.textMuted),
       textFaint: mix(textFaint, other.textFaint),
       danger: mix(danger, other.danger),
+      info: mix(info, other.info),
       tint: mix(tint, other.tint),
       divider: mix(divider, other.divider),
       shadow: mix(shadow, other.shadow),

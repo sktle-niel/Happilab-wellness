@@ -166,10 +166,25 @@ Treat everything outside the process as hostile.
 - **Errors tell an attacker nothing.** `AppException.message` is user-facing and generic; diagnostics
   go to the log, not to the screen.
 - **Dependencies are attack surface.** Justify every new package, prefer the SDK, keep `pubspec.lock`
-  committed, and never add a package to save five lines. The full approved list today is
-  `cupertino_icons`, `flutter_secure_storage` (no SDK equivalent for platform-secure storage), and
-  `flutter_lints` + `flutter_secure_storage_platform_interface` for development. Adding to it is a
-  decision, not a reflex — networking, state and DI stay hand-rolled in `core/`.
+  committed, and never add a package to save five lines. The approved list today:
+
+  | Package | Why it earns its place |
+  | --- | --- |
+  | `cupertino_icons` | Icon set. |
+  | `flutter_secure_storage` | No SDK equivalent for platform-secure storage. |
+  | `video_player` | No SDK video surface; the onboarding and story clips need one. |
+  | `url_launcher` | No SDK way to hand a link to another app. |
+  | `flutter_lints`, `flutter_secure_storage_platform_interface`, `flutter_launcher_icons` | Development and build tooling only. |
+
+  Adding to it is a decision, not a reflex — networking, state and DI stay hand-rolled in `core/`.
+
+  **3D is rendered ahead of time, never at runtime.** Flutter has no glTF renderer, and every
+  package that offers one draws the model in a WebView: a browser engine, an `INTERNET`
+  permission, and seconds of jank. `model_viewer_plus` was tried on the loader and its renderer
+  process crashed the app. `flutter_scene` renders natively but needs the master channel. So a
+  model is baked to a PNG sequence by `tool/render_model_frames.mjs` and played back as frames —
+  see `FalconLoader`. Re-run the tool when the model changes; it needs nothing installed in the
+  app.
 
 ## Rate limits & network discipline
 
