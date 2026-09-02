@@ -100,46 +100,8 @@ class _AppTextFieldState extends State<AppTextField> {
         const SizedBox(height: AppSpacing.xs),
         Container(
           height: AppSpacing.inputHeight,
-          decoration: BoxDecoration(
-            color: _isInset ? context.palette.canvas : context.palette.surface,
-            borderRadius: _isInset
-                ? const BorderRadius.all(Radius.circular(14))
-                : AppRadius.input,
-            boxShadow: _isInset ? null : context.palette.shadowInput,
-            border: Border.all(
-              color: _borderColor,
-              width: _hasFocus || hasError ? 2 : 1.5,
-            ),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: widget.controller,
-                  focusNode: _focusNode,
-                  keyboardType: widget.keyboardType,
-                  textInputAction: widget.textInputAction,
-                  obscureText: widget.obscureText,
-                  style: AppTypography.input,
-                  cursorColor: context.palette.accent,
-                  onChanged: widget.onChanged,
-                  onSubmitted: widget.onSubmitted,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    border: InputBorder.none,
-                    hintText: widget.hint,
-                    hintStyle: AppTypography.input.copyWith(
-                      color: context.palette.textFaint,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                    ),
-                  ),
-                ),
-              ),
-              if (widget.trailing != null) widget.trailing!,
-            ],
-          ),
+          decoration: _decorationFor(context, hasError: hasError),
+          child: _FieldInput(field: widget, focusNode: _focusNode),
         ),
         if (hasError || widget.helperText != null) ...[
           const SizedBox(height: AppSpacing.xs),
@@ -154,6 +116,65 @@ class _AppTextFieldState extends State<AppTextField> {
       ],
     );
   }
+
+  /// The field's frame. An inset field sits in a well on the card it is part
+  /// of; a standing one is a raised surface of its own.
+  BoxDecoration _decorationFor(
+    BuildContext context, {
+    required bool hasError,
+  }) => BoxDecoration(
+    color: _isInset ? context.palette.canvas : context.palette.surface,
+    borderRadius: _isInset
+        ? const BorderRadius.all(Radius.circular(14))
+        : AppRadius.input,
+    boxShadow: _isInset ? null : context.palette.shadowInput,
+    border: Border.all(
+      color: _borderColor,
+      width: _hasFocus || hasError ? 2 : 1.5,
+    ),
+  );
+}
+
+/// The entry itself, plus whatever sits at its trailing edge.
+///
+/// It reads its configuration off the [AppTextField] rather than taking eight
+/// parameters that would only ever be copied across.
+class _FieldInput extends StatelessWidget {
+  const _FieldInput({required this.field, required this.focusNode});
+
+  final AppTextField field;
+  final FocusNode focusNode;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Expanded(
+        child: TextField(
+          controller: field.controller,
+          focusNode: focusNode,
+          keyboardType: field.keyboardType,
+          textInputAction: field.textInputAction,
+          obscureText: field.obscureText,
+          style: AppTypography.input,
+          cursorColor: context.palette.accent,
+          onChanged: field.onChanged,
+          onSubmitted: field.onSubmitted,
+          decoration: InputDecoration(
+            isDense: true,
+            border: InputBorder.none,
+            hintText: field.hint,
+            hintStyle: AppTypography.input.copyWith(
+              color: context.palette.textFaint,
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+            ),
+          ),
+        ),
+      ),
+      ?field.trailing,
+    ],
+  );
 }
 
 class _FieldLabel extends StatelessWidget {

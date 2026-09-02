@@ -8,6 +8,7 @@ import '../../../../shared/widgets/gap.dart';
 import '../../../../shared/widgets/remote_image.dart';
 import '../../../../shared/widgets/status_pill.dart';
 import '../../domain/feed_post.dart';
+import 'heart_burst.dart';
 import 'post_video.dart';
 import '../../../../app/theme/app_palette.dart';
 
@@ -30,6 +31,14 @@ class _FeedPostCardState extends State<FeedPostCard> {
 
   void _toggleLike() => setState(() => _isLiked = !_isLiked);
 
+  /// A tap on the picture only ever likes it, the way it does on TikTok. The
+  /// button underneath is where a like is taken back, so a burst of taps never
+  /// flickers the state on and off.
+  void _like() {
+    if (_isLiked) return;
+    setState(() => _isLiked = true);
+  }
+
   @override
   Widget build(BuildContext context) => AppCard(
     padding: EdgeInsets.zero,
@@ -45,52 +54,78 @@ class _FeedPostCardState extends State<FeedPostCard> {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: ClipRRect(
               borderRadius: const BorderRadius.all(Radius.circular(18)),
-              child: _PostMedia(post: widget.post),
+              child: HeartBurst(
+                onTapped: _like,
+                child: _PostMedia(post: widget.post),
+              ),
             ),
           ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  _PostAction(
-                    icon: _isLiked
-                        ? Icons.favorite_rounded
-                        : Icons.favorite_border_rounded,
-                    label: '$_likes',
-                    color: _isLiked
-                        ? context.palette.danger
-                        : context.palette.textMuted,
-                    onPressed: _toggleLike,
-                  ),
-                  const Gap(18),
-                  _PostAction(
-                    icon: Icons.share_outlined,
-                    label: 'Share',
-                    color: context.palette.textMuted,
-                    onPressed: widget.onShare,
-                  ),
-                  const Spacer(),
-                  Text(
-                    '${widget.post.comments} comments',
-                    style: AppTypography.figtree(
-                      size: 12.5,
-                      color: context.palette.textFaint,
-                    ),
-                  ),
-                ],
-              ),
-              const Gap.sm(),
-              Text(
-                widget.post.body,
-                style: AppTypography.figtree(size: 14.5, height: 1.5),
-              ),
-            ],
-          ),
+        _PostFooter(
+          post: widget.post,
+          likes: _likes,
+          isLiked: _isLiked,
+          onToggleLike: _toggleLike,
+          onShare: widget.onShare,
         ),
+      ],
+    ),
+  );
+}
+
+/// What the reader can do with the post, and what it says.
+class _PostFooter extends StatelessWidget {
+  const _PostFooter({
+    required this.post,
+    required this.likes,
+    required this.isLiked,
+    required this.onToggleLike,
+    required this.onShare,
+  });
+
+  final FeedPost post;
+  final int likes;
+  final bool isLiked;
+  final VoidCallback onToggleLike;
+  final VoidCallback onShare;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            _PostAction(
+              icon: isLiked
+                  ? Icons.favorite_rounded
+                  : Icons.favorite_border_rounded,
+              label: '$likes',
+              color: isLiked
+                  ? context.palette.danger
+                  : context.palette.textMuted,
+              onPressed: onToggleLike,
+            ),
+            const Gap(18),
+            _PostAction(
+              icon: Icons.share_outlined,
+              label: 'Share',
+              color: context.palette.textMuted,
+              onPressed: onShare,
+            ),
+            const Spacer(),
+            Text(
+              '${post.comments} comments',
+              style: AppTypography.figtree(
+                size: 12.5,
+                color: context.palette.textFaint,
+              ),
+            ),
+          ],
+        ),
+        const Gap.sm(),
+        Text(post.body, style: AppTypography.figtree(size: 14.5, height: 1.5)),
       ],
     ),
   );

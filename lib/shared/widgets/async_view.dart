@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/errors/app_exception.dart';
 import '../../core/errors/result.dart';
+import 'app_loader.dart';
 import 'error_view.dart';
 
 /// Renders the three states of an async read — loading, failure, data — so no
@@ -27,9 +28,7 @@ class AsyncView<T> extends StatelessWidget {
       }
 
       final result = snapshot.data;
-      if (result == null) {
-        return const Center(child: CircularProgressIndicator());
-      }
+      if (result == null) return const LoadingView();
 
       return result.fold(
         (value) => builder(context, value),

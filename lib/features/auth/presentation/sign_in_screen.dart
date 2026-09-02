@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/app_scaffold.dart';
+import '../../../shared/widgets/app_toast.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_text_field.dart';
-import '../../../shared/widgets/brand_mark.dart';
+import '../../../shared/widgets/faith_wordmark.dart';
 import '../../../shared/widgets/centered_scroll_view.dart';
 import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/google_mark.dart';
@@ -41,8 +42,10 @@ class _SignInScreenState extends State<SignInScreen> {
         .pushNamedAndRemoveUntil(AppRoutes.home, (route) => false);
   }
 
-  void _showProviderUnavailable() => ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text('Google sign-in is not connected yet.')),
+  void _showProviderUnavailable() => AppToast.info(
+    context,
+    'Google sign-in is not connected yet',
+    detail: 'Use your username or Gmail and password for now.',
   );
 
   @override
@@ -88,8 +91,8 @@ class _SignInHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      const BrandMark(),
-      const Gap(6),
+      const FaithWordmark(showTagline: false, scale: 0.72),
+      const Gap(14),
       Text('Welcome back', style: AppTypography.screenTitle),
       const Gap(2),
       Text(

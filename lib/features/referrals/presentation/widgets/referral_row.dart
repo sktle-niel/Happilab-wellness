@@ -14,6 +14,54 @@ class ReferralRow extends StatelessWidget {
 
   final Referral referral;
 
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+    child: Row(
+      children: [
+        AvatarCircle(name: referral.name, imageUrl: referral.avatarUrl),
+        const Gap(12),
+        Expanded(child: _Identity(referral: referral)),
+        const Gap(10),
+        _StageAndEarnings(referral: referral),
+      ],
+    ),
+  );
+}
+
+/// Who they are and when they joined.
+class _Identity extends StatelessWidget {
+  const _Identity({required this.referral});
+
+  final Referral referral;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Text(
+        referral.name,
+        style: AppTypography.figtree(size: 15, weight: 700),
+        overflow: TextOverflow.ellipsis,
+      ),
+      Text(
+        referral.when,
+        style: AppTypography.figtree(
+          size: 12,
+          color: context.palette.textFaint,
+        ),
+      ),
+    ],
+  );
+}
+
+/// How far they got, and what that was worth.
+class _StageAndEarnings extends StatelessWidget {
+  const _StageAndEarnings({required this.referral});
+
+  final Referral referral;
+
   /// Someone who has bought is worth more than someone who has only signed up,
   /// and the badge says so at a glance.
   (Color, Color) _stageColors(AppPalette palette) => switch (referral.stage) {
@@ -24,61 +72,29 @@ class ReferralRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (background, foreground) = _stageColors(context.palette);
+    final palette = context.palette;
+    final (background, foreground) = _stageColors(palette);
+    final hasEarned = referral.pointsEarned > 0;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-      child: Row(
-        children: [
-          AvatarCircle(name: referral.name, imageUrl: referral.avatarUrl),
-          const Gap(12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  referral.name,
-                  style: AppTypography.figtree(size: 15, weight: 700),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  referral.when,
-                  style: AppTypography.figtree(
-                    size: 12,
-                    color: context.palette.textFaint,
-                  ),
-                ),
-              ],
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        StatusPill(
+          label: referral.stage.label,
+          background: background,
+          foreground: foreground,
+        ),
+        const Gap(3),
+        Text(
+          hasEarned ? NumberFormat.points(referral.pointsEarned) : '—',
+          style: AppTypography.figtree(
+            size: 14,
+            weight: 800,
+            color: hasEarned ? palette.accentText : palette.textFaint,
           ),
-          const Gap(10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              StatusPill(
-                label: referral.stage.label,
-                background: background,
-                foreground: foreground,
-              ),
-              const Gap(3),
-              Text(
-                referral.pointsEarned == 0
-                    ? '—'
-                    : NumberFormat.points(referral.pointsEarned),
-                style: AppTypography.figtree(
-                  size: 14,
-                  weight: 800,
-                  color: referral.pointsEarned == 0
-                      ? context.palette.textFaint
-                      : context.palette.accentText,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

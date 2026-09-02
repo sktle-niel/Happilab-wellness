@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../domain/catalogue.dart';
+import '../widgets/app_toast.dart';
 
 /// The messages a member actually sends, and the ways the app hands them over.
 ///
@@ -23,9 +24,10 @@ abstract final class ShareActions {
     String text, {
     required String confirmation,
   }) async {
+    // Read before the await: the context may be gone by the time it returns.
     final messenger = ScaffoldMessenger.of(context);
     await Clipboard.setData(ClipboardData(text: text));
-    messenger.showSnackBar(SnackBar(content: Text(confirmation)));
+    AppToast.showOn(messenger, ToastKind.success, confirmation);
   }
 
   /// Hands [link] to the store's app, or the browser. A refusal — no browser
@@ -44,8 +46,11 @@ abstract final class ShareActions {
       opened = false;
     }
     if (opened) return;
-    messenger.showSnackBar(
-      SnackBar(content: Text('Could not open $destination right now.')),
+    AppToast.showOn(
+      messenger,
+      ToastKind.error,
+      'Could not open $destination',
+      detail: 'Check that the app or a browser is installed, then try again.',
     );
   }
 }

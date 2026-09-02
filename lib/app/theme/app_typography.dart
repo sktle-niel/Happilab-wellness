@@ -80,13 +80,17 @@ abstract final class AppTypography {
 
   static TextStyle get buttonSecondary => figtree(size: 15, weight: 700);
 
-  /// FALCON CREST — the large serif wordmark on the loader.
+  /// AC FALCON CREST — the large serif wordmark on the loader.
+  ///
+  /// The brand green rather than the emblem's gold: the name is set in the
+  /// same colour the accent speaks in, so the lockup belongs to the app rather
+  /// than to the crest it replaced.
   static TextStyle wordmark(AppPalette palette) => cormorant(
     size: 34,
     weight: 600,
     letterSpacing: 6.8,
     height: 1.1,
-    color: palette.brand,
+    color: palette.accentText,
   );
 
   /// VENTURES — the ruled line beneath the wordmark.
@@ -94,7 +98,7 @@ abstract final class AppTypography {
     size: 15,
     weight: 500,
     letterSpacing: 6.5,
-    color: palette.brand,
+    color: palette.accentText,
   );
 
   static TextStyle tagline(AppPalette palette) => figtree(

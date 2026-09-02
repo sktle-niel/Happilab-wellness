@@ -1,13 +1,37 @@
-# Happilab
+# AC Falcon Crest Ventures
 
-A Flutter app built on a layered, feature-first foundation with a secure, rate-limited network core.
+A Flutter referral app for the Falcon Crest programme. A member shares their code, earns points on
+every order it brings in — not just the first — and cashes those points out to GCash or Maya at a peso
+apiece. The app is the whole loop: the catalogue, the share sheet, the referral ledger, the payout,
+and the community that keeps people coming back.
 
-The product features are not written yet. What exists today is the groundwork every screen will sit
-on: theming, dependency injection, routing, failure handling, logging, credential storage, and an API
-client that throttles and retries on its own. The `counter` feature is there as the reference example
-of how a slice is put together.
+The screens are built and run on placeholder data. Every figure one shows comes from a single model in
+`shared/domain/`, so the day the API exists it is a data source that changes, not a widget tree.
 
 **Stack:** Flutter 3.47 · Dart 3.13 · Material 3 · Android + iOS
+
+## What ships
+
+| Slice | Screens |
+| --- | --- |
+| `onboarding` | Splash, the product showcase, and a three-stage intro told over video |
+| `auth` | Sign in and create account, with the password policy checked as it is typed |
+| `home` | Points balance, affiliate banner, product grid, and the share sheet behind it |
+| `referrals` | How the programme works, and the member's own referral ledger |
+| `rewards` | Cash out — preset amounts, payout method, editable payout number, receipt |
+| `community` | News feed, member stories with video, and a suggestion box |
+| `notifications` | The activity a member has not read yet |
+| `profile` | Profile, edit profile, account activity |
+| `support` | Help centre and programme terms |
+
+Five of those live behind the bottom bar (`AppTab`); everything else is pushed on top of a tab and
+carries a back button.
+
+**The design system** is the rest of it. `app/theme/` holds one light palette and one dark one, plus
+the spacing, radius and duration tokens every screen reads — nothing hardcodes a colour or a gap.
+`shared/widgets/` holds the chrome: `AppScaffold`, `AppCard`, `AppButton`, `AppTextField`, the
+`AppLoader` and `AppToast`, `AsyncView` and `ErrorView` for the states a screen can actually reach.
+Two screens spelling out the same `Scaffold` is a bug here, not a style.
 
 ## Getting started
 
@@ -46,11 +70,11 @@ features/  ──▶  shared/  ──▶  core/  ──▶  (Flutter SDK)
 ```
 
 - **`core/`** — framework-level, feature-agnostic, pure Dart where possible. Knows nothing about UI.
-- **`shared/`** — cross-feature widgets. Never imports a feature.
+- **`shared/`** — cross-feature widgets and models. Never imports a feature.
 - **`features/`** — vertical slices (`data/` · `domain/` · `presentation/`). Never import each other.
-- **`app/`** — the shell: composition root, routing, theme.
+- **`app/`** — the shell: composition root, routing, theme, the tab bar.
 
-Two rules carry most of the weight:
+Three rules carry most of the weight:
 
 **One composition root.** Every service is built once in `AppDependencies` and reaches widgets through
 `AppScope.of(context)`. There are no singletons and no service locator, so any dependency can be
@@ -68,6 +92,11 @@ return result.fold(
   (error) => ErrorView(error: error, onRetry: _reload),
 );
 ```
+
+**Logic never lives in the widget tree.** A `build()` describes what a screen looks like; it does not
+compute, validate, format or decide on the way past. Rules live in `domain/`, intent lives on a
+`ChangeNotifier` controller owned by the screen's `State`, and the test for whether something is in
+the right file is whether it can be unit-tested without pumping a widget.
 
 ## Networking
 
@@ -95,27 +124,49 @@ rate limit ──▶ attach token ──▶ timeout ──▶ retry with jittere
 - Every log line passes through `Redactor`; production drops anything below `warning`.
 - Input is validated and sanitised on the way in, responses are parsed defensively on the way out.
 
+Dependencies are attack surface, so the list is short and each entry is argued for in
+[`CLAUDE.md`](CLAUDE.md): `cupertino_icons`, `flutter_secure_storage`, `video_player` and
+`url_launcher`. Networking, state and DI stay hand-rolled in `core/`.
+
+## The falcon
+
+The bird in the loader, on the tab bar and on the rewards card is a glTF model — but nothing renders
+it at runtime. Flutter has no glTF renderer, and every package offering one draws the model in a
+WebView: a browser engine, an `INTERNET` permission and seconds of jank. So each clip is baked to a
+numbered PNG sequence ahead of time and played back as frames.
+
+```bash
+node tool/render_model_frames.mjs <model.glb> assets/images/falcon/fly 24 320 Fly_Loop
+```
+
+The tool needs Node and `puppeteer`; the app needs neither. `FalconClip` in
+`shared/widgets/falcon.dart` names the sequences and how each one is timed — re-run the tool when the
+model changes, and nothing else moves.
+
 ## Testing
 
 ```bash
 flutter analyze         # must be clean
-flutter test            # 9 tests
+flutter test            # 131 tests
 dart format lib test
 ```
 
-Tests mirror `lib/`. Reusable fakes live in `test/support/`. Everything is deterministic — the clock
-and the transport are injected, and nothing sleeps.
+Tests mirror `lib/`. Reusable fakes live in `test/support/`. Everything is deterministic — the clock,
+the transport and the random source are injected, and nothing sleeps.
 
 ## Project layout
 
 ```
 lib/
-  main.dart          entry point only
-  app/               shell: DI, router, theme tokens
+  main.dart          entry point only: build deps, runApp
+  app/               shell: DI, router, tab bar, theme tokens
   core/              config, errors, logging, network, security, utils
-  features/          vertical slices (counter is the reference example)
-  shared/widgets/    AppScaffold, AppButton, AsyncView, ErrorView, Gap
+  features/          auth, onboarding, home, referrals, rewards,
+                     community, notifications, profile, support
+  shared/            domain models, formatting and share helpers, widgets
 test/                mirrors lib/, plus support/ for fakes
+tool/                render_model_frames.mjs — glTF clip to PNG sequence
+assets/              fonts, images, falcon frame sequences, onboarding video
 ```
 
 ## Contributing

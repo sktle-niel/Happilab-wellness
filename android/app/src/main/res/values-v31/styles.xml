@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 12+ replaced the windowBackground launch screen with its own splash
+  API, which ignores drawable/launch_background and draws the launcher icon
+  instead. These two attributes are what that API reads.
+-->
+<resources>
+    <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowSplashScreenBackground">@color/brand_canvas</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_icon_none</item>
+    </style>
+    <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">?android:colorBackground</item>
+    </style>
+</resources>

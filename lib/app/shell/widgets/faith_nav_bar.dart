@@ -2,14 +2,14 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import '../../../shared/widgets/faith_mascot.dart';
+import '../../../shared/widgets/falcon.dart';
 import '../../theme/app_typography.dart';
 import '../app_tab.dart';
 import '../../theme/app_palette.dart';
 
 /// The floating bar the signed-in app navigates from.
 ///
-/// The middle tab is raised and carries the mascot — it is the action the whole
+/// The middle tab is raised and carries the falcon — it is the action the whole
 /// product is about, so it does not look like the other four. That button is
 /// drawn in an unclipped layer above the bar: inside it, the bar's own rounded
 /// clip cuts its head off.
@@ -45,58 +45,79 @@ class FaithNavBar extends StatelessWidget {
     child: Stack(
       clipBehavior: Clip.none,
       children: [
-        ClipRRect(
-          borderRadius: _shape,
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-            child: Container(
-              height: height,
-              decoration: BoxDecoration(
-                color: context.palette.surface.withValues(alpha: 0.95),
-                borderRadius: _shape,
-                boxShadow: context.palette.shadowCard,
+        _BarSurface(selected: selected, onSelect: onSelect),
+        _RaisedSlot(onSelect: onSelect),
+      ],
+    ),
+  );
+}
+
+/// The blurred bar itself, with a slot per tab.
+class _BarSurface extends StatelessWidget {
+  const _BarSurface({required this.selected, required this.onSelect});
+
+  final AppTab selected;
+  final ValueChanged<AppTab> onSelect;
+
+  @override
+  Widget build(BuildContext context) => ClipRRect(
+    borderRadius: FaithNavBar._shape,
+    child: BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+      child: Container(
+        height: FaithNavBar.height,
+        decoration: BoxDecoration(
+          color: context.palette.surface.withValues(alpha: 0.95),
+          borderRadius: FaithNavBar._shape,
+          boxShadow: context.palette.shadowCard,
+        ),
+        child: Row(
+          children: [
+            for (final tab in AppTab.values)
+              Expanded(
+                child: tab.isFeature
+                    // The raised button sits in the layer above; this slot
+                    // only reserves its width.
+                    ? const SizedBox.expand()
+                    : _NavTab(
+                        tab: tab,
+                        isSelected: tab == selected,
+                        onPressed: () => onSelect(tab),
+                      ),
               ),
-              child: Row(
-                children: [
-                  for (final tab in AppTab.values)
-                    Expanded(
-                      child: tab.isFeature
-                          // The raised button sits in the layer above; this
-                          // slot only reserves its width.
-                          ? const SizedBox.expand()
-                          : _NavTab(
-                              tab: tab,
-                              isSelected: tab == selected,
-                              onPressed: () => onSelect(tab),
-                            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+/// The unclipped layer the raised tab is drawn in. It mirrors the bar's slots
+/// so the button lands over the width its tab reserved, wherever that tab sits
+/// in the order.
+class _RaisedSlot extends StatelessWidget {
+  const _RaisedSlot({required this.onSelect});
+
+  final ValueChanged<AppTab> onSelect;
+
+  @override
+  Widget build(BuildContext context) => Positioned(
+    left: 0,
+    right: 0,
+    top: -20,
+    child: Row(
+      children: [
+        for (final tab in AppTab.values)
+          Expanded(
+            child: tab.isFeature
+                ? Center(
+                    child: _FeatureTab(
+                      tab: tab,
+                      onPressed: () => onSelect(tab),
                     ),
-                ],
-              ),
-            ),
+                  )
+                : const SizedBox.shrink(),
           ),
-        ),
-        // Mirrors the bar's slots so the raised button lands over the width
-        // its tab reserved, wherever that tab sits in the order.
-        Positioned(
-          left: 0,
-          right: 0,
-          top: -20,
-          child: Row(
-            children: [
-              for (final tab in AppTab.values)
-                Expanded(
-                  child: tab.isFeature
-                      ? Center(
-                          child: _FeatureTab(
-                            tab: tab,
-                            onPressed: () => onSelect(tab),
-                          ),
-                        )
-                      : const SizedBox.shrink(),
-                ),
-            ],
-          ),
-        ),
       ],
     ),
   );
@@ -173,7 +194,7 @@ class _FeatureTab extends StatelessWidget {
               border: Border.all(color: context.palette.canvas, width: 4),
               boxShadow: context.palette.shadowCard,
             ),
-            child: const FittedBox(fit: BoxFit.contain, child: FaithMascot()),
+            child: const Falcon(clip: FalconClip.mark, size: 40),
           ),
           const SizedBox(height: 2),
           Text(

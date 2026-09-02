@@ -1,5 +1,5 @@
 name: happilab
-description: "A new Flutter project."
+description: "AC Falcon Crest Ventures — share a referral code, earn points on every order it brings in, cash them out."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -46,7 +46,6 @@ dependencies:
   # Sharing hands a product link to the store's app or the browser; the SDK
   # has no way to open an external URL.
   url_launcher: ^6.3.2
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -64,11 +63,6 @@ dev_dependencies:
   # Generates the launcher icon set from one source image. Tooling only —
   # it produces assets at build time and ships no code.
   flutter_launcher_icons: ^0.14.4
-
-# For information on the generic Dart part of this file, see the
-# following page: https://dart.dev/tools/pub/pubspec
-
-# The following section is specific to Flutter packages.
 flutter:
   uses-material-design: true
 
@@ -76,6 +70,9 @@ flutter:
     - assets/images/
     - assets/images/payout/
     - assets/images/share/
+    - assets/images/falcon/fly/
+    - assets/images/falcon/steady/
+    - assets/images/falcon/rewards/
     - assets/video/
 
   # Variable fonts: one file per family, weights selected at runtime through

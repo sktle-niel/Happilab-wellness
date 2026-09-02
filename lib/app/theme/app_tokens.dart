@@ -53,6 +53,42 @@ abstract final class AppDuration {
 
   /// The circular reveal that swaps light and dark.
   static const Duration themeReveal = Duration(milliseconds: 540);
+
+  /// How long one heart lives after a tap on a picture. Short enough that a
+  /// run of taps overlaps into a burst rather than a queue.
+  static const Duration heartBurst = Duration(milliseconds: 900);
+
+  /// One turn of the loader. Slow enough to read as waiting, not as urgency.
+  static const Duration pulse = Duration(milliseconds: 1100);
+
+  /// How long a toast stays before it withdraws. Long enough to read two
+  /// lines, short enough not to sit over the content.
+  static const Duration toast = Duration(milliseconds: 3400);
+
+  /// One beat of the falcon's wings on the loader. A shade slower than the
+  /// clip was authored at, which reads as gliding rather than as hurry.
+  static const Duration wingbeat = Duration(milliseconds: 900);
+
+  /// One sway of the falcon's wings on the marks that live in the chrome.
+  /// A shade longer than the clip runs, so the sway reads as unhurried rather
+  /// than as beating — this one is in the corner of the eye all day.
+  static const Duration wingSway = Duration(milliseconds: 1000);
+
+  /// How long the wings take to close, and to open again.
+  static const Duration wingFold = Duration(milliseconds: 550);
+
+  /// How long they stay closed before the next few beats. Long enough that the
+  /// mark settles out of notice, short enough that it is not mistaken for a
+  /// still picture.
+  static const Duration wingsRested = Duration(milliseconds: 3800);
+
+  /// One shake of the falcon's wings. The rewards card runs several in a row,
+  /// which is what turns a twitch into a pause in the flight.
+  static const Duration wingShake = Duration(milliseconds: 1000);
+
+  /// How long a load may run before the loader admits the connection is slow,
+  /// rather than leaving the member guessing whether anything is happening.
+  static const Duration slowHint = Duration(seconds: 6);
 }
 
 /// Easing shared with the design canvas.

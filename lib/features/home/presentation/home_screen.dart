@@ -27,6 +27,13 @@ class HomeScreen extends StatelessWidget {
   /// can bleed past it; everything else is inset by hand.
   static const double _inset = 20;
 
+  /// The list runs edge to edge, so only the top and the nav-bar clearance are
+  /// set here; the rows inset themselves.
+  static const EdgeInsets _listInset = EdgeInsets.only(
+    top: 12,
+    bottom: FaithNavBar.contentInset,
+  );
+
   /// Switches tabs when home is inside the shell, and pushes the screen when
   /// it is not — the same tap should not stack a second copy of a destination.
   static void _open(BuildContext context, AppTab tab, String route) {
@@ -41,10 +48,7 @@ class HomeScreen extends StatelessWidget {
 
     return AppScaffold(
       child: ListView(
-        padding: const EdgeInsets.only(
-          top: 12,
-          bottom: FaithNavBar.contentInset,
-        ),
+        padding: _listInset,
         children: [
           _Inset(
             child: HomeTopBar(

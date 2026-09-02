@@ -114,64 +114,95 @@ class _CodeCardState extends State<_CodeCard> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'YOUR CODE',
-                    style: AppTypography.figtree(
-                      size: 11.5,
-                      weight: 700,
-                      letterSpacing: 0.69,
-                      color: context.palette.textMuted,
-                    ),
-                  ),
-                  const Gap(4),
-                  Text(
-                    widget.code,
-                    style: AppTypography.figtree(
-                      size: 26,
-                      weight: 800,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Gap(12),
-            const _GiftBadge(),
-          ],
-        ),
+        _CodeDisplay(code: widget.code),
         const Gap(14),
-        Row(
-          children: [
-            Expanded(
-              child: _CodeAction(
-                label: _hasCopied ? 'Copied' : 'Copy code',
-                icon: _hasCopied ? Icons.check_rounded : Icons.copy_rounded,
-                onPressed: _copyCode,
-                background: context.palette.accent,
-                foreground: context.palette.onAccent,
-              ),
-            ),
-            const Gap(10),
-            Expanded(
-              child: _CodeAction(
-                label: 'Share',
-                icon: Icons.share_outlined,
-                onPressed: _shareInvite,
-                background: context.palette.tint,
-                foreground: context.palette.accentText,
-              ),
-            ),
-          ],
+        _CodeActions(
+          hasCopied: _hasCopied,
+          onCopy: _copyCode,
+          onShare: _shareInvite,
         ),
       ],
     ),
+  );
+}
+
+/// The code itself, with the gift badge beside it.
+class _CodeDisplay extends StatelessWidget {
+  const _CodeDisplay({required this.code});
+
+  final String code;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'YOUR CODE',
+              style: AppTypography.figtree(
+                size: 11.5,
+                weight: 700,
+                letterSpacing: 0.69,
+                color: context.palette.textMuted,
+              ),
+            ),
+            const Gap(4),
+            Text(
+              code,
+              style: AppTypography.figtree(
+                size: 26,
+                weight: 800,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+      const Gap(12),
+      const _GiftBadge(),
+    ],
+  );
+}
+
+/// The two ways to pass the code on. Copy reports itself for a moment, so the
+/// label it carries is state, not a constant.
+class _CodeActions extends StatelessWidget {
+  const _CodeActions({
+    required this.hasCopied,
+    required this.onCopy,
+    required this.onShare,
+  });
+
+  final bool hasCopied;
+  final VoidCallback onCopy;
+  final VoidCallback onShare;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Expanded(
+        child: _CodeAction(
+          label: hasCopied ? 'Copied' : 'Copy code',
+          icon: hasCopied ? Icons.check_rounded : Icons.copy_rounded,
+          onPressed: onCopy,
+          background: context.palette.accent,
+          foreground: context.palette.onAccent,
+        ),
+      ),
+      const Gap(10),
+      Expanded(
+        child: _CodeAction(
+          label: 'Share',
+          icon: Icons.share_outlined,
+          onPressed: onShare,
+          background: context.palette.tint,
+          foreground: context.palette.accentText,
+        ),
+      ),
+    ],
   );
 }
 
