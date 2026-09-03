@@ -14,14 +14,12 @@ class SessionGuard extends StatefulWidget {
   const SessionGuard({
     required this.session,
     required this.navigatorKey,
-    required this.messengerKey,
     required this.child,
     super.key,
   });
 
   final SessionManager session;
   final GlobalKey<NavigatorState> navigatorKey;
-  final GlobalKey<ScaffoldMessengerState> messengerKey;
   final Widget child;
 
   @override
@@ -50,16 +48,14 @@ class _SessionGuardState extends State<SessionGuard> {
     _last = widget.session.status;
     if (!wasSignedIn || _last != SessionStatus.signedOut) return;
 
-    widget.navigatorKey.currentState?.pushNamedAndRemoveUntil(
-      AppRoutes.signIn,
-      (route) => false,
-    );
+    final navigator = widget.navigatorKey.currentState;
+    navigator?.pushNamedAndRemoveUntil(AppRoutes.signIn, (route) => false);
 
-    final messenger = widget.messengerKey.currentState;
-    if (messenger != null &&
+    final overlay = navigator?.overlay;
+    if (overlay != null &&
         widget.session.endReason == SessionEndReason.revoked) {
       AppToast.showOn(
-        messenger,
+        overlay,
         ToastKind.caution,
         'Session expired',
         detail: 'Please sign in again to continue.',

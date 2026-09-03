@@ -23,8 +23,6 @@ class HappilabApp extends StatefulWidget {
 
 class _HappilabAppState extends State<HappilabApp> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
-  final GlobalKey<ScaffoldMessengerState> _messengerKey =
-      GlobalKey<ScaffoldMessengerState>();
 
   @override
   Widget build(BuildContext context) => AppScope(
@@ -32,7 +30,6 @@ class _HappilabAppState extends State<HappilabApp> {
     child: SessionGuard(
       session: widget.dependencies.sessionManager,
       navigatorKey: _navigatorKey,
-      messengerKey: _messengerKey,
       child: ThemeReveal(
         controller: widget.dependencies.themeController,
         child: ListenableBuilder(
@@ -41,7 +38,6 @@ class _HappilabAppState extends State<HappilabApp> {
             title: 'Falcon Crest Ventures',
             debugShowCheckedModeBanner: false,
             navigatorKey: _navigatorKey,
-            scaffoldMessengerKey: _messengerKey,
             theme: AppTheme.light(),
             darkTheme: AppTheme.dark(),
             themeMode: widget.dependencies.themeController.mode,

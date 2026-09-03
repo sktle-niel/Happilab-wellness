@@ -116,14 +116,18 @@ flutter:
   # see https://flutter.dev/to/font-from-package
 
 # Launcher icons, generated with: dart run flutter_launcher_icons
+# The source lives in assets/icon/, which is deliberately NOT in the assets
+# list above — the generator reads it at build time and nothing ships it.
 flutter_launcher_icons:
-  image_path: assets/images/brand-mark.png
+  image_path: assets/icon/app-icon.jpg
   android: true
   ios: true
   remove_alpha_ios: true
-  background_color_ios: "#FBFCF8"
-  adaptive_icon_background: "#FBFCF8"
-  adaptive_icon_foreground: assets/images/brand-mark.png
-  # The mark fills its square, and Android crops an adaptive icon to a safe
-  # circle; the inset keeps the ring from being clipped.
-  adaptive_icon_foreground_inset: 18
+  # The art's own pale-mint field, so the adaptive icon's edges continue it
+  # instead of framing it.
+  background_color_ios: "#D2F1E3"
+  adaptive_icon_background: "#D2F1E3"
+  adaptive_icon_foreground: assets/icon/app-icon.jpg
+  # Android crops an adaptive icon to a safe circle; the inset keeps the bird
+  # inside it instead of losing its crest to the crop.
+  adaptive_icon_foreground_inset: 12

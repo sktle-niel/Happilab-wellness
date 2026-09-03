@@ -6,8 +6,8 @@ import '../../../app/shell/app_shell_scope.dart';
 import '../../../app/shell/widgets/faith_nav_bar.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../shared/domain/member_summary.dart';
-import '../../../shared/utils/share_actions.dart';
 import '../../../shared/widgets/gap.dart';
+import '../../../shared/widgets/invite_share_sheet.dart';
 import '../../../shared/widgets/screen_header.dart';
 import '../domain/feed_post.dart';
 import 'widgets/feed_post_card.dart';
@@ -53,10 +53,9 @@ class NewsFeedScreen extends StatelessWidget {
           final post = posts[index - 1];
           return FeedPostCard(
             post: post,
-            onShare: () => ShareActions.copy(
+            onShare: () => InviteShareSheet.show(
               context,
-              ShareActions.inviteMessage(summary.referralCode),
-              confirmation: 'Invite message copied.',
+              referralCode: summary.referralCode,
             ),
           );
         },

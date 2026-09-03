@@ -40,6 +40,23 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Facebook app id (public, not a secret): required by Facebook for
+             add-to-story shares. Blank until marketing registers the app at
+             developers.facebook.com; story shares fall back gracefully. -->
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="" />
+        <!-- Lends the product picture to the app a share targets; scoped to
+             the cache folder the temporary image is written to. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/share_paths" />
+        </provider>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
@@ -56,5 +73,21 @@
             <action android:name="android.intent.action.VIEW"/>
             <data android:scheme="https"/>
         </intent>
+        <!-- The invite sheet opens Messenger and Viber by their own schemes;
+             Facebook, WhatsApp and TikTok ride the https entry above. -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="fb-messenger"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="viber"/>
+        </intent>
+        <!-- The product share targets these apps with ACTION_SEND; without
+             the entries Android 11+ reports them as not installed. -->
+        <package android:name="com.facebook.orca"/>
+        <package android:name="com.facebook.katana"/>
+        <package android:name="com.whatsapp"/>
+        <package android:name="com.viber.voip"/>
     </queries>
 </manifest>

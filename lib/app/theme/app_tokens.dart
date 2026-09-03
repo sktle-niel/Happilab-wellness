@@ -74,14 +74,6 @@ abstract final class AppDuration {
   /// than as beating — this one is in the corner of the eye all day.
   static const Duration wingSway = Duration(milliseconds: 1000);
 
-  /// How long the wings take to close, and to open again.
-  static const Duration wingFold = Duration(milliseconds: 550);
-
-  /// How long they stay closed before the next few beats. Long enough that the
-  /// mark settles out of notice, short enough that it is not mistaken for a
-  /// still picture.
-  static const Duration wingsRested = Duration(milliseconds: 3800);
-
   /// How long a load may run before the loader admits the connection is slow,
   /// rather than leaving the member guessing whether anything is happening.
   static const Duration slowHint = Duration(seconds: 6);

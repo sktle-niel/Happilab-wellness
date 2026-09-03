@@ -9,6 +9,7 @@ import '../../../app/theme/app_tokens.dart';
 import '../../../shared/domain/catalogue.dart';
 import '../../../shared/domain/member_summary.dart';
 import '../../../shared/widgets/gap.dart';
+import '../../../shared/widgets/invite_share_sheet.dart';
 import '../../../shared/widgets/product_share_grid.dart';
 import '../../../shared/widgets/section_header.dart';
 import 'widgets/affiliate_banner.dart';
@@ -63,8 +64,10 @@ class HomeScreen extends StatelessWidget {
               summary: summary,
               onCashOut: () =>
                   Navigator.of(context).pushNamed(AppRoutes.rewards),
-              onShareCode: () =>
-                  _open(context, AppTab.refer, AppRoutes.myReferrals),
+              onShareCode: () => InviteShareSheet.show(
+                context,
+                referralCode: summary.referralCode,
+              ),
             ),
           ),
           const Gap(AppSpacing.lg),

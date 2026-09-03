@@ -14,13 +14,13 @@ import '../domain/local_session.dart';
 /// told the member why, and the form should come back to life for another try.
 Future<bool> enterWithLocalSession(BuildContext context) async {
   final navigator = Navigator.of(context);
-  final messenger = ScaffoldMessenger.of(context);
+  final overlay = Overlay.of(context);
   final session = AppScope.of(context).sessionManager;
 
   try {
     await session.signIn(localSessionToken);
   } on AppException catch (error) {
-    AppToast.failureOn(messenger, error);
+    AppToast.failureOn(overlay, error);
     return false;
   }
 

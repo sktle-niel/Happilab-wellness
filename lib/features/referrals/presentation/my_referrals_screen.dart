@@ -9,12 +9,12 @@ import '../../../app/shell/widgets/faith_nav_bar.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/domain/member_summary.dart';
-import '../../../shared/utils/share_actions.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/circle_badge.dart';
 import '../../../shared/widgets/divided_column.dart';
 import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/icon_pill_button.dart';
+import '../../../shared/widgets/invite_share_sheet.dart';
 import '../../../shared/widgets/screen_header.dart';
 import '../domain/referral.dart';
 import 'widgets/referral_row.dart';
@@ -103,11 +103,8 @@ class _CodeCardState extends State<_CodeCard> {
     setState(() => _hasCopied = true);
   }
 
-  Future<void> _shareInvite() => ShareActions.copy(
-    context,
-    ShareActions.inviteMessage(widget.code),
-    confirmation: 'Invite message copied.',
-  );
+  Future<void> _shareInvite() =>
+      InviteShareSheet.show(context, referralCode: widget.code);
 
   @override
   Widget build(BuildContext context) => AppCard(
