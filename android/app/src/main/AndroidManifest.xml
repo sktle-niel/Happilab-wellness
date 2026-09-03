@@ -1,4 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Every API call needs this; only the debug and profile manifests carry
+         it implicitly, so without it here a release build fails every request. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <!--
          Credentials live in the Android KeyStore and must not be backed up or
          transferred: allowBackup covers Android 11 and below, the extraction

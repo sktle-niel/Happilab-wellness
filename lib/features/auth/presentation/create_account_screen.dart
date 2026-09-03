@@ -15,6 +15,7 @@ import '../../../shared/widgets/google_mark.dart';
 import '../../../shared/widgets/inline_action_text.dart';
 import '../../../shared/widgets/or_divider.dart';
 import '../../../shared/widgets/password_requirement_chips.dart';
+import 'auth_entry.dart';
 import 'create_account_controller.dart';
 import '../../../app/theme/app_palette.dart';
 
@@ -29,19 +30,23 @@ class CreateAccountScreen extends StatefulWidget {
 class _CreateAccountScreenState extends State<CreateAccountScreen> {
   final CreateAccountController _controller = CreateAccountController();
 
+  bool _isSubmitting = false;
+
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
 
-  void _submit() {
-    if (!_controller.validate()) return;
-    // No auth backend yet: a valid form goes straight through. Swap this for a
-    // repository call once the API exists. The first-run stack goes with it:
-    // an onboarding route left underneath keeps cycling its video clips.
-    Navigator.of(context)
-        .pushNamedAndRemoveUntil(AppRoutes.home, (route) => false);
+  /// No auth backend yet: a valid form starts a persisted local session, so
+  /// the member stays signed in across launches. The repository call that
+  /// registers the account and returns a server token replaces the entry
+  /// helper.
+  Future<void> _submit() async {
+    if (_isSubmitting || !_controller.validate()) return;
+    setState(() => _isSubmitting = true);
+    final entered = await enterWithLocalSession(context);
+    if (!entered && mounted) setState(() => _isSubmitting = false);
   }
 
   void _backToSignIn() {
@@ -90,8 +95,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         const Gap(AppSpacing.md),
         ListenableBuilder(
           listenable: _controller,
-          builder: (context, _) =>
-              _CreateAccountForm(controller: _controller, onSubmit: _submit),
+          builder: (context, _) => _CreateAccountForm(
+            controller: _controller,
+            onSubmit: _submit,
+            isSubmitting: _isSubmitting,
+          ),
         ),
         const Gap.sm(),
         InlineActionText(
@@ -124,10 +132,15 @@ class _CreateAccountHeader extends StatelessWidget {
 }
 
 class _CreateAccountForm extends StatelessWidget {
-  const _CreateAccountForm({required this.controller, required this.onSubmit});
+  const _CreateAccountForm({
+    required this.controller,
+    required this.onSubmit,
+    required this.isSubmitting,
+  });
 
   final CreateAccountController controller;
   final VoidCallback onSubmit;
+  final bool isSubmitting;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -177,7 +190,11 @@ class _CreateAccountForm extends StatelessWidget {
         onSubmitted: (_) => onSubmit(),
       ),
       const Gap(AppSpacing.md),
-      AppButton(label: 'Create account', onPressed: onSubmit),
+      AppButton(
+        label: 'Create account',
+        onPressed: onSubmit,
+        isLoading: isSubmitting,
+      ),
     ],
   );
 }

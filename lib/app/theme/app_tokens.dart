@@ -82,10 +82,6 @@ abstract final class AppDuration {
   /// still picture.
   static const Duration wingsRested = Duration(milliseconds: 3800);
 
-  /// One shake of the falcon's wings. The rewards card runs several in a row,
-  /// which is what turns a twitch into a pause in the flight.
-  static const Duration wingShake = Duration(milliseconds: 1000);
-
   /// How long a load may run before the loader admits the connection is slow,
   /// rather than leaving the member guessing whether anything is happening.
   static const Duration slowHint = Duration(seconds: 6);

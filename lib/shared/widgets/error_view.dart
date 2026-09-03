@@ -25,7 +25,7 @@ class ErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline, size: 40, color: theme.colorScheme.error),
+            Icon(error.displayIcon, size: 40, color: theme.colorScheme.error),
             const Gap.md(),
             Text(
               error.message,
@@ -45,4 +45,16 @@ class ErrorView extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A mark that matches the failure reads faster than the words under it.
+extension on AppException {
+  IconData get displayIcon => switch (this) {
+    NetworkException() => Icons.wifi_off_rounded,
+    RequestTimeoutException() => Icons.hourglass_bottom_rounded,
+    RateLimitedException() => Icons.speed_rounded,
+    UnauthorizedException() => Icons.lock_outline_rounded,
+    ServerException() => Icons.cloud_off_rounded,
+    _ => Icons.error_outline,
+  };
 }

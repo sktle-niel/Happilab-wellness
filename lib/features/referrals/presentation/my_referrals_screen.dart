@@ -11,8 +11,10 @@ import '../../../app/theme/app_typography.dart';
 import '../../../shared/domain/member_summary.dart';
 import '../../../shared/utils/share_actions.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/circle_badge.dart';
 import '../../../shared/widgets/divided_column.dart';
 import '../../../shared/widgets/gap.dart';
+import '../../../shared/widgets/icon_pill_button.dart';
 import '../../../shared/widgets/screen_header.dart';
 import '../domain/referral.dart';
 import 'widgets/referral_row.dart';
@@ -176,6 +178,8 @@ class _CodeActions extends StatelessWidget {
     required this.onShare,
   });
 
+  static const double _height = 48;
+
   final bool hasCopied;
   final VoidCallback onCopy;
   final VoidCallback onShare;
@@ -184,9 +188,10 @@ class _CodeActions extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     children: [
       Expanded(
-        child: _CodeAction(
+        child: IconPillButton(
           label: hasCopied ? 'Copied' : 'Copy code',
           icon: hasCopied ? Icons.check_rounded : Icons.copy_rounded,
+          height: _height,
           onPressed: onCopy,
           background: context.palette.accent,
           foreground: context.palette.onAccent,
@@ -194,9 +199,10 @@ class _CodeActions extends StatelessWidget {
       ),
       const Gap(10),
       Expanded(
-        child: _CodeAction(
+        child: IconPillButton(
           label: 'Share',
           icon: Icons.share_outlined,
+          height: _height,
           onPressed: onShare,
           background: context.palette.tint,
           foreground: context.palette.accentText,
@@ -211,71 +217,12 @@ class _GiftBadge extends StatelessWidget {
   const _GiftBadge();
 
   @override
-  Widget build(BuildContext context) => Container(
-    width: 56,
-    height: 56,
-    decoration: BoxDecoration(
-      color: context.palette.tint,
-      shape: BoxShape.circle,
-    ),
+  Widget build(BuildContext context) => CircleBadge(
+    size: 56,
     child: Icon(
       Icons.card_giftcard_rounded,
       size: 26,
       color: context.palette.accent,
-    ),
-  );
-}
-
-class _CodeAction extends StatelessWidget {
-  const _CodeAction({
-    required this.label,
-    required this.onPressed,
-    required this.background,
-    required this.foreground,
-    this.icon,
-  });
-
-  final String label;
-  final VoidCallback onPressed;
-  final Color background;
-  final Color foreground;
-  final IconData? icon;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    button: true,
-    label: label,
-    child: GestureDetector(
-      onTap: onPressed,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        height: 48,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: background,
-          borderRadius: AppRadius.pill,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null) ...[
-              Icon(icon, size: 16, color: foreground),
-              const Gap(6),
-            ],
-            Flexible(
-              child: Text(
-                label,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.figtree(
-                  size: 14.5,
-                  weight: 700,
-                  color: foreground,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     ),
   );
 }

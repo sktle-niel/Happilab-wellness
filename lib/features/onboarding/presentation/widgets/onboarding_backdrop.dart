@@ -3,7 +3,9 @@ import 'package:video_player/video_player.dart';
 
 import '../../../../app/theme/app_palette.dart';
 import '../../../../app/theme/app_tokens.dart';
+import '../../../../shared/utils/video_clips.dart';
 import '../../../../shared/widgets/faith_wordmark.dart';
+import '../../../../shared/widgets/video_cover.dart';
 
 /// What the onboarding pitch sits on top of: the brand clips, one stage at a
 /// time.
@@ -88,20 +90,12 @@ class _OnboardingBackdropState extends State<OnboardingBackdrop> {
     if (previous != null) setState(() => _controller = null);
     await previous?.dispose();
 
-    final controller = VideoPlayerController.asset(
+    // An unplayable clip comes back null: the bare canvas stays up and the
+    // screen's own timeout moves the sequence along.
+    final controller = await initializeAssetClip(
       OnboardingBackdrop.clips[index],
     );
-    try {
-      await controller.initialize();
-    } catch (_) {
-      // Deliberately broad: a missing decoder throws PlatformException, an
-      // absent plugin throws MissingPluginException, and a host without a
-      // video surface at all throws UnimplementedError. None of them should
-      // strand onboarding — the bare canvas stays up and the screen's own
-      // timeout moves the sequence along.
-      await controller.dispose();
-      return;
-    }
+    if (controller == null) return;
 
     // The stage may have moved on while the clip was loading.
     if (!mounted || _loadedClip != index) {
@@ -157,7 +151,7 @@ class _OnboardingBackdropState extends State<OnboardingBackdrop> {
                 // Nothing to draw yet: the canvas behind this already fills
                 // the screen, and the copy on top stays readable on it.
                 ? const SizedBox.shrink()
-                : _ClipStage(controller: controller),
+                : VideoCover(controller: controller),
           ),
         ),
         const _ReadabilityScrim(),
@@ -231,25 +225,6 @@ class _BrandNameState extends State<_BrandName>
       ),
     );
   }
-}
-
-/// Fills the screen with the clip, cropping rather than letterboxing.
-class _ClipStage extends StatelessWidget {
-  const _ClipStage({required this.controller});
-
-  final VideoPlayerController controller;
-
-  @override
-  Widget build(BuildContext context) => ClipRect(
-    child: FittedBox(
-      fit: BoxFit.cover,
-      child: SizedBox(
-        width: controller.value.size.width,
-        height: controller.value.size.height,
-        child: VideoPlayer(controller),
-      ),
-    ),
-  );
 }
 
 /// Darkens the lower half so white copy stays legible over any footage.

@@ -72,7 +72,6 @@ flutter:
     - assets/images/share/
     - assets/images/falcon/fly/
     - assets/images/falcon/steady/
-    - assets/images/falcon/rewards/
     - assets/video/
 
   # Variable fonts: one file per family, weights selected at runtime through

@@ -88,63 +88,6 @@ void main() {
     });
   });
 
-  group('FalconCycle — the rewards card', () {
-    const clip = FalconClip.rewards;
-    const cycle = FalconCycle(clip);
-
-    final flying = clip.loop * clip.loops;
-
-    test('flies, then shakes for several runs, and starts over', () {
-      // No rest and no reverse: the shake ends on the pose it began from, so
-      // there is nothing to hold and nothing to come back from.
-      expect(cycle.total, flying + clip.tail * clip.tailLoops);
-      expect(clip.reverses, isFalse);
-      expect(clip.rest, Duration.zero);
-    });
-
-    test('holds the pause somewhere between three and four and a half seconds', () {
-      // What was asked for, and the reason the tail repeats at all: one run of
-      // it is over in a blink.
-      final pause = clip.tail * clip.tailLoops;
-      expect(pause, greaterThanOrEqualTo(const Duration(seconds: 3)));
-      expect(pause, lessThanOrEqualTo(const Duration(milliseconds: 4500)));
-    });
-
-    test('stays in the flight for every turn before the shake', () {
-      for (var ms = 0; ms < flying.inMilliseconds; ms += 13) {
-        expect(
-          cycle.frameAt(Duration(milliseconds: ms)),
-          lessThan(clip.loopFrames),
-          reason: 'at ${ms}ms',
-        );
-      }
-    });
-
-    test('shakes only once the flight is done', () {
-      expect(cycle.frameAt(flying), clip.loopFrames);
-      expect(
-        cycle.frameAt(
-          flying + clip.tail * clip.tailLoops - const Duration(milliseconds: 1),
-        ),
-        clip.frameCount - 1,
-      );
-    });
-
-    test('starts the shake over on each of its runs', () {
-      for (var run = 0; run < clip.tailLoops; run++) {
-        expect(
-          cycle.frameAt(flying + clip.tail * run),
-          clip.loopFrames,
-          reason: 'run $run',
-        );
-      }
-    });
-
-    test('never asks for a frame that was not rendered', () {
-      expectEveryFrameExists(clip);
-    });
-  });
-
   group('FalconCycle — the loader', () {
     const clip = FalconClip.loader;
     const cycle = FalconCycle(clip);

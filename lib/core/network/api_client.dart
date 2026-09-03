@@ -7,6 +7,7 @@ import '../logging/app_logger.dart';
 import '../security/token_store.dart';
 import 'http_transport.dart';
 import 'rate_limiter.dart';
+import 'response_cache.dart';
 import 'retry_policy.dart';
 
 /// Turns raw JSON into a typed model.
@@ -26,6 +27,7 @@ class ApiClient {
     this._logger,
     this._rateLimiter,
     this._retryPolicy,
+    this._cache,
   );
 
   /// Defaults come from [AppConfig], so the limiter and the retry budget are
@@ -37,6 +39,7 @@ class ApiClient {
     required AppLogger logger,
     RateLimiter? rateLimiter,
     RetryPolicy? retryPolicy,
+    ResponseCache? cache,
   }) => ApiClient._(
     config,
     transport,
@@ -44,6 +47,7 @@ class ApiClient {
     logger,
     rateLimiter ?? RateLimiter.perMinute(config.maxRequestsPerMinute),
     retryPolicy ?? RetryPolicy(maxAttempts: config.maxRetries + 1),
+    cache ?? ResponseCache(),
   );
 
   final AppConfig _config;
@@ -52,12 +56,23 @@ class ApiClient {
   final AppLogger _logger;
   final RateLimiter _rateLimiter;
   final RetryPolicy _retryPolicy;
+  final ResponseCache _cache;
 
+  /// [maxAge] opts the read into the cache: a fresh hit skips the network and
+  /// the rate limit entirely, and when the backend is unreachable a stale hit
+  /// stands in for it. Leave it null for anything that must be live.
   Future<Result<T>> get<T>(
     String path, {
     required JsonParser<T> parse,
     Map<String, String>? query,
-  }) => _send(method: HttpMethod.get, path: path, parse: parse, query: query);
+    Duration? maxAge,
+  }) => _send(
+    method: HttpMethod.get,
+    path: path,
+    parse: parse,
+    query: query,
+    maxAge: maxAge,
+  );
 
   Future<Result<T>> post<T>(
     String path, {
@@ -74,6 +89,10 @@ class ApiClient {
   Future<Result<T>> delete<T>(String path, {required JsonParser<T> parse}) =>
       _send(method: HttpMethod.delete, path: path, parse: parse);
 
+  /// Drops every cached response. Called on any session boundary — one
+  /// member's data must never be served into another's session.
+  void clearCache() => _cache.clear();
+
   void close() => _transport.close();
 
   Future<Result<T>> _send<T>({
@@ -82,8 +101,14 @@ class ApiClient {
     required JsonParser<T> parse,
     Map<String, String>? query,
     Object? body,
+    Duration? maxAge,
   }) async {
     final url = _resolve(path, query);
+
+    if (maxAge != null) {
+      final hit = _fromCache(url, parse);
+      if (hit != null) return hit;
+    }
 
     for (var attempt = 1; ; attempt++) {
       try {
@@ -106,14 +131,24 @@ class ApiClient {
         );
 
         if (response.isSuccess) {
-          return Success<T>(parse(_decode(response.body)));
+          final decoded = _decode(response.body);
+          if (maxAge != null) {
+            _cache.write(url, decoded, maxAge);
+          } else if (method != HttpMethod.get) {
+            // A write changes what any read might return. Precise per-resource
+            // invalidation is not worth its bookkeeping at this cache's size.
+            _cache.clear();
+          }
+          return Success<T>(parse(decoded));
         }
 
         if (!_retryPolicy.shouldRetry(
           attempt: attempt,
           statusCode: response.statusCode,
         )) {
-          return Failure<T>(await _failureFor(method, url, response));
+          final failure = await _failureFor(method, url, response);
+          return _staleFallback(url, parse, failure, maxAge: maxAge) ??
+              Failure<T>(failure);
         }
 
         await Future<void>.delayed(
@@ -125,7 +160,8 @@ class ApiClient {
         if (!isTransient ||
             !_retryPolicy.shouldRetry(attempt: attempt, statusCode: null)) {
           _logger.error('${method.name.toUpperCase()} $url failed: $error');
-          return Failure<T>(error);
+          return _staleFallback(url, parse, error, maxAge: maxAge) ??
+              Failure<T>(error);
         }
         await Future<void>.delayed(_retryPolicy.delayFor(attempt));
       } catch (error, stackTrace) {
@@ -138,6 +174,45 @@ class ApiClient {
       }
     }
   }
+
+  /// A fresh cache hit, parsed — or null so the caller goes to the network.
+  /// A cached body that no longer parses is treated as a miss, never a crash.
+  Result<T>? _fromCache<T>(Uri url, JsonParser<T> parse) {
+    final hit = _cache.readFresh(url);
+    if (hit == null) return null;
+    try {
+      return Success<T>(parse(hit.json));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// When the backend is the problem, an out-of-date answer beats none: a
+  /// cached read — even an expired one — stands in and the failure goes to the
+  /// log. Auth and 4xx failures surface untouched; hiding those would lie.
+  Result<T>? _staleFallback<T>(
+    Uri url,
+    JsonParser<T> parse,
+    AppException error, {
+    required Duration? maxAge,
+  }) {
+    if (maxAge == null || !_isBackendFault(error)) return null;
+    final stale = _cache.readStale(url);
+    if (stale == null) return null;
+    try {
+      final value = parse(stale.json);
+      _logger.warning('Serving stale cache for $url after: $error');
+      return Success<T>(value);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static bool _isBackendFault(AppException error) =>
+      error is NetworkException ||
+      error is RequestTimeoutException ||
+      error is ServerException ||
+      error is RateLimitedException;
 
   Uri _resolve(String path, Map<String, String>? query) {
     final relative = path.startsWith('/') ? path.substring(1) : path;

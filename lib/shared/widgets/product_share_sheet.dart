@@ -4,6 +4,7 @@ import '../../app/theme/app_tokens.dart';
 import '../../app/theme/app_typography.dart';
 import '../domain/catalogue.dart';
 import '../utils/share_actions.dart';
+import 'app_card.dart';
 import 'gap.dart';
 import 'pressable_scale.dart';
 import '../../app/theme/app_palette.dart';
@@ -58,41 +59,40 @@ class ProductShareSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SafeArea(
-    child: Container(
-      margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-      decoration: BoxDecoration(
-        color: context.palette.surface,
-        borderRadius: BorderRadius.all(Radius.circular(28)),
-        boxShadow: context.palette.shadowCard,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const _Handle(),
-          const Gap(14),
-          Text(
-            'Share ${product.name}',
-            textAlign: TextAlign.center,
-            style: AppTypography.figtree(size: 17, weight: 800),
-          ),
-          const Gap(4),
-          Text(
-            _note,
-            textAlign: TextAlign.center,
-            style: AppTypography.figtree(
-              size: 12.5,
-              color: context.palette.textMuted,
+    child: Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+      child: AppCard(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+        borderRadius: const BorderRadius.all(Radius.circular(28)),
+        shadow: context.palette.shadowCard,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const _Handle(),
+            const Gap(14),
+            Text(
+              'Share ${product.name}',
+              textAlign: TextAlign.center,
+              style: AppTypography.figtree(size: 17, weight: 800),
             ),
-          ),
-          const Gap(20),
-          _ShareOptions(
-            onCopy: () => _choose(context, onCopy),
-            onOpen: (platform) => _choose(context, () => onOpen(platform)),
-          ),
-          const Gap(20),
-          _CancelButton(onPressed: () => Navigator.of(context).pop()),
-        ],
+            const Gap(4),
+            Text(
+              _note,
+              textAlign: TextAlign.center,
+              style: AppTypography.figtree(
+                size: 12.5,
+                color: context.palette.textMuted,
+              ),
+            ),
+            const Gap(20),
+            _ShareOptions(
+              onCopy: () => _choose(context, onCopy),
+              onOpen: (platform) => _choose(context, () => onOpen(platform)),
+            ),
+            const Gap(20),
+            _CancelButton(onPressed: () => Navigator.of(context).pop()),
+          ],
+        ),
       ),
     ),
   );

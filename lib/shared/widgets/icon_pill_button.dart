@@ -13,8 +13,8 @@ import 'pressable_scale.dart';
 class IconPillButton extends StatelessWidget {
   const IconPillButton({
     required this.label,
-    required this.icon,
     required this.onPressed,
+    this.icon,
     this.background,
     this.foreground,
     this.height = 44,
@@ -22,7 +22,7 @@ class IconPillButton extends StatelessWidget {
   });
 
   final String label;
-  final IconData icon;
+  final IconData? icon;
   final VoidCallback? onPressed;
 
   /// Defaults to the palette's tint.
@@ -52,15 +52,22 @@ class IconPillButton extends StatelessWidget {
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
+            // Centred so the pill also reads right when a parent stretches it.
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 17, color: foreground),
-              const SizedBox(width: 7),
-              Text(
-                label,
-                style: AppTypography.figtree(
-                  size: 13.5,
-                  weight: 700,
-                  color: foreground,
+              if (icon != null) ...[
+                Icon(icon, size: 17, color: foreground),
+                const SizedBox(width: 7),
+              ],
+              Flexible(
+                child: Text(
+                  label,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.figtree(
+                    size: 13.5,
+                    weight: 700,
+                    color: foreground,
+                  ),
                 ),
               ),
             ],

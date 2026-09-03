@@ -10,10 +10,9 @@ import '../../app/theme/app_tokens.dart';
 /// permission and seconds of jank. Rendering ahead of time costs a few hundred
 /// kilobytes and nothing else.
 ///
-/// Every sequence is a loop followed by an optional tail. What the tail is
-/// differs: the mark folds its wings and holds them in, the perch shakes them
-/// out and carries straight on. Named for where each is used rather than for
-/// the motion — which motion suits a place is a question that keeps being
+/// Every sequence is a loop followed by an optional tail — the mark's tail
+/// folds its wings in and holds them. Named for where each is used rather than
+/// for the motion — which motion suits a place is a question that keeps being
 /// answered again, and the call sites should not move every time it is.
 enum FalconClip {
   /// Beating its wings side-on, filling the loader. No tail: a loader that
@@ -32,18 +31,6 @@ enum FalconClip {
     tail: AppDuration.wingFold,
     rest: AppDuration.wingsRested,
     reverses: true,
-  ),
-
-  /// On the rewards card, seen head-on: flying, then pulling up to shake its
-  /// wings out for a few seconds before carrying on.
-  rewards(
-    'rewards',
-    loopFrames: 30,
-    loop: AppDuration.wingSway,
-    loops: 3,
-    tailFrames: 24,
-    tail: AppDuration.wingShake,
-    tailLoops: 4,
   );
 
   const FalconClip(
@@ -53,7 +40,6 @@ enum FalconClip {
     this.loops = 1,
     this.tailFrames = 0,
     this.tail = Duration.zero,
-    this.tailLoops = 1,
     this.rest = Duration.zero,
     this.reverses = false,
   });
@@ -66,11 +52,10 @@ enum FalconClip {
   final Duration loop;
   final int loops;
 
-  /// Frames of the tail that follows, how long one run of it takes, and how
-  /// many runs. Zero frames for a clip that only ever loops.
+  /// Frames of the tail that follows, and how long its run takes. Zero frames
+  /// for a clip that only ever loops.
   final int tailFrames;
   final Duration tail;
-  final int tailLoops;
 
   /// How long the last frame of the tail is held, and whether the tail is then
   /// run backwards to get home. A fold needs both; a shake needs neither,
@@ -97,7 +82,7 @@ class FalconCycle {
 
   Duration get total =>
       clip.loop * clip.loops +
-      clip.tail * clip.tailLoops +
+      clip.tail +
       clip.rest +
       (clip.reverses ? clip.tail : Duration.zero);
 
@@ -110,11 +95,10 @@ class FalconCycle {
     at -= looping;
 
     final running = clip.tail.inMilliseconds;
-    final tailing = running * clip.tailLoops;
-    if (at < tailing) {
-      return clip.loopFrames + _tailStep(at % running, running);
+    if (at < running) {
+      return clip.loopFrames + _tailStep(at, running);
     }
-    at -= tailing;
+    at -= running;
 
     final last = clip.frameCount - 1;
     if (!clip.reverses || at < clip.rest.inMilliseconds) return last;

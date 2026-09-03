@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_palette.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../shared/domain/member_summary.dart';
+import '../../../../shared/widgets/circle_badge.dart';
 import '../../../../shared/widgets/gap.dart';
 import '../../../../shared/widgets/pressable_scale.dart';
 
@@ -173,13 +174,9 @@ class _RoundAction extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: _size,
-              height: _size,
-              decoration: BoxDecoration(
-                color: palette.surface,
-                shape: BoxShape.circle,
-              ),
+            CircleBadge(
+              size: _size,
+              color: palette.surface,
               child: Icon(icon, size: 21, color: palette.accentText),
             ),
             const Gap(6),

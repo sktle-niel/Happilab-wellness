@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/app_palette.dart';
 import '../../app/theme/app_tokens.dart';
 import '../../app/theme/app_typography.dart';
+import '../../core/errors/app_exception.dart';
 import 'gap.dart';
 
 /// What a toast is telling the member.
@@ -63,6 +64,24 @@ abstract final class AppToast {
         title,
         detail: detail,
       );
+
+  /// One-liner for an action that failed: the exception's own user-safe
+  /// message under a short headline.
+  static void failure(BuildContext context, AppException error) =>
+      failureOn(ScaffoldMessenger.of(context), error);
+
+  /// [failure] for a caller already past an `await` — see [showOn].
+  ///
+  /// Being rate limited is a wait, not a fault, so it lands as a caution.
+  static void failureOn(ScaffoldMessengerState messenger, AppException error) {
+    final isCooldown = error is RateLimitedException;
+    showOn(
+      messenger,
+      isCooldown ? ToastKind.caution : ToastKind.error,
+      isCooldown ? 'One moment' : 'Something went wrong',
+      detail: error.message,
+    );
+  }
 
   /// For a caller that has already crossed an `await` and can no longer trust
   /// its context: read the messenger before the gap, then hand it here.
