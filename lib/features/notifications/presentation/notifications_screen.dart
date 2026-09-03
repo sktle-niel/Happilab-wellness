@@ -4,6 +4,7 @@ import '../../../app/theme/app_tokens.dart';
 import '../../../shared/widgets/app_scaffold.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/widgets/brand_mark.dart';
+import '../../../shared/widgets/circle_badge.dart';
 import '../../../shared/widgets/circle_icon_button.dart';
 import '../../../shared/widgets/screen_header.dart';
 import '../../../shared/widgets/gap.dart';
@@ -113,15 +114,10 @@ class _SenderAvatar extends StatelessWidget {
   const _SenderAvatar();
 
   @override
-  Widget build(BuildContext context) => Container(
-    width: 38,
-    height: 38,
-    padding: const EdgeInsets.all(6),
-    decoration: BoxDecoration(
-      color: context.palette.tint,
-      shape: BoxShape.circle,
-    ),
-    child: const BrandMark(size: 26),
+  Widget build(BuildContext context) => const CircleBadge(
+    size: 38,
+    padding: EdgeInsets.all(6),
+    child: BrandMark(size: 26),
   );
 }
 

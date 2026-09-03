@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:happilab/app/router/app_routes.dart';
 import 'package:happilab/shared/domain/catalogue.dart';
+import 'package:happilab/shared/domain/messaging_app.dart';
 
 import '../../support/harness.dart';
 
@@ -11,14 +12,10 @@ void main() {
     await tester.pump();
   }
 
-  /// A sheet animates in over a few frames after the tap.
-  Future<void> settleSheet(WidgetTester tester) async {
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
-  }
-
   group('SuggestionsScreen', () {
-    testWidgets('share opens a sheet with every storefront', (tester) async {
+    testWidgets('share opens a sheet with every chat app and storefront', (
+      tester,
+    ) async {
       await pumpSuggestions(tester);
 
       await tester.tap(find.bySemanticsLabel('Share Sakura Glow Soap'));
@@ -26,8 +23,15 @@ void main() {
 
       expect(find.text('Share Sakura Glow Soap'), findsOneWidget);
       expect(find.text('Copy link'), findsOneWidget);
+      for (final app in MessagingApp.values) {
+        expect(find.text(app.label), findsOneWidget, reason: app.label);
+      }
       for (final platform in SharePlatform.values) {
-        expect(find.text(platform.label), findsOneWidget);
+        expect(
+          find.text(platform.label),
+          findsOneWidget,
+          reason: platform.label,
+        );
       }
     });
 

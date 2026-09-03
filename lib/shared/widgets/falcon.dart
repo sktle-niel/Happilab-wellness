@@ -10,75 +10,31 @@ import '../../app/theme/app_tokens.dart';
 /// permission and seconds of jank. Rendering ahead of time costs a few hundred
 /// kilobytes and nothing else.
 ///
-/// Every sequence is a loop followed by an optional tail. What the tail is
-/// differs: the mark folds its wings and holds them in, the perch shakes them
-/// out and carries straight on. Named for where each is used rather than for
-/// the motion — which motion suits a place is a question that keeps being
-/// answered again, and the call sites should not move every time it is.
+/// Every sequence is a seamless loop of the bird's flight. Named for where
+/// each is used rather than for the motion — which motion suits a place is a
+/// question that keeps being answered again, and the call sites should not
+/// move every time it is.
 enum FalconClip {
-  /// Beating its wings side-on, filling the loader. No tail: a loader that
-  /// stops looks like a loader that has died.
-  loader('fly', loopFrames: 24, loop: AppDuration.wingbeat),
+  /// Beating its wings side-on, filling the loader. A loader that stops
+  /// looks like a loader that has died.
+  loader('fly', frameCount: 24, loop: AppDuration.wingbeat),
 
-  /// Head-on and small, on the tab bar. It sways a few beats, folds its wings
-  /// and holds them in — a bird that never settled would pull the eye off the
-  /// screen it sits on.
-  mark(
-    'steady',
-    loopFrames: 30,
-    loop: AppDuration.wingSway,
-    loops: 3,
-    tailFrames: 14,
-    tail: AppDuration.wingFold,
-    rest: AppDuration.wingsRested,
-    reverses: true,
-  ),
-
-  /// On the rewards card, seen head-on: flying, then pulling up to shake its
-  /// wings out for a few seconds before carrying on.
-  rewards(
-    'rewards',
-    loopFrames: 30,
-    loop: AppDuration.wingSway,
-    loops: 3,
-    tailFrames: 24,
-    tail: AppDuration.wingShake,
-    tailLoops: 4,
-  );
+  /// Head-on and small, on the tab bar, riding the same flight at an
+  /// unhurried sway. It stays airborne on purpose: the HD model's resting
+  /// pose drapes the wings forward, which reads as a tangle at mark size.
+  mark('steady', frameCount: 30, loop: AppDuration.wingSway);
 
   const FalconClip(
     this._folder, {
-    required this.loopFrames,
+    required this.frameCount,
     required this.loop,
-    this.loops = 1,
-    this.tailFrames = 0,
-    this.tail = Duration.zero,
-    this.tailLoops = 1,
-    this.rest = Duration.zero,
-    this.reverses = false,
   });
 
   final String _folder;
 
-  /// Frames of the loop, which the sequence leads with, and how long one turn
-  /// of it takes — then how many turns before the tail.
-  final int loopFrames;
+  /// Frames the loop was baked to, and how long one turn of it takes.
+  final int frameCount;
   final Duration loop;
-  final int loops;
-
-  /// Frames of the tail that follows, how long one run of it takes, and how
-  /// many runs. Zero frames for a clip that only ever loops.
-  final int tailFrames;
-  final Duration tail;
-  final int tailLoops;
-
-  /// How long the last frame of the tail is held, and whether the tail is then
-  /// run backwards to get home. A fold needs both; a shake needs neither,
-  /// because it ends where it started.
-  final Duration rest;
-  final bool reverses;
-
-  int get frameCount => loopFrames + tailFrames;
 
   FalconCycle get cycle => FalconCycle(this);
 
@@ -86,7 +42,7 @@ enum FalconClip {
       'assets/images/falcon/$_folder/${frame.toString().padLeft(2, '0')}.png';
 }
 
-/// Where a clip's cycle stands at a given moment.
+/// Where a clip's loop stands at a given moment.
 ///
 /// Pure, so the rhythm can be tested without pumping a widget — and the widget
 /// is left with nothing to do but draw the frame it is handed.
@@ -95,36 +51,12 @@ class FalconCycle {
 
   final FalconClip clip;
 
-  Duration get total =>
-      clip.loop * clip.loops +
-      clip.tail * clip.tailLoops +
-      clip.rest +
-      (clip.reverses ? clip.tail : Duration.zero);
+  Duration get total => clip.loop;
 
   int frameAt(Duration elapsed) {
-    var at = elapsed.inMilliseconds % total.inMilliseconds;
-
-    final turn = clip.loop.inMilliseconds;
-    final looping = turn * clip.loops;
-    if (at < looping) return (at % turn) * clip.loopFrames ~/ turn;
-    at -= looping;
-
-    final running = clip.tail.inMilliseconds;
-    final tailing = running * clip.tailLoops;
-    if (at < tailing) {
-      return clip.loopFrames + _tailStep(at % running, running);
-    }
-    at -= tailing;
-
-    final last = clip.frameCount - 1;
-    if (!clip.reverses || at < clip.rest.inMilliseconds) return last;
-
-    // Coming back out is the tail run backwards.
-    return last - _tailStep(at - clip.rest.inMilliseconds, running);
+    final at = elapsed.inMilliseconds % total.inMilliseconds;
+    return at * clip.frameCount ~/ total.inMilliseconds;
   }
-
-  int _tailStep(int at, int running) =>
-      (at * clip.tailFrames ~/ running).clamp(0, clip.tailFrames - 1);
 }
 
 /// The falcon, running one of its clips.

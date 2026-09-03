@@ -14,6 +14,7 @@ class AppCard extends StatelessWidget {
     this.color,
     this.borderRadius = AppRadius.card,
     this.clip = false,
+    this.shadow,
     super.key,
   });
 
@@ -22,6 +23,7 @@ class AppCard extends StatelessWidget {
     required this.child,
     this.color,
     this.borderRadius = AppRadius.hero,
+    this.shadow,
     super.key,
   }) : padding = EdgeInsets.zero,
        clip = true;
@@ -36,6 +38,9 @@ class AppCard extends StatelessWidget {
   /// Clips children to the radius — needed when a child paints to the edge.
   final bool clip;
 
+  /// Defaults to the palette's soft shadow; hero moments pass a deeper one.
+  final List<BoxShadow>? shadow;
+
   @override
   Widget build(BuildContext context) => Container(
     padding: padding,
@@ -43,7 +48,7 @@ class AppCard extends StatelessWidget {
     decoration: BoxDecoration(
       color: color ?? context.palette.surface,
       borderRadius: borderRadius,
-      boxShadow: context.palette.shadowSoft,
+      boxShadow: shadow ?? context.palette.shadowSoft,
     ),
     child: child,
   );

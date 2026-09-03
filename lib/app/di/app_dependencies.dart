@@ -5,6 +5,7 @@ import '../../core/network/http_transport.dart';
 import '../../core/network/io_http_transport.dart';
 import '../../core/network/rate_limiter.dart';
 import '../../core/security/secure_token_store.dart';
+import '../../core/security/session_manager.dart';
 import '../../core/security/token_store.dart';
 import '../theme/theme_controller.dart';
 
@@ -17,25 +18,29 @@ class AppDependencies {
   AppDependencies({
     required this.config,
     required this.logger,
-    required this.tokenStore,
+    required this.sessionManager,
     required this.apiClient,
     ThemeController? themeController,
-  }) : themeController = themeController ?? ThemeController();
+  }) : themeController = themeController ?? ThemeController() {
+    // Any session boundary — in or out — drops cached responses: one member's
+    // data must never be served into another's session.
+    sessionManager.addListener(apiClient.clearCache);
+  }
 
   factory AppDependencies.production() {
     final config = AppConfig.fromEnvironment();
     final logger = AppLogger.forEnvironment(isProduction: config.isProduction);
-    final tokenStore = SecureTokenStore();
+    final sessionManager = SessionManager(store: SecureTokenStore());
     final transport = IoHttpTransport(timeout: config.requestTimeout);
 
     return AppDependencies(
       config: config,
       logger: logger,
-      tokenStore: tokenStore,
+      sessionManager: sessionManager,
       apiClient: ApiClient(
         config: config,
         transport: transport,
-        tokenStore: tokenStore,
+        tokenStore: sessionManager,
         logger: logger,
         rateLimiter: RateLimiter.perMinute(config.maxRequestsPerMinute),
       ),
@@ -51,16 +56,16 @@ class AppDependencies {
     required HttpTransport transport,
   }) {
     final logger = AppLogger.forEnvironment(isProduction: config.isProduction);
-    final tokenStore = InMemoryTokenStore();
+    final sessionManager = SessionManager(store: InMemoryTokenStore());
 
     return AppDependencies(
       config: config,
       logger: logger,
-      tokenStore: tokenStore,
+      sessionManager: sessionManager,
       apiClient: ApiClient(
         config: config,
         transport: transport,
-        tokenStore: tokenStore,
+        tokenStore: sessionManager,
         logger: logger,
       ),
     );
@@ -68,7 +73,10 @@ class AppDependencies {
 
   final AppConfig config;
   final AppLogger logger;
-  final TokenStore tokenStore;
+
+  /// The session, observable — also the token store `apiClient` reads, so a
+  /// rejected token and an explicit log-out land in the same place.
+  final SessionManager sessionManager;
   final ApiClient apiClient;
 
   /// Light or dark, chosen by the member for the session.
@@ -76,6 +84,7 @@ class AppDependencies {
 
   void dispose() {
     themeController.dispose();
+    sessionManager.dispose();
     apiClient.close();
   }
 }

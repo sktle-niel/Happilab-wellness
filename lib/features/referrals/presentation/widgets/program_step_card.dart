@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_typography.dart';
 import '../../../../shared/widgets/app_card.dart';
+import '../../../../shared/widgets/circle_badge.dart';
 import '../../../../shared/widgets/gap.dart';
 import '../../domain/program_guide.dart';
 import '../../../../app/theme/app_palette.dart';
@@ -17,14 +18,8 @@ class ProgramStepCard extends StatelessWidget {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 42,
-          height: 42,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: context.palette.tint,
-            shape: BoxShape.circle,
-          ),
+        CircleBadge(
+          size: 42,
           child: Text(
             '${step.number}',
             style: AppTypography.figtree(

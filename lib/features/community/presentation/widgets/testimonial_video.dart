@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../app/theme/app_palette.dart';
+import '../../../../shared/utils/video_clips.dart';
+import '../../../../shared/widgets/video_cover.dart';
 
 /// A member's clip: it rests on a frame until someone asks for it, then plays
 /// with sound.
@@ -34,17 +36,11 @@ class _TestimonialVideoState extends State<TestimonialVideo> {
   }
 
   Future<void> _load() async {
-    final controller = VideoPlayerController.asset(widget.assetPath);
-    try {
-      // Initialising is enough to render the opening frame; seeking for a
-      // prettier one is what a paused clip on Android will not reliably do.
-      await controller.initialize();
-    } catch (_) {
-      // No decoder, no plugin, or no video surface — the placeholder stands in
-      // and the card still reads. Same fallback the feed's clips take.
-      await controller.dispose();
-      return;
-    }
+    // Initialising is enough to render the opening frame; seeking for a
+    // prettier one is what a paused clip on Android will not reliably do.
+    // Unplayable clips come back null and the placeholder stands in.
+    final controller = await initializeAssetClip(widget.assetPath);
+    if (controller == null) return;
     if (!mounted) {
       await controller.dispose();
       return;
@@ -77,18 +73,7 @@ class _TestimonialVideoState extends State<TestimonialVideo> {
         builder: (context, value, _) => Stack(
           fit: StackFit.expand,
           children: [
-            FittedBox(
-              fit: BoxFit.cover,
-              // Covering scales the frame past its box on one axis, and a
-              // FittedBox does not clip on its own — without this the clip
-              // spills over the words underneath it.
-              clipBehavior: Clip.hardEdge,
-              child: SizedBox(
-                width: value.size.width,
-                height: value.size.height,
-                child: VideoPlayer(controller),
-              ),
-            ),
+            VideoCover(controller: controller),
             if (!value.isPlaying) const Center(child: PlayBadge()),
           ],
         ),

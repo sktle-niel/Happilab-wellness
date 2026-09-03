@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/app_tokens.dart';
 import '../../app/theme/app_typography.dart';
 import '../domain/catalogue.dart';
+import 'circle_badge.dart';
 import 'pressable_scale.dart';
 import 'remote_image.dart';
 import 'status_pill.dart';
@@ -182,13 +183,8 @@ class _ShareButton extends StatelessWidget {
     child: PressableScale(
       scale: 0.9,
       onPressed: onPressed,
-      child: Container(
-        width: _size,
-        height: _size,
-        decoration: BoxDecoration(
-          color: context.palette.tint,
-          shape: BoxShape.circle,
-        ),
+      child: CircleBadge(
+        size: _size,
         child: Icon(
           Icons.share_outlined,
           size: 17,

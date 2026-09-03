@@ -68,3 +68,9 @@ Future<void> tapVisible(WidgetTester tester, Finder finder) async {
   await tester.pump(const Duration(milliseconds: 300));
   await tester.tap(finder);
 }
+
+/// Waits out a bottom sheet's entrance — or exit — animation.
+Future<void> settleSheet(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 400));
+}

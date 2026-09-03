@@ -2,15 +2,18 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../app/di/app_scope.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../app/theme/app_tokens.dart';
+import '../../../core/security/session_manager.dart';
 import '../../../shared/widgets/falcon.dart';
 import '../../../shared/widgets/faith_wordmark.dart';
 import '../../../shared/widgets/floating_petals.dart';
 import '../../../app/theme/app_palette.dart';
 
 /// The loader: brand lockup, drifting petals and the flying falcon, then a
-/// hand-off to the product showcase.
+/// hand-off — straight home for a member with a live session, to the product
+/// showcase for everyone else.
 ///
 /// One controller drives the whole entrance; each element claims an interval of
 /// it, which is what keeps the stagger in step no matter how the timings change.
@@ -29,11 +32,19 @@ class _SplashScreenState extends State<SplashScreen>
   )..forward();
 
   Timer? _handoff;
+  SessionManager? _session;
 
   @override
   void initState() {
     super.initState();
-    _handoff = Timer(AppDuration.splash, _continueToShowcase);
+    _handoff = Timer(AppDuration.splash, _continueOn);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Kick the restore off now so it runs behind the entrance animation.
+    _session ??= AppScope.of(context).sessionManager..restore();
   }
 
   @override
@@ -43,9 +54,16 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
-  void _continueToShowcase() {
+  Future<void> _continueOn() async {
+    final session = _session!;
+    final navigator = Navigator.of(context);
+    // Usually already done well inside the splash hold; awaiting covers a slow
+    // keystore without a second timer.
+    await session.restore();
     if (!mounted) return;
-    Navigator.of(context).pushReplacementNamed(AppRoutes.productIntro);
+    navigator.pushReplacementNamed(
+      session.isSignedIn ? AppRoutes.home : AppRoutes.productIntro,
+    );
   }
 
   @override

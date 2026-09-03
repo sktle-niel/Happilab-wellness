@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../app/theme/app_palette.dart';
+import '../../../../shared/utils/video_clips.dart';
+import '../../../../shared/widgets/video_cover.dart';
 
 /// A looping, muted clip inside a feed post.
 ///
@@ -33,14 +35,9 @@ class _PostVideoState extends State<PostVideo> {
   }
 
   Future<void> _load() async {
-    final controller = VideoPlayerController.asset(widget.assetPath);
-    try {
-      await controller.initialize();
-    } catch (_) {
-      // No decoder, no plugin, or no video surface — the placeholder stands in.
-      await controller.dispose();
-      return;
-    }
+    // Unplayable clips come back null; the placeholder stands in.
+    final controller = await initializeAssetClip(widget.assetPath);
+    if (controller == null) return;
     if (!mounted) {
       await controller.dispose();
       return;
@@ -61,14 +58,7 @@ class _PostVideoState extends State<PostVideo> {
       width: double.infinity,
       child: controller == null
           ? ColoredBox(color: context.palette.tint)
-          : FittedBox(
-              fit: BoxFit.cover,
-              child: SizedBox(
-                width: controller.value.size.width,
-                height: controller.value.size.height,
-                child: VideoPlayer(controller),
-              ),
-            ),
+          : VideoCover(controller: controller),
     );
   }
 }

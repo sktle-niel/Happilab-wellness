@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/falcon.dart';
@@ -52,7 +50,12 @@ class FaithNavBar extends StatelessWidget {
   );
 }
 
-/// The blurred bar itself, with a slot per tab.
+/// The bar itself, with a slot per tab.
+///
+/// Nearly opaque rather than glass: at 95% opacity a backdrop blur is all but
+/// invisible, yet `BackdropFilter` would re-blur the scene on every frame the
+/// falcon above it animates — the most expensive thing an always-on bar could
+/// do. The translucency alone carries the floating look.
 class _BarSurface extends StatelessWidget {
   const _BarSurface({required this.selected, required this.onSelect});
 
@@ -60,34 +63,28 @@ class _BarSurface extends StatelessWidget {
   final ValueChanged<AppTab> onSelect;
 
   @override
-  Widget build(BuildContext context) => ClipRRect(
-    borderRadius: FaithNavBar._shape,
-    child: BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-      child: Container(
-        height: FaithNavBar.height,
-        decoration: BoxDecoration(
-          color: context.palette.surface.withValues(alpha: 0.95),
-          borderRadius: FaithNavBar._shape,
-          boxShadow: context.palette.shadowCard,
-        ),
-        child: Row(
-          children: [
-            for (final tab in AppTab.values)
-              Expanded(
-                child: tab.isFeature
-                    // The raised button sits in the layer above; this slot
-                    // only reserves its width.
-                    ? const SizedBox.expand()
-                    : _NavTab(
-                        tab: tab,
-                        isSelected: tab == selected,
-                        onPressed: () => onSelect(tab),
-                      ),
-              ),
-          ],
-        ),
-      ),
+  Widget build(BuildContext context) => Container(
+    height: FaithNavBar.height,
+    decoration: BoxDecoration(
+      color: context.palette.surface.withValues(alpha: 0.95),
+      borderRadius: FaithNavBar._shape,
+      boxShadow: context.palette.shadowCard,
+    ),
+    child: Row(
+      children: [
+        for (final tab in AppTab.values)
+          Expanded(
+            child: tab.isFeature
+                // The raised button sits in the layer above; this slot
+                // only reserves its width.
+                ? const SizedBox.expand()
+                : _NavTab(
+                    tab: tab,
+                    isSelected: tab == selected,
+                    onPressed: () => onSelect(tab),
+                  ),
+          ),
+      ],
     ),
   );
 }

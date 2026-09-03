@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/di/app_scope.dart';
 import '../../../shared/widgets/app_scaffold.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../app/shell/widgets/faith_nav_bar.dart';
@@ -29,6 +30,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   bool _notificationsEnabled = true;
 
+  /// Ends the session; the guard above the navigator walks the member out.
+  /// Repeated taps are no-ops — an ended session cannot end again.
+  void _logOut() => AppScope.of(context).sessionManager.signOut();
+
   @override
   Widget build(BuildContext context) => AppScaffold(
     child: ListView(
@@ -52,11 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const Gap(AppSpacing.sm),
         const _SupportGroup(),
         const Gap(AppSpacing.md),
-        _LogOutButton(
-          onPressed: () =>
-              Navigator.of(context)
-                  .pushNamedAndRemoveUntil(AppRoutes.signIn, (route) => false),
-        ),
+        _LogOutButton(onPressed: _logOut),
       ],
     ),
   );
@@ -216,23 +217,23 @@ class _RewardsCard extends StatelessWidget {
   );
 }
 
-/// The falcon artwork, hung off the right edge at its own proportions rather
-/// than stretched to the card.
+/// The perched-bird artwork, covering the card edge to edge.
 ///
-/// The picture was painted on black. That black is keyed out of the asset and
-/// the glow left translucent, so what stands behind the bird is whatever the
-/// card is — white in the light theme, charcoal in the dark one — instead of a
-/// slab that belongs to neither.
+/// The art ships with its background baked in — one plate per theme — so the
+/// image is the card's whole surface and the wording sits on the plain field
+/// its left half provides.
 class _CashOutBanner extends StatelessWidget {
   const _CashOutBanner();
 
   @override
   Widget build(BuildContext context) => Image.asset(
-    'assets/images/cash-out-card.png',
-    fit: BoxFit.fitHeight,
+    context.palette.isDark
+        ? 'assets/images/cash-out-card-dark.jpg'
+        : 'assets/images/cash-out-card-light.jpg',
+    fit: BoxFit.cover,
     alignment: Alignment.centerRight,
     filterQuality: FilterQuality.medium,
-    semanticLabel: 'A falcon looking on',
+    semanticLabel: 'A falcon perched on a branch',
   );
 }
 

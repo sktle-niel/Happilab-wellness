@@ -9,6 +9,7 @@ import '../../../app/theme/app_typography.dart';
 import '../../../shared/domain/program_terms.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/circle_badge.dart';
 import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/screen_header.dart';
 import '../../../shared/widgets/section_header.dart';
@@ -177,18 +178,15 @@ class _BenefitRow extends StatelessWidget {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 22,
-          height: 22,
-          margin: const EdgeInsets.only(top: 1),
-          decoration: BoxDecoration(
-            color: context.palette.tint,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            Icons.check_rounded,
-            size: 13,
-            color: context.palette.accentText,
+        Padding(
+          padding: const EdgeInsets.only(top: 1),
+          child: CircleBadge(
+            size: 22,
+            child: Icon(
+              Icons.check_rounded,
+              size: 13,
+              color: context.palette.accentText,
+            ),
           ),
         ),
         const Gap(10),

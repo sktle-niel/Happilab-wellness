@@ -13,6 +13,7 @@ import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/google_mark.dart';
 import '../../../shared/widgets/inline_action_text.dart';
 import '../../../shared/widgets/or_divider.dart';
+import 'auth_entry.dart';
 import 'sign_in_controller.dart';
 import '../../../app/theme/app_palette.dart';
 
@@ -27,19 +28,22 @@ class SignInScreen extends StatefulWidget {
 class _SignInScreenState extends State<SignInScreen> {
   final SignInController _controller = SignInController();
 
+  bool _isSubmitting = false;
+
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
 
-  void _submit() {
-    if (!_controller.validate()) return;
-    // No auth backend yet: a valid form goes straight through. Swap this for a
-    // repository call once the API exists. The first-run stack goes with it:
-    // an onboarding route left underneath keeps cycling its video clips.
-    Navigator.of(context)
-        .pushNamedAndRemoveUntil(AppRoutes.home, (route) => false);
+  /// No auth backend yet: a valid form starts a persisted local session, so
+  /// the member stays signed in across launches. The repository call that
+  /// exchanges these credentials for a server token replaces the entry helper.
+  Future<void> _submit() async {
+    if (_isSubmitting || !_controller.validate()) return;
+    setState(() => _isSubmitting = true);
+    final entered = await enterWithLocalSession(context);
+    if (!entered && mounted) setState(() => _isSubmitting = false);
   }
 
   void _showProviderUnavailable() => AppToast.info(
@@ -70,8 +74,11 @@ class _SignInScreenState extends State<SignInScreen> {
         const Gap(18),
         ListenableBuilder(
           listenable: _controller,
-          builder: (context, _) =>
-              _SignInForm(controller: _controller, onSubmit: _submit),
+          builder: (context, _) => _SignInForm(
+            controller: _controller,
+            onSubmit: _submit,
+            isSubmitting: _isSubmitting,
+          ),
         ),
         const Gap.sm(),
         InlineActionText(
@@ -104,10 +111,15 @@ class _SignInHeader extends StatelessWidget {
 }
 
 class _SignInForm extends StatelessWidget {
-  const _SignInForm({required this.controller, required this.onSubmit});
+  const _SignInForm({
+    required this.controller,
+    required this.onSubmit,
+    required this.isSubmitting,
+  });
 
   final SignInController controller;
   final VoidCallback onSubmit;
+  final bool isSubmitting;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -135,7 +147,7 @@ class _SignInForm extends StatelessWidget {
         trailing: _PasswordVisibilityToggle(controller: controller),
       ),
       const Gap(AppSpacing.md),
-      AppButton(label: 'Sign in', onPressed: onSubmit),
+      AppButton(label: 'Sign in', onPressed: onSubmit, isLoading: isSubmitting),
     ],
   );
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_typography.dart';
+import '../../../../shared/widgets/app_card.dart';
+import '../../../../shared/widgets/circle_badge.dart';
 import '../../../../shared/widgets/gap.dart';
 import '../../../../shared/widgets/icon_pill_button.dart';
 import '../../domain/cash_out.dart';
@@ -21,22 +23,15 @@ class CashOutSuccessCard extends StatelessWidget {
   final VoidCallback onDone;
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) => AppCard(
     padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 30),
-    decoration: BoxDecoration(
-      color: context.palette.surface,
-      borderRadius: BorderRadius.all(Radius.circular(28)),
-      boxShadow: context.palette.shadowCard,
-    ),
+    borderRadius: const BorderRadius.all(Radius.circular(28)),
+    shadow: context.palette.shadowCard,
     child: Column(
       children: [
-        Container(
-          width: 72,
-          height: 72,
-          decoration: BoxDecoration(
-            color: context.palette.accent,
-            shape: BoxShape.circle,
-          ),
+        CircleBadge(
+          size: 72,
+          color: context.palette.accent,
           child: Icon(
             Icons.check_rounded,
             size: 34,
