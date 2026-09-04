@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/app_tokens.dart';
 import '../../app/theme/app_typography.dart';
+import '../domain/catalogue.dart';
+import '../domain/messaging_app.dart';
 import '../utils/share_actions.dart';
 import 'app_share_sheet.dart';
 import 'facebook_share_sheet.dart';
@@ -22,60 +24,57 @@ abstract final class InviteShareSheet {
       title: 'Invite a friend',
       preview: _InvitePreview(message: message),
       targets: [
-        ShareTarget(
+        ShareTarget.icon(
           label: 'Copy link',
-          child: Icon(
-            Icons.link_rounded,
-            size: 24,
-            color: context.palette.accentText,
-          ),
+          icon: Icons.link_rounded,
+          color: context.palette.accentText,
           onChosen: () => ShareActions.copy(
             context,
             message,
             confirmation: 'Invite message copied.',
           ),
         ),
-        _app(
-          'Messenger',
-          'messenger',
+        _chat(
+          MessagingApp.messenger,
           () => ShareActions.open(
             context,
             ShareActions.messengerShare(link),
-            destination: 'Messenger',
+            destination: MessagingApp.messenger.label,
           ),
         ),
-        _app('TikTok', 'tiktok', () => _copyThenOpenTikTok(context, message)),
-        _app(
-          'Facebook',
-          'facebook',
+        ShareTarget.appLogo(
+          label: SharePlatform.tiktok.label,
+          asset: SharePlatform.tiktok.logoAsset,
+          onChosen: () => _copyThenOpenTikTok(context, message),
+        ),
+        _chat(
+          MessagingApp.facebook,
           () => _shareToFacebook(context, link, referralCode),
         ),
-        _app(
-          'WhatsApp',
-          'whatsapp',
+        _chat(
+          MessagingApp.whatsapp,
           () => ShareActions.open(
             context,
             ShareActions.whatsappShare(message),
-            destination: 'WhatsApp',
+            destination: MessagingApp.whatsapp.label,
           ),
         ),
-        _app(
-          'Viber',
-          'viber',
+        _chat(
+          MessagingApp.viber,
           () => ShareActions.open(
             context,
             ShareActions.viberShare(message),
-            destination: 'Viber',
+            destination: MessagingApp.viber.label,
           ),
         ),
       ],
     );
   }
 
-  static ShareTarget _app(String label, String logo, VoidCallback onChosen) =>
+  static ShareTarget _chat(MessagingApp app, VoidCallback onChosen) =>
       ShareTarget.appLogo(
-        label: label,
-        asset: 'assets/images/share/$logo.png',
+        label: app.label,
+        asset: app.logoAsset,
         onChosen: onChosen,
       );
 
@@ -89,7 +88,7 @@ abstract final class InviteShareSheet {
     onPost: () => ShareActions.open(
       context,
       ShareActions.facebookShare(link),
-      destination: 'Facebook',
+      destination: MessagingApp.facebook.label,
     ),
     onStory: () =>
         ShareActions.shareInviteStory(context, referralCode: referralCode),
@@ -110,7 +109,7 @@ abstract final class InviteShareSheet {
     await ShareActions.open(
       context,
       ShareActions.tiktokHome(),
-      destination: 'TikTok',
+      destination: SharePlatform.tiktok.label,
     );
   }
 }

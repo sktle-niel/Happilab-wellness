@@ -13,22 +13,16 @@ abstract final class FacebookShareSheet {
     context,
     title: 'Share to Facebook',
     targets: [
-      ShareTarget(
+      ShareTarget.icon(
         label: 'Post',
-        child: Icon(
-          Icons.dynamic_feed_rounded,
-          size: 24,
-          color: context.palette.accentText,
-        ),
+        icon: Icons.dynamic_feed_rounded,
+        color: context.palette.accentText,
         onChosen: onPost,
       ),
-      ShareTarget(
+      ShareTarget.icon(
         label: 'Story',
-        child: Icon(
-          Icons.amp_stories_rounded,
-          size: 24,
-          color: context.palette.accentText,
-        ),
+        icon: Icons.amp_stories_rounded,
+        color: context.palette.accentText,
         onChosen: onStory,
       ),
     ],
