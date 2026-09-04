@@ -58,14 +58,20 @@ abstract final class NativeShare {
     try {
       final image = await resolveImage(provider)
           .timeout(const Duration(seconds: 8));
-      final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (bytes == null) return null;
-      final file = File('${Directory.systemTemp.path}/product-share.png');
-      await file.writeAsBytes(bytes.buffer.asUint8List(), flush: true);
-      return file;
+      return await writePng(image, 'product-share.png');
     } catch (_) {
       return null;
     }
+  }
+
+  /// Writes [image] as a PNG under the system temp folder — the staging
+  /// ground every share intent and story card loads from.
+  static Future<File?> writePng(ui.Image image, String fileName) async {
+    final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+    if (bytes == null) return null;
+    final file = File('${Directory.systemTemp.path}/$fileName');
+    await file.writeAsBytes(bytes.buffer.asUint8List(), flush: true);
+    return file;
   }
 
   /// One frame of [provider], through the regular image cache — what both the

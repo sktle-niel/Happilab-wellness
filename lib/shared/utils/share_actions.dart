@@ -90,13 +90,7 @@ abstract final class ShareActions {
       image: image,
       toPackage: app.androidPackage,
     );
-    if (sent) return;
-    AppToast.showOn(
-      overlay,
-      ToastKind.error,
-      'Could not open ${app.label}',
-      detail: 'Check that the app is installed, then try again.',
-    );
+    if (!sent) _couldNotOpen(overlay, app.label);
   }
 
   /// Puts the branded invite card on the member's Facebook story.
@@ -126,13 +120,7 @@ abstract final class ShareActions {
   static Future<void> _sendStory(OverlayState overlay, File? card) async {
     final sent =
         card != null && await NativeShare.sendToFacebookStory(image: card);
-    if (sent) return;
-    AppToast.showOn(
-      overlay,
-      ToastKind.error,
-      'Could not open Facebook Stories',
-      detail: 'Check that Facebook is installed, then try again.',
-    );
+    if (!sent) _couldNotOpen(overlay, 'Facebook Stories');
   }
 
   /// Hands [link] to the store's app, or the browser. A refusal — no browser
@@ -150,12 +138,15 @@ abstract final class ShareActions {
     } on Exception {
       opened = false;
     }
-    if (opened) return;
-    AppToast.showOn(
-      overlay,
-      ToastKind.error,
-      'Could not open $destination',
-      detail: 'Check that the app or a browser is installed, then try again.',
-    );
+    if (!opened) _couldNotOpen(overlay, destination);
   }
+
+  /// The one way a hand-over declines, whatever was being handed where.
+  static void _couldNotOpen(OverlayState overlay, String destination) =>
+      AppToast.showOn(
+        overlay,
+        ToastKind.error,
+        'Could not open $destination',
+        detail: 'Check that the app is installed, then try again.',
+      );
 }
