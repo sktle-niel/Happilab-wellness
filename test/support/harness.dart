@@ -6,8 +6,10 @@ import 'package:happilab/app/router/app_router.dart';
 import 'package:happilab/app/theme/app_theme.dart';
 import 'package:happilab/app/theme/theme_reveal.dart';
 import 'package:happilab/core/config/app_config.dart';
+import 'package:happilab/shared/domain/profile_photo.dart';
 
 import 'fake_http_transport.dart';
+import 'fake_photo_library.dart';
 
 /// Boots the real scope, router and theme at [initialRoute], so navigation
 /// between screens under test behaves exactly as it does in the app — with a
@@ -17,13 +19,14 @@ import 'fake_http_transport.dart';
 /// otherwise makes Navigator build `/` underneath it: the screen under test
 /// would start with a hidden splash below it, `canPop()` would lie, and a back
 /// button would appear to work while going somewhere else entirely.
-Widget testApp({required String initialRoute}) {
+Widget testApp({required String initialRoute, PhotoLibrary? photoLibrary}) {
   final dependencies = AppDependencies.withTransport(
     config: AppConfig(
       environment: AppEnvironment.dev,
       apiBaseUrl: Uri.parse('https://api.test.local'),
     ),
     transport: FakeHttpTransport(),
+    photoLibrary: photoLibrary ?? FakePhotoLibrary(),
   );
 
   return AppScope(

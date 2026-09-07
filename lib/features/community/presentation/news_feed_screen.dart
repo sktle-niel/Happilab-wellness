@@ -19,7 +19,7 @@ class NewsFeedScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const summary = MemberSummary.placeholder;
+    final summary = MemberSummary.placeholder;
     const posts = FeedPost.placeholder;
 
     return AppScaffold(

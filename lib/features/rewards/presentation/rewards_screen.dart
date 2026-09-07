@@ -27,7 +27,7 @@ class RewardsScreen extends StatefulWidget {
 }
 
 class _RewardsScreenState extends State<RewardsScreen> {
-  static const MemberSummary _summary = MemberSummary.placeholder;
+  static final MemberSummary _summary = MemberSummary.placeholder;
 
   final RewardsController _controller = RewardsController(
     availablePoints: _summary.points,
@@ -46,7 +46,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
       children: [
         const ScreenHeader(title: 'Cash out'),
         const Gap(AppSpacing.md),
-        const _BalanceStrip(summary: _summary),
+        _BalanceStrip(summary: _summary),
         const Gap(AppSpacing.md),
         ListenableBuilder(
           listenable: _controller,

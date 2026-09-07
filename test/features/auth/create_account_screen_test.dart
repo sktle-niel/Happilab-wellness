@@ -80,7 +80,7 @@ void main() {
       expect(find.text('1 symbol'), findsOneWidget);
     });
 
-    testWidgets('a complete form leaves the screen', (tester) async {
+    testWidgets('a complete form goes on to the photo step', (tester) async {
       await pumpCreateAccount(tester);
       await fillValidForm(tester, referralCode: 'FCV-MARIA24');
 
@@ -91,6 +91,7 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
 
       expect(find.text('Join and start earning from day one'), findsNothing);
+      expect(find.text('Add your photo'), findsOneWidget);
     });
 
     testWidgets('the back affordance returns to sign in', (tester) async {

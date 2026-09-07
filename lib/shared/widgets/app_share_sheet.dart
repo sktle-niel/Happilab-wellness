@@ -38,7 +38,8 @@ class ShareTarget {
   /// What fills the disc — a logo drawn full bleed, or an icon.
   final Widget child;
 
-  /// Runs after the sheet has closed, through the caller's own context.
+  /// What choosing it does. On a sheet, runs after the sheet has closed,
+  /// through the caller's own context.
   final VoidCallback onChosen;
 }
 
@@ -128,25 +129,9 @@ class AppShareSheet extends StatelessWidget {
                 ],
                 if (preview != null) ...[const Gap(14), preview],
                 const Gap(20),
-                // One line the thumb swipes through, the way the platform's own
-                // share sheets scroll — a target cut off at the edge is the cue
-                // that more follow. Centred when the few that exist all fit.
-                Center(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        for (final target in targets) ...[
-                          if (target != targets.first) const Gap(14),
-                          _TargetButton(
-                            target: target,
-                            onPressed: () => _choose(context, target),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
+                ShareTargetRow(
+                  targets: targets,
+                  onChosen: (target) => _choose(context, target),
                 ),
                 const Gap(20),
                 _CancelButton(onPressed: () => Navigator.of(context).pop()),
@@ -157,6 +142,46 @@ class AppShareSheet extends StatelessWidget {
       ),
     );
   }
+}
+
+/// One line of round targets the thumb swipes through, the way the platform's
+/// own share sheets scroll — a target cut off at the edge is the cue that more
+/// follow. Centred when the few that exist all fit.
+///
+/// The sheet's row, but also usable on a page: the sign-up photo step lays
+/// the profile-picture choices out with it.
+class ShareTargetRow extends StatelessWidget {
+  const ShareTargetRow({
+    required this.targets,
+    required this.onChosen,
+    this.enabled = true,
+    super.key,
+  });
+
+  final List<ShareTarget> targets;
+  final ValueChanged<ShareTarget> onChosen;
+
+  /// False while a choice is still being acted on — every target goes inert.
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final target in targets) ...[
+            if (target != targets.first) const Gap(14),
+            _TargetButton(
+              target: target,
+              onPressed: enabled ? () => onChosen(target) : null,
+            ),
+          ],
+        ],
+      ),
+    ),
+  );
 }
 
 class _Handle extends StatelessWidget {
@@ -184,7 +209,7 @@ class _TargetButton extends StatelessWidget {
   static const double _slotWidth = 64;
 
   final ShareTarget target;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) => Semantics(

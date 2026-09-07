@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../core/config/app_config.dart';
 import '../../core/logging/app_logger.dart';
 import '../../core/network/api_client.dart';
@@ -7,6 +9,8 @@ import '../../core/network/rate_limiter.dart';
 import '../../core/security/secure_token_store.dart';
 import '../../core/security/session_manager.dart';
 import '../../core/security/token_store.dart';
+import '../../shared/domain/profile_photo.dart';
+import '../../shared/utils/native_photo_library.dart';
 import '../theme/theme_controller.dart';
 
 /// Composition root.
@@ -20,11 +24,15 @@ class AppDependencies {
     required this.logger,
     required this.sessionManager,
     required this.apiClient,
+    required this.profilePhoto,
     ThemeController? themeController,
   }) : themeController = themeController ?? ThemeController() {
     // Any session boundary — in or out — drops cached responses: one member's
     // data must never be served into another's session.
     sessionManager.addListener(apiClient.clearCache);
+    // The picture is the member's; a phone the next member signs in on must
+    // not still wear it.
+    sessionManager.addListener(_forgetPhotoWhenSignedOut);
   }
 
   factory AppDependencies.production() {
@@ -44,16 +52,18 @@ class AppDependencies {
         logger: logger,
         rateLimiter: RateLimiter.perMinute(config.maxRequestsPerMinute),
       ),
+      profilePhoto: ProfilePhoto(library: const NativePhotoLibrary()),
     );
   }
 
   /// Wires the real graph around a caller-supplied [transport] — the seam tests
   /// and previews use instead of touching the network. Credentials stay in
   /// memory here: secure storage needs a platform channel that a widget test
-  /// does not have.
+  /// does not have. [photoLibrary] is the same seam for the picker.
   factory AppDependencies.withTransport({
     required AppConfig config,
     required HttpTransport transport,
+    PhotoLibrary? photoLibrary,
   }) {
     final logger = AppLogger.forEnvironment(isProduction: config.isProduction);
     final sessionManager = SessionManager(store: InMemoryTokenStore());
@@ -68,6 +78,9 @@ class AppDependencies {
         tokenStore: sessionManager,
         logger: logger,
       ),
+      profilePhoto: ProfilePhoto(
+        library: photoLibrary ?? const NativePhotoLibrary(),
+      ),
     );
   }
 
@@ -79,11 +92,19 @@ class AppDependencies {
   final SessionManager sessionManager;
   final ApiClient apiClient;
 
+  /// The member's picture, observable — every avatar of them draws from it.
+  final ProfilePhoto profilePhoto;
+
   /// Light or dark, chosen by the member for the session.
   final ThemeController themeController;
 
+  void _forgetPhotoWhenSignedOut() {
+    if (!sessionManager.isSignedIn) unawaited(profilePhoto.remove());
+  }
+
   void dispose() {
     themeController.dispose();
+    profilePhoto.dispose();
     sessionManager.dispose();
     apiClient.close();
   }

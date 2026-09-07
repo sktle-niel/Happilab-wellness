@@ -6,7 +6,7 @@ import '../../../../app/theme/theme_reveal.dart';
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../shared/domain/member_summary.dart';
-import '../../../../shared/widgets/avatar_circle.dart';
+import '../../../../shared/widgets/member_avatar.dart';
 import '../../../../shared/widgets/circle_icon_button.dart';
 import '../../../../shared/widgets/gap.dart';
 import '../../../../app/theme/app_palette.dart';
@@ -25,7 +25,12 @@ class HomeTopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(
     children: [
-      AvatarCircle(name: summary.name, size: 46, bordered: true),
+      MemberAvatar(
+        photo: AppScope.of(context).profilePhoto,
+        name: summary.name,
+        size: 46,
+        bordered: true,
+      ),
       const Gap(12),
       Expanded(
         child: Column(

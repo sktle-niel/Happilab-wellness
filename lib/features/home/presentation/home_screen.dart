@@ -44,7 +44,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const summary = MemberSummary.placeholder;
+    final summary = MemberSummary.placeholder;
     final featured = Product.showcase.take(_featuredCount).toList();
 
     return AppScaffold(

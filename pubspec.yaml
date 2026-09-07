@@ -70,6 +70,7 @@ flutter:
     - assets/images/
     - assets/images/payout/
     - assets/images/share/
+    - assets/images/avatars/
     - assets/images/falcon/fly/
     - assets/images/falcon/steady/
     - assets/video/

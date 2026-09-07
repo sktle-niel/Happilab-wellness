@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../features/auth/presentation/choose_photo_screen.dart';
 import '../../features/auth/presentation/create_account_screen.dart';
 import '../../features/auth/presentation/sign_in_screen.dart';
 import '../../features/community/presentation/news_feed_screen.dart';
@@ -39,6 +40,7 @@ abstract final class AppRouter {
           AppRoutes.onboarding => (_) => const OnboardingScreen(),
           AppRoutes.signIn => (_) => const SignInScreen(),
           AppRoutes.createAccount => (_) => const CreateAccountScreen(),
+          AppRoutes.choosePhoto => (_) => const ChoosePhotoScreen(),
           AppRoutes.home => (_) => const AppShell(),
           AppRoutes.howItWorks => (_) => const HowItWorksScreen(),
           AppRoutes.myReferrals => (_) => const MyReferralsScreen(),

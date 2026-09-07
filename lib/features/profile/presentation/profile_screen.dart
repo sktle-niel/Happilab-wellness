@@ -8,7 +8,7 @@ import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/domain/member_summary.dart';
 import '../../../shared/widgets/app_card.dart';
-import '../../../shared/widgets/avatar_circle.dart';
+import '../../../shared/widgets/member_avatar.dart';
 import '../../../shared/widgets/circle_icon_button.dart';
 import '../../../shared/widgets/divided_column.dart';
 import '../../../shared/widgets/gap.dart';
@@ -26,7 +26,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  static const MemberSummary _summary = MemberSummary.placeholder;
+  static final MemberSummary _summary = MemberSummary.placeholder;
 
   bool _notificationsEnabled = true;
 
@@ -155,7 +155,12 @@ class _ProfileHeader extends StatelessWidget {
         ],
       ),
       const Gap(AppSpacing.lg),
-      AvatarCircle(name: summary.name, size: 92, bordered: true),
+      MemberAvatar(
+        photo: AppScope.of(context).profilePhoto,
+        name: summary.name,
+        size: 92,
+        bordered: true,
+      ),
       const Gap(12),
       Text(
         summary.name,
@@ -164,7 +169,7 @@ class _ProfileHeader extends StatelessWidget {
       ),
       const Gap(2),
       Text(
-        'Code: ${summary.referralCode}',
+        summary.membershipSummary,
         style: AppTypography.figtree(
           size: 13.5,
           weight: 700,
