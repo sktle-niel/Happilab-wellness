@@ -6,7 +6,9 @@ import 'package:happilab/app/router/app_router.dart';
 import 'package:happilab/app/theme/app_theme.dart';
 import 'package:happilab/app/theme/theme_reveal.dart';
 import 'package:happilab/core/config/app_config.dart';
+import 'package:happilab/shared/domain/payout_account.dart';
 import 'package:happilab/shared/domain/profile_photo.dart';
+import 'package:happilab/shared/widgets/app_backdrop.dart';
 
 import 'fake_http_transport.dart';
 import 'fake_photo_library.dart';
@@ -19,7 +21,11 @@ import 'fake_photo_library.dart';
 /// otherwise makes Navigator build `/` underneath it: the screen under test
 /// would start with a hidden splash below it, `canPop()` would lie, and a back
 /// button would appear to work while going somewhere else entirely.
-Widget testApp({required String initialRoute, PhotoLibrary? photoLibrary}) {
+Widget testApp({
+  required String initialRoute,
+  PhotoLibrary? photoLibrary,
+  PayoutAccounts? payoutAccounts,
+}) {
   final dependencies = AppDependencies.withTransport(
     config: AppConfig(
       environment: AppEnvironment.dev,
@@ -27,6 +33,7 @@ Widget testApp({required String initialRoute, PhotoLibrary? photoLibrary}) {
     ),
     transport: FakeHttpTransport(),
     photoLibrary: photoLibrary ?? FakePhotoLibrary(),
+    payoutAccounts: payoutAccounts,
   );
 
   return AppScope(
@@ -45,6 +52,7 @@ Widget testApp({required String initialRoute, PhotoLibrary? photoLibrary}) {
           onGenerateInitialRoutes: (route) => [
             AppRouter.onGenerateRoute(RouteSettings(name: route)),
           ],
+          builder: (context, child) => AppBackdrop(child: child),
         ),
       ),
     ),

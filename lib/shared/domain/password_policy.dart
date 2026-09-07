@@ -37,4 +37,10 @@ abstract final class PasswordPolicy {
   /// Message for the field itself; the chips carry the detail.
   static String? validate(String password) =>
       isValid(password) ? null : 'Password does not meet all requirements yet.';
+
+  /// The second entry has to be typed, and has to be the first one again.
+  static String? confirm(String password, String confirmation) {
+    if (confirmation.isEmpty) return 'Re-enter your password.';
+    return confirmation == password ? null : 'Passwords do not match.';
+  }
 }

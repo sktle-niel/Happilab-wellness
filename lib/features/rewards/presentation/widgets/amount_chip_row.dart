@@ -58,8 +58,11 @@ class _AmountChip extends StatelessWidget {
         height: 52,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: isSelected ? context.palette.accent : context.palette.surface,
+          color: isSelected ? context.palette.accent : context.palette.glass,
           borderRadius: AppRadius.pill,
+          border: isSelected
+              ? null
+              : Border.all(color: context.palette.glassEdge),
           boxShadow: isSelected ? null : context.palette.shadowSoft,
         ),
         child: Text(

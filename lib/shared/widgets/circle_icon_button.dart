@@ -4,7 +4,7 @@ import '../../app/theme/app_tokens.dart';
 import 'pressable_scale.dart';
 import '../../app/theme/app_palette.dart';
 
-/// White circular icon button — the back affordance and the notification bell
+/// Glass circular icon button — the back affordance and the notification bell
 /// in the design share this shape.
 class CircleIconButton extends StatelessWidget {
   const CircleIconButton({
@@ -33,8 +33,9 @@ class CircleIconButton extends StatelessWidget {
         width: AppSpacing.iconButtonSize,
         height: AppSpacing.iconButtonSize,
         decoration: BoxDecoration(
-          color: context.palette.surface,
+          color: context.palette.glass,
           shape: BoxShape.circle,
+          border: Border.all(color: context.palette.glassEdge),
           boxShadow: context.palette.shadowInput,
         ),
         child: Icon(

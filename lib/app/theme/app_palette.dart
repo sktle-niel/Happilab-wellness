@@ -22,6 +22,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.danger,
     required this.info,
     required this.tint,
+    required this.glass,
+    required this.glassEdge,
     required this.divider,
     required this.shadow,
     required this.shadowStrength,
@@ -44,6 +46,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     danger: Color(0xFFE0563E),
     info: Color(0xFF2F86C5),
     tint: Color(0xFFEFF8DC),
+    glass: Color(0xF0F4FAEC),
+    glassEdge: Color(0x38A6E22E),
     divider: Color(0x1A141A0E),
     shadow: Color(0xFF1B2A10),
     shadowStrength: 0.08,
@@ -66,15 +70,15 @@ class AppPalette extends ThemeExtension<AppPalette> {
     danger: Color(0xFFFF6B54),
     info: Color(0xFF6BB8E8),
     tint: Color(0xFF2C3320),
+    glass: Color(0xE61F241A),
+    glassEdge: Color(0x24FFFFFF),
     divider: Color(0x24FFFFFF),
     shadow: Color(0xFF000000),
     shadowStrength: 0.4,
   );
 
-  /// Illustration colours that do not change with the theme: the blossoms and
-  /// the mascot are drawn, not themed.
-  static const Color petalLight = Color(0xFFF0C8CD);
-  static const Color petalDeep = Color(0xFFDDAAB1);
+  /// Illustration colours that do not change with the theme: the mascot is
+  /// drawn, not themed.
   static const Color blush = Color(0xFFF5B8BD);
   static const Color mascotBody = Color(0xFFFDEED3);
   static const Color mascotOutline = Color(0xFF3B2F1E);
@@ -116,6 +120,14 @@ class AppPalette extends ThemeExtension<AppPalette> {
 
   /// Soft tint behind chips, avatars and secondary buttons.
   final Color tint;
+
+  /// Cards and sheets, laid over the backdrop: a breath of the brand green so
+  /// they never dissolve into a white page, and just enough of the picture
+  /// let through to sit in the scene rather than on it.
+  final Color glass;
+
+  /// The hairline round a [glass] surface.
+  final Color glassEdge;
   final Color divider;
 
   /// Every elevation is this colour at a different alpha.
@@ -164,6 +176,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
       danger: mix(danger, other.danger),
       info: mix(info, other.info),
       tint: mix(tint, other.tint),
+      glass: mix(glass, other.glass),
+      glassEdge: mix(glassEdge, other.glassEdge),
       divider: mix(divider, other.divider),
       shadow: mix(shadow, other.shadow),
       shadowStrength:

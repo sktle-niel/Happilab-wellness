@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:happilab/app/router/app_routes.dart';
+import 'package:happilab/app/theme/app_tokens.dart';
 
 import '../../support/harness.dart';
 
@@ -79,6 +80,18 @@ void main() {
 
       expect(tester.widget<TextField>(passwordField()).obscureText, isFalse);
       expect(find.byTooltip('Hide password'), findsOneWidget);
+    });
+
+    testWidgets('says password reset is not connected yet', (tester) async {
+      await pumpSignIn(tester);
+
+      await tester.tap(find.text('Forgot password?'));
+      await tester.pump();
+
+      expect(find.text('Password reset is not connected yet'), findsOneWidget);
+      // Let the toast withdraw so no timer outlives the test.
+      await tester.pump(AppDuration.toast);
+      await tester.pump(const Duration(seconds: 1));
     });
 
     testWidgets('offers the way to create an account', (tester) async {

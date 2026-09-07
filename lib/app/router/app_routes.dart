@@ -40,5 +40,6 @@ abstract final class AppRoutes {
 
   // Support
   static const String helpCenter = '/help';
+  static const String supportChat = '/help/chat';
   static const String terms = '/terms';
 }

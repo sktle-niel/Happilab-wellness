@@ -11,6 +11,7 @@ void main() {
       controller.fullName.text = 'Ivy Santos';
       controller.email.text = 'ivy@gmail.com';
       controller.password.text = 'Sakura99!';
+      controller.confirmPassword.text = 'Sakura99!';
       controller.referralCode.text = 'FCV-IVY24';
     }
 
@@ -31,6 +32,15 @@ void main() {
         'Password does not meet all requirements yet.',
       );
       expect(controller.referralCodeError, 'Referral code is required.');
+      expect(controller.confirmPasswordError, 'Re-enter your password.');
+    });
+
+    test('refuses a re-entered password that differs', () {
+      fillValidForm();
+      controller.confirmPassword.text = 'Sakura98!';
+
+      expect(controller.validate(), isFalse);
+      expect(controller.confirmPasswordError, 'Passwords do not match.');
     });
 
     test('will not create an account without a referral code', () {

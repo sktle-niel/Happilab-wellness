@@ -18,6 +18,7 @@ import '../../features/referrals/presentation/my_referrals_screen.dart';
 import '../../features/rewards/presentation/edit_payout_number_screen.dart';
 import '../../features/rewards/presentation/rewards_screen.dart';
 import '../../features/support/presentation/help_center_screen.dart';
+import '../../features/support/presentation/support_chat_screen.dart';
 import '../../features/support/presentation/terms_screen.dart';
 import '../../shared/widgets/app_scaffold.dart';
 import '../../shared/widgets/screen_header.dart';
@@ -45,7 +46,9 @@ abstract final class AppRouter {
           AppRoutes.howItWorks => (_) => const HowItWorksScreen(),
           AppRoutes.myReferrals => (_) => const MyReferralsScreen(),
           AppRoutes.rewards => (_) => const RewardsScreen(),
-          AppRoutes.editPayoutNumber => (_) => const EditPayoutNumberScreen(),
+          AppRoutes.editPayoutNumber => (_) => EditPayoutNumberScreen(
+            kind: EditPayoutNumberScreen.kindFrom(settings.arguments),
+          ),
           AppRoutes.newsFeed => (_) => const NewsFeedScreen(),
           AppRoutes.testimonials => (_) => const TestimonialsScreen(),
           AppRoutes.suggestions => (_) => const SuggestionsScreen(),
@@ -54,6 +57,7 @@ abstract final class AppRouter {
           AppRoutes.editProfile => (_) => const EditProfileScreen(),
           AppRoutes.accountActivity => (_) => const AccountActivityScreen(),
           AppRoutes.helpCenter => (_) => const HelpCenterScreen(),
+          AppRoutes.supportChat => (_) => const SupportChatScreen(),
           AppRoutes.terms => (_) => const TermsScreen(),
           _ => (_) => const _RouteNotFoundScreen(),
         },

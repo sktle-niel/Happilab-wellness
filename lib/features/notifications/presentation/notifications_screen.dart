@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/router/app_routes.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../shared/widgets/app_scaffold.dart';
 import '../../../app/theme/app_typography.dart';
@@ -8,6 +9,7 @@ import '../../../shared/widgets/circle_badge.dart';
 import '../../../shared/widgets/circle_icon_button.dart';
 import '../../../shared/widgets/screen_header.dart';
 import '../../../shared/widgets/gap.dart';
+import '../../../shared/widgets/pressable_scale.dart';
 import '../domain/app_notification.dart';
 import '../../../app/theme/app_palette.dart';
 
@@ -27,6 +29,27 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   void _markAllRead() => setState(
     () => _notifications = [for (final entry in _notifications) entry.asRead()],
   );
+
+  /// Reading one is opening it: it is marked read, then the member is taken
+  /// where it points. One with nowhere to point never gets here.
+  void _open(AppNotification notification) {
+    final destination = notification.destination;
+    if (destination == null) return;
+    setState(
+      () => _notifications = [
+        for (final entry in _notifications)
+          if (identical(entry, notification)) entry.asRead() else entry,
+      ],
+    );
+    Navigator.of(context).pushNamed(_routeFor(destination));
+  }
+
+  static String _routeFor(NotificationDestination destination) =>
+      switch (destination) {
+        NotificationDestination.transactions => AppRoutes.accountActivity,
+        NotificationDestination.referrals => AppRoutes.myReferrals,
+        NotificationDestination.products => AppRoutes.suggestions,
+      };
 
   @override
   Widget build(BuildContext context) => AppScaffold(
@@ -57,7 +80,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             ),
           ),
         for (final entry in _notifications) ...[
-          _NotificationTile(notification: entry),
+          _NotificationTile(notification: entry, onOpen: _open),
           const Gap(12),
         ],
       ],
@@ -65,8 +88,30 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   );
 }
 
+/// One message. Tappable only when it leads somewhere — the rest give no
+/// response at all, so a tap is never a promise the tile cannot keep.
 class _NotificationTile extends StatelessWidget {
-  const _NotificationTile({required this.notification});
+  const _NotificationTile({required this.notification, required this.onOpen});
+
+  final AppNotification notification;
+  final ValueChanged<AppNotification> onOpen;
+
+  VoidCallback? get _onPressed =>
+      notification.isActionable ? () => onOpen(notification) : null;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: notification.isActionable,
+    child: PressableScale(
+      scale: 0.98,
+      onPressed: _onPressed,
+      child: _TileSurface(notification: notification),
+    ),
+  );
+}
+
+class _TileSurface extends StatelessWidget {
+  const _TileSurface({required this.notification});
 
   final AppNotification notification;
 
@@ -74,11 +119,12 @@ class _NotificationTile extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
     decoration: BoxDecoration(
-      // Unread sits on cream so the eye finds it without a badge.
+      // Unread sits on the tint so the eye finds it without a badge.
       color: notification.isUnread
           ? context.palette.tint
-          : context.palette.surface,
+          : context.palette.glass,
       borderRadius: const BorderRadius.all(Radius.circular(18)),
+      border: Border.all(color: context.palette.glassEdge),
       boxShadow: context.palette.shadowInput,
     ),
     child: Row(

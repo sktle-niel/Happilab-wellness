@@ -15,7 +15,8 @@ void main() {
   Finder fullNameField() => find.byType(TextField).at(0);
   Finder emailField() => find.byType(TextField).at(1);
   Finder passwordField() => find.byType(TextField).at(2);
-  Finder referralField() => find.byType(TextField).at(3);
+  Finder confirmField() => find.byType(TextField).at(3);
+  Finder referralField() => find.byType(TextField).at(4);
 
   Future<void> fillValidForm(
     WidgetTester tester, {
@@ -24,6 +25,7 @@ void main() {
     await tester.enterText(fullNameField(), 'Ivy C');
     await tester.enterText(emailField(), 'ivy@gmail.com');
     await tester.enterText(passwordField(), 'Sakura99!');
+    await tester.enterText(confirmField(), 'Sakura99!');
     if (referralCode != null) {
       await tester.enterText(referralField(), referralCode);
     }
@@ -43,6 +45,18 @@ void main() {
         find.text('Password does not meet all requirements yet.'),
         findsOneWidget,
       );
+      expect(find.text('Re-enter your password.'), findsOneWidget);
+    });
+
+    testWidgets('refuses a re-entered password that differs', (tester) async {
+      await pumpCreateAccount(tester);
+      await fillValidForm(tester, referralCode: 'FCV-MARIA24');
+      await tester.enterText(confirmField(), 'Sakura98!');
+
+      await tapVisible(tester, submitButton());
+      await tester.pump();
+
+      expect(find.text('Passwords do not match.'), findsOneWidget);
     });
 
     testWidgets('will not create an account without a referral code', (
@@ -92,6 +106,19 @@ void main() {
 
       expect(find.text('Join and start earning from day one'), findsNothing);
       expect(find.text('Add your photo'), findsOneWidget);
+    });
+
+    testWidgets('the password toggle flips between hidden and shown', (
+      tester,
+    ) async {
+      await pumpCreateAccount(tester);
+
+      expect(tester.widget<TextField>(passwordField()).obscureText, isTrue);
+
+      await tapVisible(tester, find.byTooltip('Show password'));
+      await tester.pump();
+
+      expect(tester.widget<TextField>(passwordField()).obscureText, isFalse);
     });
 
     testWidgets('the back affordance returns to sign in', (tester) async {

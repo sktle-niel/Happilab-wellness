@@ -20,4 +20,12 @@ abstract final class DateFormat {
   /// 2025-03-12 -> "March 2025"
   static String monthYear(DateTime date) =>
       '${_months[date.month - 1]} ${date.year}';
+
+  /// 15:05 -> "3:05 PM"; 00:30 -> "12:30 AM"
+  static String time(DateTime time) {
+    final hour = time.hour % 12 == 0 ? 12 : time.hour % 12;
+    final minute = time.minute.toString().padLeft(2, '0');
+    final period = time.hour < 12 ? 'AM' : 'PM';
+    return '$hour:$minute $period';
+  }
 }

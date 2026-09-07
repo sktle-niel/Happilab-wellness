@@ -58,12 +58,9 @@ abstract final class AppTypography {
   static TextStyle screenSubtitle(AppPalette palette) =>
       figtree(size: 13.5, color: palette.textMuted);
 
-  static TextStyle fieldLabel(AppPalette palette) => figtree(
-    size: 11,
-    weight: 800,
-    letterSpacing: 0.66,
-    color: palette.textMuted,
-  );
+  /// Sentence case, untracked: the label reads as a word, not a badge.
+  static TextStyle fieldLabel(AppPalette palette) =>
+      figtree(size: 12.5, weight: 700, color: palette.textMuted);
 
   static TextStyle get input => figtree(size: 14.5);
 

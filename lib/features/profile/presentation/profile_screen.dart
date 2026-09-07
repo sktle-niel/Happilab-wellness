@@ -199,23 +199,21 @@ class _RewardsCard extends StatelessWidget {
     child: PressableScale(
       scale: 0.99,
       onPressed: onCashOut,
-      child: Container(
-        height: _height,
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: context.palette.surface,
-          borderRadius: AppRadius.card,
-          boxShadow: context.palette.shadowSoft,
-        ),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            const _CashOutBanner(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              child: _CashOutLabel(summary: summary),
-            ),
-          ],
+      child: AppCard(
+        padding: EdgeInsets.zero,
+        clip: true,
+        child: SizedBox(
+          height: _height,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              const _CashOutBanner(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 18),
+                child: _CashOutLabel(summary: summary),
+              ),
+            ],
+          ),
         ),
       ),
     ),
@@ -279,8 +277,9 @@ class _LogOutButton extends StatelessWidget {
         height: 50,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: context.palette.surface,
+          color: context.palette.glass,
           borderRadius: AppRadius.pill,
+          border: Border.all(color: context.palette.glassEdge),
           boxShadow: context.palette.shadowSoft,
         ),
         child: Text(

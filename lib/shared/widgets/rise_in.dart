@@ -35,12 +35,18 @@ class RiseIn extends StatelessWidget {
       curve: Interval(begin, end, curve: AppCurves.entrance),
     );
 
+    // The translate sits outermost on purpose: a transform hit-tests its
+    // child wherever it has moved it, but an opacity only inside its own
+    // bounds — with the order reversed, a rising button is untappable until
+    // it has fully landed. Semantics are kept through the fade for the same
+    // reason: what is rising is already there for a screen reader.
     return AnimatedBuilder(
       animation: curved,
-      builder: (context, child) => Opacity(
-        opacity: curved.value.clamp(0, 1),
-        child: Transform.translate(
-          offset: Offset(0, offset * (1 - curved.value)),
+      builder: (context, child) => Transform.translate(
+        offset: Offset(0, offset * (1 - curved.value)),
+        child: Opacity(
+          opacity: curved.value.clamp(0, 1),
+          alwaysIncludeSemantics: true,
           child: child,
         ),
       ),

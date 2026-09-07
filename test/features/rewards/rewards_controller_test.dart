@@ -8,14 +8,36 @@ void main() {
     const gcash = PayoutAccount(
       kind: PayoutKind.gcash,
       accountName: 'Ivy Santos',
-      reference: '0917 •••• 1234',
+      number: '09171231234',
     );
 
+    late PayoutAccounts wallets;
+
     RewardsController build({int points = 1240}) {
-      final controller = RewardsController(availablePoints: points);
+      wallets = PayoutAccounts(initial: PayoutAccount.placeholder);
+      addTearDown(wallets.dispose);
+      final controller = RewardsController(
+        availablePoints: points,
+        wallets: wallets,
+      );
       addTearDown(controller.dispose);
       return controller;
     }
+
+    test('follows an edit to the chosen wallet', () {
+      final controller = build()..selectDestination(gcash);
+      const edited = PayoutAccount(
+        kind: PayoutKind.gcash,
+        accountName: 'Ivy S. Santos',
+        number: '09170000000',
+      );
+
+      wallets.save(edited);
+
+      expect(controller.destination, edited);
+      expect(controller.accounts, contains(edited));
+      expect(controller.missingKinds, isEmpty);
+    });
 
     test('offers the presets the member can afford, plus their balance', () {
       expect(build().amountOptions, [500, 1000, 1240]);
