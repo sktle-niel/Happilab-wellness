@@ -34,6 +34,19 @@ abstract final class AppTheme {
       extensions: [palette],
       scaffoldBackgroundColor: palette.canvas,
       textTheme: AppTypography.textTheme(palette),
+      // Screens are transparent over one fixed backdrop, so they cross-fade
+      // rather than slide or zoom: a moving page would drag the picture
+      // with it. The transition paints a plate behind the two routes while
+      // they cross; left at its default it is the opaque surface colour,
+      // which blanks the backdrop for the length of every push and pop.
+      pageTransitionsTheme: PageTransitionsTheme(
+        builders: {
+          for (final platform in TargetPlatform.values)
+            platform: const FadeForwardsPageTransitionsBuilder(
+              backgroundColor: Colors.transparent,
+            ),
+        },
+      ),
       splashColor: palette.accent.withValues(alpha: 0.08),
       highlightColor: palette.accent.withValues(alpha: 0.04),
       appBarTheme: AppBarThemeData(

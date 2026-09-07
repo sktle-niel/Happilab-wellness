@@ -8,15 +8,14 @@ import '../domain/cash_out.dart';
 /// The rules live here so the button's enabled state and the request summary
 /// can never disagree with what the screen shows.
 class RewardsController extends ChangeNotifier {
-  RewardsController({
-    required this.availablePoints,
-    this.accounts = PayoutAccount.placeholder,
-  });
+  RewardsController({required this.availablePoints, required this.wallets}) {
+    wallets.addListener(_onWalletsChanged);
+  }
 
   final int availablePoints;
 
-  /// The wallets the member can send to.
-  final List<PayoutAccount> accounts;
+  /// The member's saved wallets, which the form follows as they change.
+  final PayoutAccounts wallets;
 
   int? _amount;
   PayoutAccount? _destination;
@@ -25,6 +24,12 @@ class RewardsController extends ChangeNotifier {
   int? get amount => _amount;
   PayoutAccount? get destination => _destination;
   bool get isSubmitted => _isSubmitted;
+
+  /// The wallets the member can send to.
+  List<PayoutAccount> get accounts => wallets.all;
+
+  /// The wallets not set up yet, offered for adding beside the list.
+  List<PayoutKind> get missingKinds => wallets.missingKinds;
 
   /// The presets the member can send, plus their whole balance.
   ///
@@ -62,6 +67,14 @@ class RewardsController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// An edit to the chosen wallet keeps it chosen, as edited; a wallet that
+  /// is gone is unchosen.
+  void _onWalletsChanged() {
+    final chosen = _destination;
+    if (chosen != null) _destination = wallets.forKind(chosen.kind);
+    notifyListeners();
+  }
+
   void submit() {
     if (!canSubmit) return;
     _isSubmitted = true;
@@ -74,5 +87,11 @@ class RewardsController extends ChangeNotifier {
     _amount = null;
     _destination = null;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    wallets.removeListener(_onWalletsChanged);
+    super.dispose();
   }
 }

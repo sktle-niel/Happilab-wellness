@@ -52,10 +52,9 @@ class FaithNavBar extends StatelessWidget {
 
 /// The bar itself, with a slot per tab.
 ///
-/// Nearly opaque rather than glass: at 95% opacity a backdrop blur is all but
-/// invisible, yet `BackdropFilter` would re-blur the scene on every frame the
-/// falcon above it animates — the most expensive thing an always-on bar could
-/// do. The translucency alone carries the floating look.
+/// The palette's glass, and no backdrop blur: `BackdropFilter` would re-blur
+/// the scene on every frame the falcon above it animates — the most expensive
+/// thing an always-on bar could do. The tint and the edge carry the look.
 class _BarSurface extends StatelessWidget {
   const _BarSurface({required this.selected, required this.onSelect});
 
@@ -66,8 +65,9 @@ class _BarSurface extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     height: FaithNavBar.height,
     decoration: BoxDecoration(
-      color: context.palette.surface.withValues(alpha: 0.95),
+      color: context.palette.glass,
       borderRadius: FaithNavBar._shape,
+      border: Border.all(color: context.palette.glassEdge),
       boxShadow: context.palette.shadowCard,
     ),
     child: Row(

@@ -1,27 +1,28 @@
 import 'package:flutter/material.dart';
 
-import '../../../shared/widgets/app_scaffold.dart';
-import '../../../shared/widgets/app_toast.dart';
 import '../../../app/router/app_routes.dart';
+import '../../../app/theme/app_palette.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_text_field.dart';
-import '../../../shared/widgets/faith_wordmark.dart';
-import '../../../shared/widgets/centered_scroll_view.dart';
-import '../../../shared/widgets/circle_icon_button.dart';
+import '../../../shared/widgets/app_toast.dart';
 import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/google_mark.dart';
-import '../../../shared/widgets/inline_action_text.dart';
 import '../../../shared/widgets/or_divider.dart';
 import '../../../shared/widgets/password_requirement_chips.dart';
 import 'auth_entry.dart';
 import 'create_account_controller.dart';
-import '../../../app/theme/app_palette.dart';
+import 'widgets/auth_sheet.dart';
+import 'widgets/password_visibility_toggle.dart';
 
-/// Join with a referral code — the only way into the programme.
+/// Join with a referral code — the only way into the programme. The first
+/// of two steps; the photo follows.
 class CreateAccountScreen extends StatefulWidget {
   const CreateAccountScreen({super.key});
+
+  static const int _step = 1;
+  static const int _steps = 2;
 
   @override
   State<CreateAccountScreen> createState() => _CreateAccountScreenState();
@@ -39,10 +40,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   }
 
   /// No auth backend yet: a valid form starts a persisted local session and
-  /// goes on to the photo step, so
-  /// the member stays signed in across launches. The repository call that
-  /// registers the account and returns a server token replaces the entry
-  /// helper.
+  /// goes on to the photo step, so the member stays signed in across
+  /// launches. The repository call that registers the account and returns a
+  /// server token replaces the entry helper.
   Future<void> _submit() async {
     if (_isSubmitting || !_controller.validate()) return;
     setState(() => _isSubmitting = true);
@@ -65,73 +65,36 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   void _showProviderUnavailable() => AppToast.info(
     context,
     'Google sign-up is not connected yet',
-    detail: 'Fill the form below to join with your referral code.',
+    detail: 'Fill the form to join with your referral code.',
   );
 
   @override
-  Widget build(BuildContext context) => AppScaffold(
-    child: CenteredScrollView(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.screenInset,
-        AppSpacing.md,
-        AppSpacing.screenInset,
-        40,
+  Widget build(BuildContext context) => AuthSheet(
+    title: 'Create account',
+    eyebrow:
+        'Step ${CreateAccountScreen._step} of ${CreateAccountScreen._steps}'
+        ' · Your details',
+    progress: CreateAccountScreen._step / CreateAccountScreen._steps,
+    onClose: _backToSignIn,
+    closeLabel: 'Back to sign in',
+    heading: 'Join and start earning from day one',
+    helper: 'Fill in your details here; your photo comes next.',
+    form: ListenableBuilder(
+      listenable: _controller,
+      builder: (context, _) => _CreateAccountForm(
+        controller: _controller,
+        onSubmit: _submit,
+        onGoogle: _showProviderUnavailable,
+        isSubmitting: _isSubmitting,
       ),
-      children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: CircleIconButton(
-            icon: Icons.arrow_back,
-            semanticLabel: 'Back to sign in',
-            onPressed: _backToSignIn,
-          ),
-        ),
-        const Gap.sm(),
-        const _CreateAccountHeader(),
-        const Gap(18),
-        AppButton.secondary(
-          label: 'Sign up with Google',
-          leading: const GoogleMark(),
-          onPressed: _showProviderUnavailable,
-        ),
-        const Gap(AppSpacing.md),
-        const OrDivider(),
-        const Gap(AppSpacing.md),
-        ListenableBuilder(
-          listenable: _controller,
-          builder: (context, _) => _CreateAccountForm(
-            controller: _controller,
-            onSubmit: _submit,
-            isSubmitting: _isSubmitting,
-          ),
-        ),
-        const Gap.sm(),
-        InlineActionText(
-          text: 'Already a member?',
-          actionLabel: 'Sign in',
-          onPressed: _backToSignIn,
-        ),
-      ],
     ),
-  );
-}
-
-class _CreateAccountHeader extends StatelessWidget {
-  const _CreateAccountHeader();
-
-  @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      const FaithWordmark(showTagline: false, scale: 0.62),
-      const Gap(12),
-      Text('Create account', style: AppTypography.screenTitle),
-      const Gap(2),
-      Text(
-        'Join and start earning from day one',
-        style: AppTypography.screenSubtitle(context.palette),
-        textAlign: TextAlign.center,
+    footer: AuthSheetFooter(
+      onCancel: _backToSignIn,
+      trailing: Text(
+        'Next: your photo',
+        style: AppTypography.footnote(context.palette),
       ),
-    ],
+    ),
   );
 }
 
@@ -139,11 +102,13 @@ class _CreateAccountForm extends StatelessWidget {
   const _CreateAccountForm({
     required this.controller,
     required this.onSubmit,
+    required this.onGoogle,
     required this.isSubmitting,
   });
 
   final CreateAccountController controller;
   final VoidCallback onSubmit;
+  final VoidCallback onGoogle;
   final bool isSubmitting;
 
   @override
@@ -154,50 +119,83 @@ class _CreateAccountForm extends StatelessWidget {
         label: 'Full name',
         controller: controller.fullName,
         hint: 'Ivy C',
+        leadingIcon: Icons.person_outline_rounded,
+        style: AppTextFieldStyle.inset,
         keyboardType: TextInputType.name,
         textInputAction: TextInputAction.next,
         errorText: controller.fullNameError,
         onChanged: controller.onFullNameChanged,
       ),
-      const Gap(AppSpacing.fieldGap),
+      const Gap(AppSpacing.fieldGap + 2),
       AppTextField(
         label: 'Gmail account',
         controller: controller.email,
         hint: 'example@gmail.com',
+        leadingIcon: Icons.alternate_email_rounded,
+        style: AppTextFieldStyle.inset,
         keyboardType: TextInputType.emailAddress,
         textInputAction: TextInputAction.next,
         errorText: controller.emailError,
         onChanged: controller.onEmailChanged,
       ),
-      const Gap(AppSpacing.fieldGap),
+      const Gap(AppSpacing.fieldGap + 2),
       AppTextField(
         label: 'Password',
         controller: controller.password,
         hint: 'At least 8 characters',
-        obscureText: true,
+        leadingIcon: Icons.lock_outline_rounded,
+        style: AppTextFieldStyle.inset,
+        obscureText: controller.isPasswordHidden,
         textInputAction: TextInputAction.next,
         errorText: controller.passwordError,
         onChanged: controller.onPasswordChanged,
+        trailing: PasswordVisibilityToggle(
+          isHidden: controller.isPasswordHidden,
+          onPressed: controller.togglePasswordVisibility,
+        ),
       ),
-      const Gap(6),
+      const Gap(AppSpacing.sm),
       PasswordRequirementChips(unmetRules: controller.unmetRules),
-      const Gap(AppSpacing.fieldGap),
+      const Gap(AppSpacing.fieldGap + 2),
+      AppTextField(
+        label: 'Re-enter your password',
+        controller: controller.confirmPassword,
+        hint: 'Same as above',
+        leadingIcon: Icons.lock_outline_rounded,
+        style: AppTextFieldStyle.inset,
+        // Follows the field above: one eye reveals both.
+        obscureText: controller.isPasswordHidden,
+        textInputAction: TextInputAction.next,
+        errorText: controller.confirmPasswordError,
+        onChanged: controller.onConfirmPasswordChanged,
+      ),
+      const Gap(AppSpacing.fieldGap + 2),
       AppTextField(
         label: 'Referral code',
         requiredNote: '*required',
         controller: controller.referralCode,
         hint: 'e.g. FCV-MARIA24',
+        leadingIcon: Icons.card_giftcard_rounded,
+        style: AppTextFieldStyle.inset,
         textInputAction: TextInputAction.done,
         helperText: 'Ask the friend who invited you for their code.',
         errorText: controller.referralCodeError,
         onChanged: controller.onReferralCodeChanged,
         onSubmitted: (_) => onSubmit(),
       ),
-      const Gap(AppSpacing.md),
+      const Gap(AppSpacing.lg),
       AppButton(
         label: 'Create account',
         onPressed: onSubmit,
         isLoading: isSubmitting,
+      ),
+      const Gap(AppSpacing.md),
+      const OrDivider(label: 'or continue with'),
+      const Gap(AppSpacing.md),
+      AppButton.outlined(
+        label: 'Sign up with Google',
+        leading: const GoogleMark(),
+        onPressed: onGoogle,
       ),
     ],
   );

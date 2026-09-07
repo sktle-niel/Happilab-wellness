@@ -1,3 +1,5 @@
+import '../../../shared/domain/program_terms.dart';
+
 /// A question and its answer.
 class FaqEntry {
   const FaqEntry({required this.question, required this.answer});
@@ -28,7 +30,9 @@ abstract final class SupportContent {
     ),
     FaqEntry(
       question: 'How much is a point worth?',
-      answer: 'One point is one peso. There is no conversion fee.',
+      answer:
+          'One point is one peso: ${ProgramTerms.pointsConversion}, the same '
+          'rate everywhere in the app, with no conversion fee.',
     ),
     FaqEntry(
       question: 'Is there a minimum cash out?',

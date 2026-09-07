@@ -11,26 +11,39 @@ class CreateAccountController extends ChangeNotifier {
   final TextEditingController fullName = TextEditingController();
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
+  final TextEditingController confirmPassword = TextEditingController();
   final TextEditingController referralCode = TextEditingController();
 
+  bool _isPasswordHidden = true;
   String? _fullNameError;
   String? _emailError;
   String? _passwordError;
+  String? _confirmPasswordError;
   String? _referralCodeError;
 
+  bool get isPasswordHidden => _isPasswordHidden;
   String? get fullNameError => _fullNameError;
   String? get emailError => _emailError;
   String? get passwordError => _passwordError;
+  String? get confirmPasswordError => _confirmPasswordError;
   String? get referralCodeError => _referralCodeError;
 
   /// Rules the current password still fails — drives the chips.
   Set<PasswordRule> get unmetRules => PasswordPolicy.unmetRules(password.text);
+
+  void togglePasswordVisibility() {
+    _isPasswordHidden = !_isPasswordHidden;
+    notifyListeners();
+  }
 
   void onFullNameChanged(String _) =>
       _clearError(_fullNameError, () => _fullNameError = null);
 
   void onEmailChanged(String _) =>
       _clearError(_emailError, () => _emailError = null);
+
+  void onConfirmPasswordChanged(String _) =>
+      _clearError(_confirmPasswordError, () => _confirmPasswordError = null);
 
   void onReferralCodeChanged(String _) =>
       _clearError(_referralCodeError, () => _referralCodeError = null);
@@ -48,6 +61,10 @@ class CreateAccountController extends ChangeNotifier {
     );
     _emailError = InputValidator.email(InputValidator.sanitize(email.text));
     _passwordError = PasswordPolicy.validate(password.text);
+    _confirmPasswordError = PasswordPolicy.confirm(
+      password.text,
+      confirmPassword.text,
+    );
     _referralCodeError = InputValidator.notEmpty(
       InputValidator.sanitize(referralCode.text),
       field: 'Referral code',
@@ -57,6 +74,7 @@ class CreateAccountController extends ChangeNotifier {
     return _fullNameError == null &&
         _emailError == null &&
         _passwordError == null &&
+        _confirmPasswordError == null &&
         _referralCodeError == null;
   }
 
@@ -73,6 +91,7 @@ class CreateAccountController extends ChangeNotifier {
     fullName.dispose();
     email.dispose();
     password.dispose();
+    confirmPassword.dispose();
     referralCode.dispose();
     super.dispose();
   }

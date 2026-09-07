@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import '../../app/theme/app_tokens.dart';
 import '../../app/theme/app_palette.dart';
 
-/// The white card the content screens are built from.
+/// The glass card the content screens are built from.
 ///
-/// Every list, panel and tile in the design shares one surface, one radius and
-/// one shadow — putting that here is what keeps them from drifting apart.
+/// Every list, panel and tile in the design shares one surface, one edge, one
+/// radius and one shadow — putting that here is what keeps them from drifting
+/// apart, and what lets them all sit on the backdrop the same way.
 class AppCard extends StatelessWidget {
   const AppCard({
     required this.child,
@@ -31,7 +32,7 @@ class AppCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
 
-  /// Defaults to the palette's surface.
+  /// Defaults to the palette's glass.
   final Color? color;
   final BorderRadius borderRadius;
 
@@ -46,8 +47,9 @@ class AppCard extends StatelessWidget {
     padding: padding,
     clipBehavior: clip ? Clip.antiAlias : Clip.none,
     decoration: BoxDecoration(
-      color: color ?? context.palette.surface,
+      color: color ?? context.palette.glass,
       borderRadius: borderRadius,
+      border: Border.all(color: context.palette.glassEdge),
       boxShadow: shadow ?? context.palette.shadowSoft,
     ),
     child: child,

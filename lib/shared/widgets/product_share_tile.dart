@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'app_card.dart';
+
 import '../../app/theme/app_tokens.dart';
 import '../../app/theme/app_typography.dart';
 import '../domain/catalogue.dart';
@@ -28,13 +30,8 @@ class ProductShareTile extends StatelessWidget {
   final VoidCallback onShare;
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) => AppCard(
     padding: const EdgeInsets.all(_inset),
-    decoration: BoxDecoration(
-      color: context.palette.surface,
-      borderRadius: AppRadius.card,
-      boxShadow: context.palette.shadowSoft,
-    ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -148,12 +145,19 @@ class _Money extends StatelessWidget {
 
   final Product product;
 
+  /// One line each: the card's height is fixed by the grid, so a wrapped
+  /// money line would push the row out of the card at a large font size.
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     mainAxisSize: MainAxisSize.min,
     children: [
-      Text(product.price, style: AppTypography.figtree(size: 17, weight: 800)),
+      Text(
+        product.price,
+        style: AppTypography.figtree(size: 17, weight: 800),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
       Text(
         product.earnShort,
         style: AppTypography.figtree(
@@ -161,6 +165,8 @@ class _Money extends StatelessWidget {
           weight: 800,
           color: context.palette.accentText,
         ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
     ],
   );

@@ -8,7 +8,6 @@ import '../../features/referrals/presentation/my_referrals_screen.dart';
 import 'app_shell_scope.dart';
 import 'app_tab.dart';
 import 'widgets/faith_nav_bar.dart';
-import '../theme/app_palette.dart';
 
 /// The signed-in app: five destinations under one floating bar.
 ///
@@ -34,7 +33,7 @@ class _AppShellState extends State<AppShell> {
     selectedTab: _selected,
     onSelect: _select,
     child: Scaffold(
-      backgroundColor: context.palette.canvas,
+      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
           IndexedStack(

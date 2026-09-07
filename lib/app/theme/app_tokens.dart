@@ -41,6 +41,9 @@ abstract final class AppRadius {
 abstract final class AppDuration {
   static const Duration fast = Duration(milliseconds: 150);
   static const Duration screenIn = Duration(milliseconds: 250);
+
+  /// One thing turning up on its own — a message landing in a thread.
+  static const Duration arrival = Duration(milliseconds: 320);
   static const Duration entrance = Duration(milliseconds: 900);
 
   /// How long the loader holds before handing over to sign in. Long enough for

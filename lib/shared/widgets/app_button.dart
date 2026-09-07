@@ -10,8 +10,12 @@ enum AppButtonVariant {
   /// Gold pill — the single primary action on a screen.
   primary,
 
-  /// White pill on the cream canvas, used for provider sign-in.
+  /// Glass pill on the page — the second action on a screen.
   secondary,
+
+  /// Surface pill drawn with a hairline instead of a shadow — for a surface
+  /// that already carries one, like a sheet.
+  outlined,
 }
 
 /// The app's button. Screens use this instead of raw Material buttons so
@@ -40,6 +44,15 @@ class AppButton extends StatelessWidget {
     super.key,
   }) : variant = AppButtonVariant.secondary;
 
+  const AppButton.outlined({
+    required this.label,
+    this.onPressed,
+    this.icon,
+    this.leading,
+    this.isLoading = false,
+    super.key,
+  }) : variant = AppButtonVariant.outlined;
+
   final String label;
   final VoidCallback? onPressed;
   final IconData? icon;
@@ -51,6 +64,27 @@ class AppButton extends StatelessWidget {
   final AppButtonVariant variant;
 
   bool get _isPrimary => variant == AppButtonVariant.primary;
+
+  BoxDecoration _decorationFor(AppPalette palette) => BoxDecoration(
+    color: switch (variant) {
+      AppButtonVariant.primary => palette.accent,
+      AppButtonVariant.secondary => palette.glass,
+      AppButtonVariant.outlined => palette.surface,
+    },
+    borderRadius: AppRadius.pill,
+    boxShadow: switch (variant) {
+      AppButtonVariant.secondary => palette.shadowRaised,
+      AppButtonVariant.primary || AppButtonVariant.outlined => null,
+    },
+    border: switch (variant) {
+      AppButtonVariant.primary => null,
+      AppButtonVariant.secondary => Border.all(color: palette.glassEdge),
+      AppButtonVariant.outlined => Border.all(
+        color: palette.divider,
+        width: 1.5,
+      ),
+    },
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -70,13 +104,7 @@ class AppButton extends StatelessWidget {
           child: Container(
             height: AppSpacing.buttonHeight,
             alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: _isPrimary
-                  ? context.palette.accent
-                  : context.palette.surface,
-              borderRadius: AppRadius.pill,
-              boxShadow: _isPrimary ? null : context.palette.shadowRaised,
-            ),
+            decoration: _decorationFor(context.palette),
             child: isLoading
                 ? _ButtonProgress(color: foreground)
                 : _ButtonContent(

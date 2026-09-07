@@ -6,12 +6,11 @@ import '../../../app/di/app_scope.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../core/security/session_manager.dart';
+import '../../../shared/widgets/app_scaffold.dart';
 import '../../../shared/widgets/falcon.dart';
 import '../../../shared/widgets/faith_wordmark.dart';
-import '../../../shared/widgets/floating_petals.dart';
-import '../../../app/theme/app_palette.dart';
 
-/// The loader: brand lockup, drifting petals and the flying falcon, then a
+/// The loader: brand lockup and the flying falcon, then a
 /// hand-off — straight home for a member with a live session, to the product
 /// showcase for everyone else.
 ///
@@ -67,22 +66,16 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: context.palette.canvas,
-    body: Stack(
-      children: [
-        const Positioned.fill(child: FloatingPetals()),
-        Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              FaithWordmark(entrance: _entrance),
-              const SizedBox(height: 18),
-              const Falcon(clip: FalconClip.loader),
-            ],
-          ),
-        ),
-      ],
+  Widget build(BuildContext context) => AppScaffold(
+    child: Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FaithWordmark(entrance: _entrance),
+          const SizedBox(height: 18),
+          const Falcon(clip: FalconClip.loader),
+        ],
+      ),
     ),
   );
 }

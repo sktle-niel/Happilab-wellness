@@ -140,7 +140,6 @@ class _OnboardingBackdropState extends State<OnboardingBackdrop> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        ColoredBox(color: context.palette.canvas),
         AnimatedSwitcher(
           duration: _stageFade,
           // AnimatedSwitcher sizes to its child, so the stage has to claim the
@@ -148,8 +147,8 @@ class _OnboardingBackdropState extends State<OnboardingBackdrop> {
           child: SizedBox.expand(
             key: ValueKey(controller == null ? 'loading' : 'clip-$_loadedClip'),
             child: controller == null
-                // Nothing to draw yet: the canvas behind this already fills
-                // the screen, and the copy on top stays readable on it.
+                // Nothing to draw yet: the app's backdrop shows through, and
+                // the copy on top stays readable on it.
                 ? const SizedBox.shrink()
                 : VideoCover(controller: controller),
           ),

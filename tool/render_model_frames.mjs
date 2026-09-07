@@ -60,8 +60,10 @@ const PAGE = `<!doctype html>
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 window.THREE = THREE;
 window.GLTFLoader = GLTFLoader;
+window.RoomEnvironment = RoomEnvironment;
 window.ready = true;
 </script>
 </body>`;
@@ -109,7 +111,7 @@ await page.waitForFunction('window.ready === true', { timeout: 30000 });
 
 const frames = await page.evaluate(
   async (loopFrames, blendFrames, size, outSize, clipName, yaw, pitch) => {
-    const { THREE, GLTFLoader } = window;
+    const { THREE, GLTFLoader, RoomEnvironment } = window;
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -118,20 +120,43 @@ const frames = await page.evaluate(
     });
     renderer.setSize(size, size);
     renderer.setClearColor(0x000000, 0);
+    // Filmic tone mapping: the highlights on the plumage roll off instead of
+    // clipping to white.
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
     document.body.appendChild(renderer.domElement);
 
+    // Lit the way a model viewer lights it: a neutral studio room for the
+    // reflections and the fill, one warm sun for the form, sky and ground for
+    // the last of the shadow. The flat ambient wash this replaced bleached
+    // the plumage to mint and hid every feather the normal map carries.
     const scene = new THREE.Scene();
-    scene.add(new THREE.AmbientLight(0xffffff, 2.2));
-    const key = new THREE.DirectionalLight(0xffffff, 2.6);
-    key.position.set(2, 3, 4);
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    scene.environmentIntensity = 0.9;
+    const key = new THREE.DirectionalLight(0xfff4e6, 2.4);
+    key.position.set(2.5, 4, 3);
     scene.add(key);
-    const rim = new THREE.DirectionalLight(0xffffff, 1.2);
-    rim.position.set(-3, 1, -2);
-    scene.add(rim);
+    scene.add(new THREE.HemisphereLight(0xdfe9ff, 0x2a2f22, 0.5));
 
     const gltf = await new GLTFLoader().loadAsync('/model.glb');
     const model = gltf.scene;
     scene.add(model);
+
+    // The falcon exports with a full-strength white sheen — a cloth term that
+    // under any real light lays a white veil over the plumage and bleaches it
+    // to mint. The feathers live in the base and normal maps; the sheen goes.
+    // Those maps are fine detail seen at a grazing angle, and without
+    // anisotropic sampling they smear.
+    const anisotropy = renderer.capabilities.getMaxAnisotropy();
+    model.traverse((node) => {
+      if (!node.isMesh) return;
+      node.material.sheen = 0;
+      const { map, normalMap, roughnessMap } = node.material;
+      for (const texture of [map, normalMap, roughnessMap]) {
+        if (texture) texture.anisotropy = anisotropy;
+      }
+    });
 
     // Frame the bird: centre it on the origin, then pull the camera back to
     // the radius of its bounding sphere so any model fills the tile alike.

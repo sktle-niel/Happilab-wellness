@@ -4,6 +4,7 @@ import 'di/app_dependencies.dart';
 import 'di/app_scope.dart';
 import 'router/app_router.dart';
 import 'router/app_routes.dart';
+import '../shared/widgets/app_backdrop.dart';
 import 'session_guard.dart';
 import 'theme/app_theme.dart';
 import 'theme/theme_reveal.dart';
@@ -46,6 +47,9 @@ class _HappilabAppState extends State<HappilabApp> {
             themeAnimationDuration: Duration.zero,
             initialRoute: AppRoutes.splash,
             onGenerateRoute: AppRouter.onGenerateRoute,
+            // The picture every screen sits on, painted once beneath the
+            // navigator; screens are transparent over it.
+            builder: (context, child) => AppBackdrop(child: child),
           ),
         ),
       ),

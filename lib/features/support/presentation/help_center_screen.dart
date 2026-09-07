@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/router/app_routes.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../shared/widgets/app_scaffold.dart';
-import '../../../shared/widgets/app_toast.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/divided_column.dart';
@@ -16,6 +16,9 @@ import '../../../app/theme/app_palette.dart';
 /// Answers to what members ask most, and a way to reach a person.
 class HelpCenterScreen extends StatelessWidget {
   const HelpCenterScreen({super.key});
+
+  static void _openChat(BuildContext context) =>
+      Navigator.of(context).pushNamed(AppRoutes.supportChat);
 
   @override
   Widget build(BuildContext context) => AppScaffold(
@@ -34,14 +37,16 @@ class HelpCenterScreen extends StatelessWidget {
           ),
         ),
         const Gap(14),
-        const _ContactCard(),
+        _ContactCard(onChat: () => _openChat(context)),
       ],
     ),
   );
 }
 
 class _ContactCard extends StatelessWidget {
-  const _ContactCard();
+  const _ContactCard({required this.onChat});
+
+  final VoidCallback onChat;
 
   @override
   Widget build(BuildContext context) => AppCard(
@@ -65,11 +70,7 @@ class _ContactCard extends StatelessWidget {
           icon: Icons.chat_bubble_outline_rounded,
           background: context.palette.accent,
           foreground: context.palette.onAccent,
-          onPressed: () => AppToast.info(
-            context,
-            'Support chat is not connected yet',
-            detail: 'Email us in the meantime and we will pick it up there.',
-          ),
+          onPressed: onChat,
         ),
       ],
     ),

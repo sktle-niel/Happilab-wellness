@@ -60,7 +60,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: context.palette.canvas,
+    backgroundColor: Colors.transparent,
     body: Stack(
       fit: StackFit.expand,
       children: [

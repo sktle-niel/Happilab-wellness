@@ -29,6 +29,7 @@ class AppTextField extends StatefulWidget {
     this.keyboardType,
     this.textInputAction,
     this.obscureText = false,
+    this.leadingIcon,
     this.trailing,
     this.onChanged,
     this.onSubmitted,
@@ -47,6 +48,10 @@ class AppTextField extends StatefulWidget {
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
   final bool obscureText;
+
+  /// Sits at the leading edge, and lights in the accent while the field has
+  /// focus — the cue that this is the one being filled.
+  final IconData? leadingIcon;
   final Widget? trailing;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
@@ -101,7 +106,11 @@ class _AppTextFieldState extends State<AppTextField> {
         Container(
           height: AppSpacing.inputHeight,
           decoration: _decorationFor(context, hasError: hasError),
-          child: _FieldInput(field: widget, focusNode: _focusNode),
+          child: _FieldInput(
+            field: widget,
+            focusNode: _focusNode,
+            hasFocus: _hasFocus,
+          ),
         ),
         if (hasError || widget.helperText != null) ...[
           const SizedBox(height: AppSpacing.xs),
@@ -140,14 +149,26 @@ class _AppTextFieldState extends State<AppTextField> {
 /// It reads its configuration off the [AppTextField] rather than taking eight
 /// parameters that would only ever be copied across.
 class _FieldInput extends StatelessWidget {
-  const _FieldInput({required this.field, required this.focusNode});
+  const _FieldInput({
+    required this.field,
+    required this.focusNode,
+    required this.hasFocus,
+  });
 
   final AppTextField field;
   final FocusNode focusNode;
+  final bool hasFocus;
+
+  /// The icon already holds the text off the edge.
+  EdgeInsets get _contentPadding => EdgeInsets.symmetric(
+    horizontal: field.leadingIcon == null ? AppSpacing.md : AppSpacing.sm + 2,
+  );
 
   @override
   Widget build(BuildContext context) => Row(
     children: [
+      if (field.leadingIcon != null)
+        _LeadingIcon(icon: field.leadingIcon!, isActive: hasFocus),
       Expanded(
         child: TextField(
           controller: field.controller,
@@ -166,14 +187,29 @@ class _FieldInput extends StatelessWidget {
             hintStyle: AppTypography.input.copyWith(
               color: context.palette.textFaint,
             ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-            ),
+            contentPadding: _contentPadding,
           ),
         ),
       ),
       ?field.trailing,
     ],
+  );
+}
+
+class _LeadingIcon extends StatelessWidget {
+  const _LeadingIcon({required this.icon, required this.isActive});
+
+  final IconData icon;
+  final bool isActive;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(left: AppSpacing.md),
+    child: Icon(
+      icon,
+      size: 18,
+      color: isActive ? context.palette.accentText : context.palette.textFaint,
+    ),
   );
 }
 
@@ -186,15 +222,15 @@ class _FieldLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text.rich(
     TextSpan(
-      text: label.toUpperCase(),
+      text: label,
       style: AppTypography.fieldLabel(context.palette),
       children: [
         if (requiredNote != null)
           TextSpan(
             text: ' $requiredNote',
             style: AppTypography.figtree(
-              size: 11,
-              weight: 800,
+              size: 11.5,
+              weight: 700,
               color: context.palette.danger,
             ),
           ),

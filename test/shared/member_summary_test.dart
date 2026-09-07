@@ -31,5 +31,11 @@ void main() {
       expect(DateFormat.monthYear(DateTime(2024, 1, 31)), 'January 2024');
       expect(DateFormat.monthYear(DateTime(2026, 12, 1)), 'December 2026');
     });
+
+    test('time reads on a twelve-hour clock', () {
+      expect(DateFormat.time(DateTime(2026, 9, 7, 15, 5)), '3:05 PM');
+      expect(DateFormat.time(DateTime(2026, 9, 7, 0, 30)), '12:30 AM');
+      expect(DateFormat.time(DateTime(2026, 9, 7, 12, 0)), '12:00 PM');
+    });
   });
 }

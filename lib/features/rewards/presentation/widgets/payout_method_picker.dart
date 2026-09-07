@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../app/theme/app_palette.dart';
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../shared/domain/payout_account.dart';
@@ -7,21 +8,25 @@ import '../../../../shared/widgets/app_card.dart';
 import '../../../../shared/widgets/divided_column.dart';
 import '../../../../shared/widgets/gap.dart';
 import '../../../../shared/widgets/payout_brand_mark.dart';
-import '../../../../app/theme/app_palette.dart';
 
 /// Single-choice list of the member's payout destinations: the provider's
-/// mark, its name, the masked account, and a check on the chosen row.
+/// mark, its name over the account it is under, a pencil to change it, and a
+/// check on the chosen row.
 class PayoutMethodPicker extends StatelessWidget {
   const PayoutMethodPicker({
     required this.accounts,
     required this.selected,
     required this.onSelect,
+    required this.onEdit,
     super.key,
   });
 
   final List<PayoutAccount> accounts;
   final PayoutAccount? selected;
   final ValueChanged<PayoutAccount> onSelect;
+
+  /// Opens the wallet's form, filled with what is saved.
+  final ValueChanged<PayoutKind> onEdit;
 
   @override
   Widget build(BuildContext context) => AppCard.flush(
@@ -32,6 +37,7 @@ class PayoutMethodPicker extends StatelessWidget {
             account: account,
             isSelected: account == selected,
             onPressed: () => onSelect(account),
+            onEdit: () => onEdit(account.kind),
           ),
       ],
     ),
@@ -43,11 +49,13 @@ class _MethodRow extends StatelessWidget {
     required this.account,
     required this.isSelected,
     required this.onPressed,
+    required this.onEdit,
   });
 
   final PayoutAccount account;
   final bool isSelected;
   final VoidCallback onPressed;
+  final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) => Semantics(
@@ -58,37 +66,67 @@ class _MethodRow extends StatelessWidget {
       onTap: onPressed,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
         child: Row(
           children: [
             PayoutBrandMark(logoAsset: account.logoAsset),
             const Gap(12),
-            // Two equal columns put every account number on the same line,
-            // however long the provider's name runs.
-            Expanded(
-              child: Text(
-                account.label,
-                style: AppTypography.figtree(size: 15, weight: 700),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            Expanded(
-              child: Text(
-                account.reference,
-                style: AppTypography.figtree(
-                  size: 12.5,
-                  color: context.palette.textMuted,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const Gap(AppSpacing.sm),
+            Expanded(child: _AccountLines(account: account)),
+            _EditButton(label: account.label, onPressed: onEdit),
+            const Gap(AppSpacing.xs),
             _CheckMark(isSelected: isSelected),
           ],
         ),
       ),
+    ),
+  );
+}
+
+/// The wallet's name, and under it whose account and which number.
+class _AccountLines extends StatelessWidget {
+  const _AccountLines({required this.account});
+
+  final PayoutAccount account;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Text(
+        account.label,
+        style: AppTypography.figtree(size: 15, weight: 700),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      Text(
+        '${account.accountName} · ${account.reference}',
+        style: AppTypography.figtree(
+          size: 12.5,
+          color: context.palette.textMuted,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    ],
+  );
+}
+
+class _EditButton extends StatelessWidget {
+  const _EditButton({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) => IconButton(
+    onPressed: onPressed,
+    tooltip: 'Edit $label',
+    splashRadius: 20,
+    icon: Icon(
+      Icons.edit_outlined,
+      size: 19,
+      color: context.palette.accentText,
     ),
   );
 }

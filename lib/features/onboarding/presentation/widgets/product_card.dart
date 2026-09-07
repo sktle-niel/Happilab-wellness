@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../shared/widgets/app_card.dart';
+
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../shared/domain/catalogue.dart';
@@ -20,13 +22,9 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Transform.rotate(
     angle: tiltDegrees * 3.1415926535 / 180,
-    child: Container(
+    child: AppCard(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: context.palette.surface,
-        borderRadius: AppRadius.card,
-        boxShadow: context.palette.shadowCard,
-      ),
+      shadow: context.palette.shadowCard,
       child: Row(
         children: [
           Expanded(child: _ProductDetails(product: product)),
