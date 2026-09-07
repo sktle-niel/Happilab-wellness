@@ -69,12 +69,9 @@ abstract final class AppToast {
   static void error(BuildContext context, String title, {String? detail}) =>
       showOn(Overlay.of(context), ToastKind.error, title, detail: detail);
 
-  /// One-liner for surfacing a failed action: the exception's own user-safe
-  /// message under a short headline.
-  static void failure(BuildContext context, AppException error) =>
-      failureOn(Overlay.of(context), error);
-
-  /// [failure] for a caller already past an `await` — see [showOn].
+  /// One-liner for surfacing a failed action from past an `await` — the
+  /// exception's own user-safe message under a short headline. See [showOn]
+  /// for why it takes the overlay rather than a context.
   ///
   /// Being rate limited is a wait, not a fault, so it lands as a caution.
   static void failureOn(OverlayState overlay, AppException error) {

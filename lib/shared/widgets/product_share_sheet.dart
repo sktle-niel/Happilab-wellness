@@ -25,13 +25,10 @@ abstract final class ProductShareSheet {
       title: 'Share ${product.name}',
       note: _note,
       targets: [
-        ShareTarget(
+        ShareTarget.icon(
           label: 'Copy link',
-          child: Icon(
-            Icons.link_rounded,
-            size: 24,
-            color: context.palette.accentText,
-          ),
+          icon: Icons.link_rounded,
+          color: context.palette.accentText,
           onChosen: () => ShareActions.copy(
             context,
             message,

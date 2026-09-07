@@ -126,11 +126,7 @@ abstract final class StoryCard {
         _w.toInt(),
         _h.toInt(),
       );
-      final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (bytes == null) return null;
-      final file = File('${Directory.systemTemp.path}/story-card.png');
-      await file.writeAsBytes(bytes.buffer.asUint8List(), flush: true);
-      return file;
+      return await NativeShare.writePng(image, 'story-card.png');
     } catch (_) {
       return null;
     }
@@ -167,10 +163,7 @@ abstract final class StoryCard {
           ..addText(text);
     final paragraph = builder.build()
       ..layout(const ui.ParagraphConstraints(width: width));
-    canvas.drawParagraph(
-      paragraph,
-      const ui.Offset((_w - width) / 2, 0).translate(0, y),
-    );
+    canvas.drawParagraph(paragraph, ui.Offset((_w - width) / 2, y));
     return y + paragraph.height;
   }
 
@@ -181,12 +174,7 @@ abstract final class StoryCard {
     const double height = 170;
     canvas.drawRRect(
       ui.RRect.fromRectAndRadius(
-        const ui.Rect.fromLTWH(
-          (_w - width) / 2,
-          0,
-          width,
-          height,
-        ).translate(0, top),
+        ui.Rect.fromLTWH((_w - width) / 2, top, width, height),
         const ui.Radius.circular(999),
       ),
       ui.Paint()..color = _ink.surface,

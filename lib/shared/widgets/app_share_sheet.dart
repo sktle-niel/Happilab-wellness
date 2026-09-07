@@ -24,6 +24,15 @@ class ShareTarget {
     required this.onChosen,
   }) : child = Image.asset(asset, fit: BoxFit.cover, cacheWidth: 174);
 
+  /// A target wearing one of our own glyphs on the tint disc — copy, post,
+  /// story: the actions that belong to this app rather than another.
+  ShareTarget.icon({
+    required this.label,
+    required IconData icon,
+    required Color color,
+    required this.onChosen,
+  }) : child = Icon(icon, size: 24, color: color);
+
   final String label;
 
   /// What fills the disc — a logo drawn full bleed, or an icon.
