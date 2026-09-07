@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/di/app_scope.dart';
 import '../../../shared/widgets/app_scaffold.dart';
 import '../../../shared/widgets/app_toast.dart';
 import '../../../app/theme/app_tokens.dart';
@@ -7,16 +8,17 @@ import '../../../app/theme/app_typography.dart';
 import '../../../core/security/input_validator.dart';
 import '../../../shared/domain/member_summary.dart';
 import '../../../shared/domain/password_policy.dart';
+import '../../../shared/domain/profile_photo.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_text_field.dart';
-import '../../../shared/widgets/avatar_circle.dart';
 import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/password_requirement_chips.dart';
 import '../../../shared/widgets/screen_header.dart';
-import '../../../app/theme/app_palette.dart';
+import 'widgets/profile_photo_picker.dart';
 
-/// Change the details on the account, and the password that guards it.
+/// Change the picture and details on the account, and the password that
+/// guards it.
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
 
@@ -25,7 +27,7 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  static const MemberSummary _summary = MemberSummary.placeholder;
+  static final MemberSummary _summary = MemberSummary.placeholder;
 
   final TextEditingController _name = TextEditingController(
     text: _summary.name,
@@ -38,6 +40,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String? _nameError;
   String? _phoneError;
   String? _passwordError;
+
+  ProfilePhoto get _photo => AppScope.of(context).profilePhoto;
 
   @override
   void dispose() {
@@ -93,7 +97,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         const ScreenHeader(title: 'Edit profile'),
         const Gap(AppSpacing.md),
         _DetailsCard(
-          memberName: _summary.name,
+          photoPicker: ProfilePhotoPicker(photo: _photo, name: _summary.name),
           name: _name,
           phone: _phone,
           nameError: _nameError,
@@ -114,10 +118,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   );
 }
 
-/// Who the member is: the avatar, their name and their mobile number.
+/// Who the member is: the picture, their name and their mobile number.
 class _DetailsCard extends StatelessWidget {
   const _DetailsCard({
-    required this.memberName,
+    required this.photoPicker,
     required this.name,
     required this.phone,
     required this.nameError,
@@ -125,9 +129,9 @@ class _DetailsCard extends StatelessWidget {
     required this.onSave,
   });
 
-  /// The stored name, which the avatar draws its initials from — not the text
-  /// being edited, which changes under the cursor.
-  final String memberName;
+  /// The avatar and the way to change it — built by the screen, which owns
+  /// what choosing a source does.
+  final Widget photoPicker;
 
   final TextEditingController name;
   final TextEditingController phone;
@@ -141,16 +145,7 @@ class _DetailsCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Center(child: AvatarCircle(name: memberName, size: 84, bordered: true)),
-        const Gap(12),
-        Text(
-          'Photo upload is not connected yet.',
-          textAlign: TextAlign.center,
-          style: AppTypography.figtree(
-            size: 11.5,
-            color: context.palette.textFaint,
-          ),
-        ),
+        Center(child: photoPicker),
         const Gap(12),
         AppTextField(
           label: 'Full name',

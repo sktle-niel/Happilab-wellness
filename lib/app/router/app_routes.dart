@@ -13,6 +13,9 @@ abstract final class AppRoutes {
   static const String signIn = '/sign-in';
   static const String createAccount = '/create-account';
 
+  /// The step between joining and home: the picture the member goes in with.
+  static const String choosePhoto = '/create-account/photo';
+
   // Main
   static const String home = '/home';
   static const String notifications = '/notifications';

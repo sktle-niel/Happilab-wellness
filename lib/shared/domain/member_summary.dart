@@ -1,3 +1,4 @@
+import '../utils/date_format.dart';
 import '../utils/number_format.dart';
 
 /// The signed-in member's headline figures.
@@ -8,7 +9,9 @@ class MemberSummary {
   const MemberSummary({
     required this.name,
     required this.referralCode,
+    required this.joinedOn,
     required this.points,
+    required this.lifetimePoints,
     required this.referredPeople,
     required this.referredBuyers,
     required this.unreadNotifications,
@@ -16,7 +19,16 @@ class MemberSummary {
 
   final String name;
   final String referralCode;
+
+  /// When the member signed up.
+  final DateTime joinedOn;
+
+  /// The balance — what there is to cash out now.
   final int points;
+
+  /// Everything the member has ever earned, cash-outs included.
+  final int lifetimePoints;
+
   final int referredPeople;
   final int referredBuyers;
   final int unreadNotifications;
@@ -31,10 +43,19 @@ class MemberSummary {
   String get referralSummary =>
       '$referredPeople people · $referredBuyers purchased';
 
-  static const MemberSummary placeholder = MemberSummary(
+  /// The line under the name on the profile: how long they have been here,
+  /// and what that has added up to.
+  String get membershipSummary =>
+      'Joined ${DateFormat.monthYear(joinedOn)} · '
+      '${NumberFormat.points(lifetimePoints)} earned';
+
+  /// Not a constant only because a date cannot be one.
+  static final MemberSummary placeholder = MemberSummary(
     name: 'Ivy Santos',
     referralCode: 'FCV-IVY24',
+    joinedOn: DateTime(2025, 3, 12),
     points: 1240,
+    lifetimePoints: 4860,
     referredPeople: 8,
     referredBuyers: 5,
     unreadNotifications: 3,

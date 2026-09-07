@@ -26,7 +26,7 @@ class MyReferralsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const summary = MemberSummary.placeholder;
+    final summary = MemberSummary.placeholder;
 
     return AppScaffold(
       child: ListView(

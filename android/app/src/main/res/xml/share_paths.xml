@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- What the share FileProvider may hand out: only the app's cache, which is
-     where Dart writes the one temporary picture a share attaches. -->
+<!-- What the FileProvider may hand out: only the app's cache, which is where
+     Dart writes the one temporary picture a share attaches, and where the
+     camera writes the capture a profile photo starts from. -->
 <paths>
     <cache-path name="shared" path="." />
 </paths>

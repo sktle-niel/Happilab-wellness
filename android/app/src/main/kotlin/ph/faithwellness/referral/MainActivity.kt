@@ -11,10 +11,14 @@ import io.flutter.plugin.common.MethodChannel
 import java.io.File
 
 class MainActivity : FlutterActivity() {
-    // The one thing Dart cannot do through a URL scheme: hand another app a
-    // picture together with its caption via ACTION_SEND.
+    private val profilePhoto = ProfilePhotoChannel(this)
+
+    // The two things Dart cannot do through a URL scheme: hand another app a
+    // picture together with its caption via ACTION_SEND, and take a picture
+    // in from the photo picker or the camera.
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        profilePhoto.register(flutterEngine.dartExecutor.binaryMessenger)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "happilab/share")
             .setMethodCallHandler { call, result ->
                 when (call.method) {
@@ -31,6 +35,12 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (!profilePhoto.onActivityResult(requestCode, resultCode, data)) {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
     }
 
     /// Facebook's add-to-story intent, backed by [imagePath]. Facebook wants

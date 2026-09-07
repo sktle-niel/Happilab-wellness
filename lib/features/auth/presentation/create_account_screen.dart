@@ -38,14 +38,18 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     super.dispose();
   }
 
-  /// No auth backend yet: a valid form starts a persisted local session, so
+  /// No auth backend yet: a valid form starts a persisted local session and
+  /// goes on to the photo step, so
   /// the member stays signed in across launches. The repository call that
   /// registers the account and returns a server token replaces the entry
   /// helper.
   Future<void> _submit() async {
     if (_isSubmitting || !_controller.validate()) return;
     setState(() => _isSubmitting = true);
-    final entered = await enterWithLocalSession(context);
+    final entered = await enterWithLocalSession(
+      context,
+      destination: AppRoutes.choosePhoto,
+    );
     if (!entered && mounted) setState(() => _isSubmitting = false);
   }
 
