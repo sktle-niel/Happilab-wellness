@@ -23,6 +23,9 @@ abstract final class ApiEndpoints {
   /// One notification, read.
   static String notificationRead(String id) => '$_v/me/notifications/$id/read';
 
+  /// What members said under one post; a POST says something new.
+  static String postComments(String postId) => '$_v/feed/$postId/comments';
+
   // Catalogue and community
   static const String products = '$_v/products';
   static const String feed = '$_v/feed';
