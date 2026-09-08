@@ -191,7 +191,8 @@ Treat everything outside the process as hostile.
 - **All output is untrusted too.** Parse responses defensively; a shape mismatch is a
   `DataFormatException`, never a crash. Never render server-supplied text as markup.
 - **Errors tell an attacker nothing.** `AppException.message` is user-facing and generic; diagnostics
-  go to the log, not to the screen.
+  go to the log, not to the screen. A server `{ "error", "message" }` body supplies the sentence
+  the member reads — sanitised, capped and never rendered as markup — and its code goes to the log.
 - **Dependencies are attack surface.** Justify every new package, prefer the SDK, keep `pubspec.lock`
   committed, and never add a package to save five lines. The approved list today:
 
