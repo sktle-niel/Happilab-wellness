@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 import '../../app/theme/app_tokens.dart';
 
 /// The press feedback used across the design: the target shrinks slightly while
-/// held. Wrapping it once keeps every button and icon button in step.
+/// held, answering on the press itself rather than on release. Wrapping it once
+/// keeps every button and icon button in step.
+///
+/// A member who asked the system for less motion gets the same feedback with
+/// no easing to sit through.
 class PressableScale extends StatefulWidget {
   const PressableScale({
     required this.child,
@@ -38,8 +42,10 @@ class _PressableScaleState extends State<PressableScale> {
     onTap: widget.onPressed,
     child: AnimatedScale(
       scale: _isPressed ? widget.scale : 1,
-      duration: AppDuration.fast,
-      curve: Curves.easeOut,
+      duration: MediaQuery.disableAnimationsOf(context)
+          ? Duration.zero
+          : AppDuration.press,
+      curve: AppCurves.press,
       child: widget.child,
     ),
   );
