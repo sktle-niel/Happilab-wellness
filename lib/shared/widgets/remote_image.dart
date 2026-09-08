@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../app/theme/app_palette.dart';
+import 'skeleton.dart';
 
 /// Network image with the two states a photo actually has on a phone: still
 /// loading, and failed.
 ///
-/// Without this every remote image is a silent grey box on a bad connection.
+/// While it loads, a skeleton breathes in its place; when it fails, a plain
+/// tinted box stays — a placeholder that kept breathing would promise a
+/// picture that is not coming.
 class RemoteImage extends StatelessWidget {
   const RemoteImage({
     required this.url,
@@ -30,8 +33,8 @@ class RemoteImage extends StatelessWidget {
       height: height,
       fit: fit,
       loadingBuilder: (context, child, progress) =>
-          progress == null ? child : _placeholder,
-      errorBuilder: (context, error, stackTrace) => _placeholder,
+          progress == null ? child : _loading,
+      errorBuilder: (context, error, stackTrace) => _failed,
     );
 
     final radius = borderRadius;
@@ -40,9 +43,25 @@ class RemoteImage extends StatelessWidget {
         : ClipRRect(borderRadius: radius, child: image);
   }
 
-  Widget get _placeholder => SizedBox(
+  Widget get _loading => SkeletonBox(
     width: width,
     height: height,
-    child: const ColoredBox(color: AppPalette.mascotBody),
+    borderRadius: borderRadius ?? BorderRadius.zero,
+  );
+
+  Widget get _failed => _Failed(width: width, height: height);
+}
+
+class _Failed extends StatelessWidget {
+  const _Failed({required this.width, required this.height});
+
+  final double? width;
+  final double? height;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: width,
+    height: height,
+    child: ColoredBox(color: context.palette.tint),
   );
 }

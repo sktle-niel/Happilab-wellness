@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:happilab/app/router/app_routes.dart';
 import 'package:happilab/shared/domain/payout_account.dart';
@@ -7,17 +8,18 @@ import '../../support/harness.dart';
 void main() {
   Future<void> pumpRewards(
     WidgetTester tester, {
-    PayoutAccounts? wallets,
+    Iterable<PayoutAccount> wallets = const [],
   }) async {
     usePhoneViewport(tester);
     await tester.pumpWidget(
       testApp(initialRoute: AppRoutes.rewards, payoutAccounts: wallets),
     );
+    // Two reads settle in turn: the member, then their wallets.
+    await tester.pump();
     await tester.pump();
   }
 
-  PayoutAccounts savedWallets() =>
-      PayoutAccounts(initial: PayoutAccount.placeholder);
+  Iterable<PayoutAccount> savedWallets() => PayoutAccount.placeholder;
 
   group('RewardsScreen', () {
     testWidgets('offers the saved wallets as destinations', (tester) async {
@@ -34,6 +36,10 @@ void main() {
       await pumpRewards(tester);
 
       expect(find.text('No payout account yet'), findsOneWidget);
+      expect(
+        find.text('You need at least 1,000 pts to cash out. No fees.'),
+        findsOneWidget,
+      );
       expect(find.text('Add GCash'), findsOneWidget);
       expect(find.text('Add Maya'), findsOneWidget);
       expect(find.text('GCash'), findsNothing);
@@ -52,6 +58,20 @@ void main() {
       expect(find.text('09171231234'), findsOneWidget);
     });
 
+    testWidgets('a typed amount is checked as it is typed', (tester) async {
+      await pumpRewards(tester, wallets: savedWallets());
+      final field = find.widgetWithText(TextField, 'e.g. 1500');
+
+      await tester.enterText(field, '900');
+      await tester.pump();
+      expect(find.text('Minimum cash out is 1,000 pts.'), findsOneWidget);
+      expect(find.text('Choose an amount'), findsOneWidget);
+
+      await tester.enterText(field, '1200');
+      await tester.pump();
+      expect(find.text('Cash out ₱1,200'), findsOneWidget);
+    });
+
     testWidgets('needs an amount and a destination before it will send', (
       tester,
     ) async {
@@ -59,15 +79,15 @@ void main() {
       expect(find.text('Choose an amount'), findsOneWidget);
 
       // The history below repeats the figure; the chip comes first in the tree.
-      await tester.tap(find.text('₱500').first);
+      await tester.tap(find.text('₱1,000').first);
       await tester.pump();
       await tester.tap(find.text('GCash'));
       await tester.pump();
 
-      await tapVisible(tester, find.text('Cash out ₱500'));
+      await tapVisible(tester, find.text('Cash out ₱1,000'));
       await tester.pump();
 
-      expect(find.textContaining('sending ₱500'), findsOneWidget);
+      expect(find.textContaining('sending ₱1,000'), findsOneWidget);
     });
   });
 }

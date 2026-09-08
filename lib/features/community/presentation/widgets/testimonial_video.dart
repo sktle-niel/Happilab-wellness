@@ -3,6 +3,7 @@ import 'package:video_player/video_player.dart';
 
 import '../../../../app/theme/app_palette.dart';
 import '../../../../shared/utils/video_clips.dart';
+import '../../../../shared/widgets/skeleton.dart';
 import '../../../../shared/widgets/video_cover.dart';
 
 /// A member's clip: it rests on a frame until someone asks for it, then plays
@@ -39,7 +40,7 @@ class _TestimonialVideoState extends State<TestimonialVideo> {
     // Initialising is enough to render the opening frame; seeking for a
     // prettier one is what a paused clip on Android will not reliably do.
     // Unplayable clips come back null and the placeholder stands in.
-    final controller = await initializeAssetClip(widget.assetPath);
+    final controller = await initializeClip(widget.assetPath);
     if (controller == null) return;
     if (!mounted) {
       await controller.dispose();
@@ -61,7 +62,9 @@ class _TestimonialVideoState extends State<TestimonialVideo> {
   @override
   Widget build(BuildContext context) {
     final controller = _controller;
-    if (controller == null) return ColoredBox(color: context.palette.tint);
+    if (controller == null) {
+      return const SkeletonBox(borderRadius: BorderRadius.zero);
+    }
 
     return GestureDetector(
       onTap: _toggle,

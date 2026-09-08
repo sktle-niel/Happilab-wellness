@@ -41,6 +41,7 @@ class _EditPayoutNumberScreenState extends State<EditPayoutNumberScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _wallets.load();
     _form ??= PayoutAccountForm(
       kind: widget.kind,
       existing: _wallets.forKind(widget.kind),
@@ -56,12 +57,24 @@ class _EditPayoutNumberScreenState extends State<EditPayoutNumberScreen> {
   String get _title =>
       '${_form!.isNew ? 'Add' : 'Update'} ${widget.kind.label}';
 
-  void _save() {
+  bool _isSaving = false;
+
+  /// The wallet lands in the store at once and is written through; a write
+  /// the server refuses is said here, and the wallet stays for the session.
+  Future<void> _save() async {
     final account = _form!.submit();
-    if (account == null) return;
-    _wallets.save(account);
-    AppToast.success(context, '${account.label} account saved');
-    Navigator.of(context).pop();
+    if (account == null || _isSaving) return;
+    setState(() => _isSaving = true);
+    final navigator = Navigator.of(context);
+    final overlay = Overlay.of(context);
+    final outcome = await _wallets.save(account);
+    if (!mounted) return;
+    outcome.fold(
+      (_) => AppToast.success(context, '${account.label} account saved'),
+      (error) => AppToast.failureOn(overlay, error),
+    );
+    setState(() => _isSaving = false);
+    if (outcome.isSuccess) navigator.pop();
   }
 
   @override
@@ -77,8 +90,11 @@ class _EditPayoutNumberScreenState extends State<EditPayoutNumberScreen> {
           AppCard(
             child: ListenableBuilder(
               listenable: form,
-              builder: (context, _) =>
-                  _AccountFields(form: form, onSave: _save),
+              builder: (context, _) => _AccountFields(
+                form: form,
+                onSave: _save,
+                isSaving: _isSaving,
+              ),
             ),
           ),
         ],
@@ -88,10 +104,15 @@ class _EditPayoutNumberScreenState extends State<EditPayoutNumberScreen> {
 }
 
 class _AccountFields extends StatelessWidget {
-  const _AccountFields({required this.form, required this.onSave});
+  const _AccountFields({
+    required this.form,
+    required this.onSave,
+    required this.isSaving,
+  });
 
   final PayoutAccountForm form;
   final VoidCallback onSave;
+  final bool isSaving;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -101,7 +122,7 @@ class _AccountFields extends StatelessWidget {
       AppTextField(
         label: 'Account name',
         controller: form.accountName,
-        hint: 'Full name on the account',
+        hint: 'Account name',
         leadingIcon: Icons.person_outline_rounded,
         style: AppTextFieldStyle.inset,
         textInputAction: TextInputAction.next,
@@ -131,7 +152,7 @@ class _AccountFields extends StatelessWidget {
         ),
       ),
       const Gap(12),
-      AppButton(label: 'Save account', onPressed: onSave),
+      AppButton(label: 'Save account', onPressed: onSave, isLoading: isSaving),
     ],
   );
 }

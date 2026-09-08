@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../shared/widgets/card_skeleton.dart';
+import '../../../shared/widgets/repository_view.dart';
+
 import '../../../app/theme/app_tokens.dart';
 import '../../../shared/widgets/app_scaffold.dart';
 import '../../../shared/widgets/gap.dart';
@@ -18,10 +21,20 @@ class TestimonialsScreen extends StatelessWidget {
       children: [
         const ScreenHeader(title: 'Member stories'),
         const Gap(14),
-        for (final testimonial in Testimonial.placeholder) ...[
-          TestimonialCard(testimonial: testimonial),
-          const Gap(14),
-        ],
+        RepositoryView<List<Testimonial>>(
+          read: (repositories) => repositories.community.testimonials(),
+          skeleton: const Column(
+            children: [CardSkeleton(withImage: true), Gap(14), CardSkeleton()],
+          ),
+          builder: (context, testimonials) => Column(
+            children: [
+              for (final testimonial in testimonials) ...[
+                TestimonialCard(testimonial: testimonial),
+                const Gap(14),
+              ],
+            ],
+          ),
+        ),
       ],
     ),
   );

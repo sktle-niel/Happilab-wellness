@@ -13,4 +13,7 @@ abstract final class ProgramTerms {
 
   /// Ways a member can take their money out.
   static const List<String> payoutMethods = ['GCash', 'Maya'];
+
+  /// The balance a member needs before a cash out is allowed.
+  static const int minimumCashOutPoints = 1000;
 }

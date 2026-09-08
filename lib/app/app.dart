@@ -6,6 +6,7 @@ import 'router/app_router.dart';
 import 'router/app_routes.dart';
 import '../shared/widgets/app_backdrop.dart';
 import 'session_guard.dart';
+import 'theme/app_scroll_behavior.dart';
 import 'theme/app_theme.dart';
 import 'theme/theme_reveal.dart';
 
@@ -38,6 +39,7 @@ class _HappilabAppState extends State<HappilabApp> {
           builder: (context, _) => MaterialApp(
             title: 'Falcon Crest Ventures',
             debugShowCheckedModeBanner: false,
+            scrollBehavior: const AppScrollBehavior(),
             navigatorKey: _navigatorKey,
             theme: AppTheme.light(),
             darkTheme: AppTheme.dark(),

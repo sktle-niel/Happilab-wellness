@@ -59,8 +59,34 @@ features/<name>/
   presentation/  # screen + controller + widgets/
 ```
 
-The `counter` feature is presentation-only on purpose: it has no data source, so inventing `data/`
-and `domain/` for it would be architecture theatre. Add a layer when the feature earns it.
+Add a layer when the feature earns it; a slice that only presents does not grow `data/` for show.
+
+### Data layer
+
+Every read and write goes **contract -> implementation -> screen**, and the screen never learns which
+implementation it got:
+
+- **The contract is an interface in `domain/`** (`NotificationsRepository`, `RewardsRepository`,
+  `MemberRepository` in `shared/domain/` when two features read it). It returns `Result<T>`, never
+  throws, and speaks in domain models.
+- **Two implementations in `data/`.** `XApi` calls `ApiClient` with a path from `ApiEndpoints` and a
+  parser built on `JsonReader`, which turns any shape the contract did not promise into a
+  `DataFormatException`. `FakeX` serves the bundled placeholders and remembers writes for the
+  session. Both are bound in `app/di/repositories.dart` by `AppConfig.backend`
+  (`--dart-define=BACKEND=api`; `fake` is the default until the API exists).
+- **Screens read through `RepositoryView`, `MemberView` or a store.** `RepositoryView` makes one
+  read and renders its skeleton, its `ErrorView` with retry, and its data. `MemberView` does the same
+  for the signed-in member from `MemberStore`, loaded once per session. Mutable state that several
+  screens share (`PayoutAccounts`, `MemberStore`) is a `ChangeNotifier` store over its repository,
+  written through optimistically and reset on every session boundary.
+- **Every loading state is a skeleton** (`SkeletonBox`, `ListSkeleton`, `CardSkeleton`), never a
+  blank; every failure is an `ErrorView` the member can retry.
+- **A new data source is not done** until it has the contract, the API implementation, the fake, a
+  parser test on a wire-shaped fixture, and a screen test on the fake.
+
+Cash out, sign in, sign up, payout accounts, profile edits and notifications already go through
+this path; the support desk (`SupportDesk`) is the one seam still simulated in presentation, waiting
+on a push channel.
 
 ## Folder structure
 
@@ -79,7 +105,8 @@ lib/
     auth/ onboarding/ home/ referrals/ rewards/ community/
     notifications/ profile/ support/
   shared/                          # used by two or more features
-    domain/                        # models and copy every feature reads
+    data/                          # API + fake implementations of shared contracts
+    domain/                        # models, contracts and stores every feature reads
     utils/                         # formatting and share helpers
     widgets/                       # AppCard, AppButton, AppTextField, ...
 test/
@@ -237,6 +264,7 @@ A comment that restates the line below it gets deleted.
 - [ ] No file or `build()` turned into a monolith.
 - [ ] Layering respected — no feature-to-feature import, no `core/` importing UI.
 - [ ] Network path goes through `ApiClient`: rate limited, timed out, bounded retries.
+- [ ] New data has its contract, API implementation, fake, parser test and skeleton.
 - [ ] No secret, token or personal data in source, storage or logs.
 - [ ] `const` applied where valid; everything disposable is disposed.
 - [ ] `flutter analyze` clean and `flutter test` green.
@@ -254,5 +282,9 @@ dart format lib test
 Point the app at a real backend with build-time defines:
 
 ```bash
-flutter run --dart-define=APP_ENV=dev --dart-define=API_BASE_URL=https://api.example.com --dart-define=API_MAX_REQUESTS_PER_MINUTE=60
+flutter run --dart-define=APP_ENV=dev --dart-define=BACKEND=api --dart-define=API_BASE_URL=https://api.example.com --dart-define=API_MAX_REQUESTS_PER_MINUTE=60
 ```
+
+Without `BACKEND=api` the app binds the fakes and runs end to end on bundled data. The database
+the API is expected to sit on, with its sessions, tokens, rate limits and audit tables, is drawn in
+`C:/Users/user/Documents/Niel/ERD/happilab-erd.md`.

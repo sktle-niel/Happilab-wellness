@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../shared/widgets/list_skeleton.dart';
+import '../../../shared/widgets/repository_view.dart';
+
 import '../../../shared/widgets/app_scaffold.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
@@ -21,14 +24,17 @@ class AccountActivityScreen extends StatelessWidget {
       children: [
         const ScreenHeader(title: 'Account activity'),
         const Gap(14),
-        AppCard.flush(
-          borderRadius: AppRadius.card,
-          child: DividedColumn(
-            children: [
-              for (final entry in ActivityEntry.placeholder)
-                _ActivityRow(entry: entry),
-              const _EndOfList(),
-            ],
+        RepositoryView<List<ActivityEntry>>(
+          read: (repositories) => repositories.profile.activity(),
+          skeleton: const ListSkeleton(withAvatar: false),
+          builder: (context, entries) => AppCard.flush(
+            borderRadius: AppRadius.card,
+            child: DividedColumn(
+              children: [
+                for (final entry in entries) _ActivityRow(entry: entry),
+                const _EndOfList(),
+              ],
+            ),
           ),
         ),
       ],

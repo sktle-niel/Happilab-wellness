@@ -33,7 +33,17 @@ class MemberSummary {
   final int referredBuyers;
   final int unreadNotifications;
 
+  /// What stands in for a figure while the member keeps it hidden.
+  static const String masked = '••••';
+
   String get pointsFormatted => NumberFormat.thousands(points);
+
+  /// The balance, or the mask when [hidden].
+  String pointsShown({required bool hidden}) =>
+      hidden ? masked : pointsFormatted;
+
+  /// The peso value, or the mask when [hidden].
+  String pesoShown({required bool hidden}) => hidden ? '₱$masked' : pesoValue;
 
   /// A point is a peso, which is the whole promise of the programme.
   String get pesoValue => NumberFormat.peso(points);

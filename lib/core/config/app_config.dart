@@ -2,6 +2,14 @@
 /// this — never on a hardcoded `if (kDebugMode)` sprinkled through features.
 enum AppEnvironment { dev, staging, prod }
 
+/// Where the app's data comes from.
+///
+/// The screens never know: they read repositories, and the composition root
+/// binds either the API implementations or the fakes that serve the bundled
+/// placeholders. Fake is the default until a backend exists, so a build with
+/// no defines still runs end to end.
+enum BackendMode { fake, api }
+
 /// Immutable runtime configuration.
 ///
 /// Values arrive through `--dart-define` at build time, so no endpoint, key or
@@ -11,6 +19,7 @@ class AppConfig {
   AppConfig({
     required this.environment,
     required this.apiBaseUrl,
+    this.backend = BackendMode.fake,
     this.requestTimeout = const Duration(seconds: 20),
     this.maxRequestsPerMinute = 60,
     this.maxRetries = 3,
@@ -29,6 +38,7 @@ class AppConfig {
       'API_MAX_REQUESTS_PER_MINUTE',
       defaultValue: 60,
     );
+    const backend = String.fromEnvironment('BACKEND', defaultValue: 'fake');
 
     return AppConfig(
       environment: AppEnvironment.values.firstWhere(
@@ -36,12 +46,19 @@ class AppConfig {
         orElse: () => AppEnvironment.dev,
       ),
       apiBaseUrl: Uri.parse(baseUrl),
+      backend: BackendMode.values.firstWhere(
+        (value) => value.name == backend,
+        orElse: () => BackendMode.fake,
+      ),
       maxRequestsPerMinute: requestsPerMinute,
     );
   }
 
   final AppEnvironment environment;
   final Uri apiBaseUrl;
+
+  /// API or the bundled fakes — see [BackendMode].
+  final BackendMode backend;
   final Duration requestTimeout;
 
   /// Client-side ceiling enforced by `RateLimiter`. Keep it at or below the
@@ -51,6 +68,8 @@ class AppConfig {
   final int maxRetries;
 
   bool get isProduction => environment == AppEnvironment.prod;
+
+  bool get usesApi => backend == BackendMode.api;
 
   /// Plain HTTP is only tolerated against a local machine during development;
   /// anything shipped talks TLS or does not talk at all.

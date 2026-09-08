@@ -92,9 +92,7 @@ class _OnboardingBackdropState extends State<OnboardingBackdrop> {
 
     // An unplayable clip comes back null: the bare canvas stays up and the
     // screen's own timeout moves the sequence along.
-    final controller = await initializeAssetClip(
-      OnboardingBackdrop.clips[index],
-    );
+    final controller = await initializeClip(OnboardingBackdrop.clips[index]);
     if (controller == null) return;
 
     // The stage may have moved on while the clip was loading.

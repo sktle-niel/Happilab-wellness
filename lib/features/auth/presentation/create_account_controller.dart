@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../core/security/input_validator.dart';
 import '../../../shared/domain/password_policy.dart';
+import '../domain/auth_repository.dart';
 
 /// Form state for the create-account screen.
 ///
@@ -30,6 +31,14 @@ class CreateAccountController extends ChangeNotifier {
 
   /// Rules the current password still fails — drives the chips.
   Set<PasswordRule> get unmetRules => PasswordPolicy.unmetRules(password.text);
+
+  /// What the form asks the server to create, once [validate] has passed.
+  Registration get registration => Registration(
+    fullName: InputValidator.sanitize(fullName.text),
+    email: InputValidator.sanitize(email.text),
+    password: password.text,
+    referralCode: InputValidator.sanitize(referralCode.text),
+  );
 
   void togglePasswordVisibility() {
     _isPasswordHidden = !_isPasswordHidden;

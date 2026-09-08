@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:happilab/features/rewards/data/fake_rewards_repository.dart';
 import 'package:happilab/features/rewards/domain/cash_out.dart';
 import 'package:happilab/features/rewards/presentation/rewards_controller.dart';
+import 'package:happilab/shared/data/fake_payout_accounts_repository.dart';
 import 'package:happilab/shared/domain/payout_account.dart';
 
 void main() {
@@ -14,18 +16,22 @@ void main() {
     late PayoutAccounts wallets;
 
     RewardsController build({int points = 1240}) {
-      wallets = PayoutAccounts(initial: PayoutAccount.placeholder);
+      wallets = PayoutAccounts(
+        FakePayoutAccountsRepository(initial: PayoutAccount.placeholder),
+      );
       addTearDown(wallets.dispose);
       final controller = RewardsController(
         availablePoints: points,
         wallets: wallets,
+        rewards: const FakeRewardsRepository(),
       );
       addTearDown(controller.dispose);
       return controller;
     }
 
-    test('follows an edit to the chosen wallet', () {
+    test('follows an edit to the chosen wallet', () async {
       final controller = build()..selectDestination(gcash);
+      await wallets.load();
       const edited = PayoutAccount(
         kind: PayoutKind.gcash,
         accountName: 'Ivy S. Santos',
@@ -40,12 +46,12 @@ void main() {
     });
 
     test('offers the presets the member can afford, plus their balance', () {
-      expect(build().amountOptions, [500, 1000, 1240]);
-      expect(build(points: 700).amountOptions, [500, 700]);
+      expect(build().amountOptions, [1000, 1240]);
+      expect(build(points: 2300).amountOptions, [1000, 2000, 2300]);
     });
 
     test('does not offer the balance twice when it is already a preset', () {
-      expect(build(points: 1000).amountOptions, [500, 1000]);
+      expect(build(points: 2000).amountOptions, [1000, 2000]);
     });
 
     test('offers nothing until the balance reaches the minimum', () {
@@ -73,8 +79,47 @@ void main() {
       }
     });
 
+    test('takes a typed amount within the rules', () {
+      final controller = build()..selectDestination(gcash);
+
+      controller.onCustomAmountChanged('1,200');
+      expect(controller.amount, 1200);
+      expect(controller.customAmountError, isNull);
+      expect(controller.canSubmit, isTrue);
+
+      controller.onCustomAmountChanged('900');
+      expect(controller.amount, isNull);
+      expect(controller.customAmountError, 'Minimum cash out is 1,000 pts.');
+      expect(controller.canSubmit, isFalse);
+
+      controller.onCustomAmountChanged('5000');
+      expect(controller.customAmountError, 'You only have 1,240 pts.');
+      expect(controller.canSubmit, isFalse);
+
+      controller.onCustomAmountChanged('');
+      expect(controller.amount, isNull);
+      expect(controller.customAmountError, isNull);
+    });
+
+    test('a preset stands in for whatever was typed', () {
+      final controller = build()
+        ..customAmount.text = '900'
+        ..onCustomAmountChanged('900');
+
+      controller.selectAmount(1000);
+
+      expect(controller.amount, 1000);
+      expect(controller.customAmount.text, isEmpty);
+      expect(controller.customAmountError, isNull);
+    });
+
+    test('nothing can be cashed out below the minimum balance', () {
+      expect(build(points: 999).canCashOut, isFalse);
+      expect(build(points: 1000).canCashOut, isTrue);
+    });
+
     test('needs both an amount and a destination before it will send', () {
-      final controller = build()..selectAmount(500);
+      final controller = build()..selectAmount(1000);
       expect(controller.canSubmit, isFalse);
 
       controller.selectDestination(gcash);
@@ -99,25 +144,26 @@ void main() {
       expect(controller.canSubmit, isFalse);
     });
 
-    test('submit does nothing until the form allows it', () {
-      final controller = build()..submit();
+    test('submit does nothing until the form allows it', () async {
+      final controller = build();
+      await controller.submit();
       expect(controller.isSubmitted, isFalse);
 
       controller
-        ..selectAmount(500)
-        ..selectDestination(gcash)
-        ..submit();
+        ..selectAmount(1000)
+        ..selectDestination(gcash);
+      await controller.submit();
       expect(controller.isSubmitted, isTrue);
     });
 
     test('reads the request back to the member', () {
       final controller = build()
-        ..selectAmount(500)
+        ..selectAmount(1000)
         ..selectDestination(gcash);
 
       expect(
         controller.confirmation,
-        'We are sending ₱500 to your GCash account 0917 •••• 1234.',
+        'We are sending ₱1,000 to your GCash account 0917 •••• 1234.',
       );
     });
 
@@ -125,12 +171,12 @@ void main() {
       expect(build().confirmation, isEmpty);
     });
 
-    test('reset returns an empty form, ready for another request', () {
+    test('reset returns an empty form, ready for another request', () async {
       final controller = build()
-        ..selectAmount(500)
-        ..selectDestination(gcash)
-        ..submit()
-        ..reset();
+        ..selectAmount(1000)
+        ..selectDestination(gcash);
+      await controller.submit();
+      controller.reset();
 
       expect(controller.isSubmitted, isFalse);
       expect(controller.amount, isNull);

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../../../shared/widgets/card_skeleton.dart';
+import '../../../shared/widgets/member_view.dart';
+import '../../../shared/widgets/repository_view.dart';
+
 import '../../../shared/widgets/app_scaffold.dart';
 import '../../../app/shell/app_shell_scope.dart';
 import '../../../app/shell/widgets/faith_nav_bar.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/domain/catalogue.dart';
-import '../../../shared/domain/member_summary.dart';
 import '../../../shared/domain/program_terms.dart';
 import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/product_share_grid.dart';
@@ -17,11 +20,9 @@ class SuggestionsScreen extends StatelessWidget {
   const SuggestionsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final summary = MemberSummary.placeholder;
-
-    return AppScaffold(
-      child: CustomScrollView(
+  Widget build(BuildContext context) => AppScaffold(
+    child: MemberView(
+      builder: (context, member) => CustomScrollView(
         slivers: [
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
@@ -57,14 +58,20 @@ class SuggestionsScreen extends StatelessWidget {
               FaithNavBar.contentInset,
             ),
             sliver: SliverToBoxAdapter(
-              child: ProductShareGrid(
-                products: Product.showcase,
-                referralCode: summary.referralCode,
+              child: RepositoryView<List<Product>>(
+                read: (repositories) => repositories.catalogue.products(),
+                skeleton: const Column(
+                  children: [CardSkeleton(withImage: true), Gap(14)],
+                ),
+                builder: (context, products) => ProductShareGrid(
+                  products: products,
+                  referralCode: member.referralCode,
+                ),
               ),
             ),
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
 }

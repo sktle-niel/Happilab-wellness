@@ -2,9 +2,12 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../../app/di/app_scope.dart';
 import '../../../../app/theme/app_palette.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../core/storage/persisted_flag.dart';
 import '../../../../shared/domain/member_summary.dart';
+import '../../../../shared/widgets/balance_eye.dart';
 import '../../../../shared/widgets/circle_badge.dart';
 import '../../../../shared/widgets/gap.dart';
 import '../../../../shared/widgets/pressable_scale.dart';
@@ -40,7 +43,12 @@ class PointsCard extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(26, 20, 22, 18),
         child: Row(
           children: [
-            Expanded(child: _Balance(summary: summary)),
+            Expanded(
+              child: _Balance(
+                summary: summary,
+                hidden: AppScope.of(context).balanceHidden,
+              ),
+            ),
             const Gap(12),
             _RoundAction(
               label: 'Cash out',
@@ -97,53 +105,85 @@ class _TicketClipper extends CustomClipper<Path> {
   bool shouldReclip(_TicketClipper oldClipper) => false;
 }
 
+/// The figure, with the eye that hides it beside its label.
 class _Balance extends StatelessWidget {
-  const _Balance({required this.summary});
+  const _Balance({required this.summary, required this.hidden});
 
   final MemberSummary summary;
+  final PersistedFlag hidden;
 
   @override
-  Widget build(BuildContext context) {
-    final ink = context.palette.onAccent;
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: hidden,
+    builder: (context, _) => _BalanceLines(
+      summary: summary,
+      hidden: hidden,
+      isHidden: hidden.value,
+      ink: context.palette.onAccent,
+    ),
+  );
+}
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          'YOUR POINTS',
-          style: AppTypography.figtree(
-            size: 11,
-            weight: 700,
-            letterSpacing: 1.1,
-            color: ink.withValues(alpha: 0.75),
+class _BalanceLines extends StatelessWidget {
+  const _BalanceLines({
+    required this.summary,
+    required this.hidden,
+    required this.isHidden,
+    required this.ink,
+  });
+
+  final MemberSummary summary;
+  final PersistedFlag hidden;
+  final bool isHidden;
+  final Color ink;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Row(
+        children: [
+          Flexible(
+            child: Text(
+              'YOUR POINTS',
+              style: AppTypography.figtree(
+                size: 11,
+                weight: 700,
+                letterSpacing: 1.1,
+                color: ink.withValues(alpha: 0.75),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
+          const Gap(4),
+          BalanceEye(hidden: hidden, color: ink.withValues(alpha: 0.85)),
+        ],
+      ),
+      Text(
+        '${summary.pointsShown(hidden: isHidden)} POINTS',
+        style: AppTypography.figtree(
+          size: 26,
+          weight: 800,
+          height: 1.1,
+          letterSpacing: -0.5,
+          color: ink,
         ),
-        const Gap(6),
-        Text(
-          '${summary.pointsFormatted} POINTS',
-          style: AppTypography.figtree(
-            size: 26,
-            weight: 800,
-            height: 1.1,
-            letterSpacing: -0.5,
-            color: ink,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      const Gap(4),
+      Text(
+        '= ${summary.pesoShown(hidden: isHidden)}',
+        style: AppTypography.figtree(
+          size: 13,
+          weight: 700,
+          color: ink.withValues(alpha: 0.85),
         ),
-        const Gap(4),
-        Text(
-          '= ${summary.pesoValue}',
-          style: AppTypography.figtree(
-            size: 13,
-            weight: 700,
-            color: ink.withValues(alpha: 0.85),
-          ),
-        ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
 }
 
 /// A disc with its name beneath — the action reads at a glance and the label

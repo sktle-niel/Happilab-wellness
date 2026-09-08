@@ -9,6 +9,8 @@ void main() {
   Future<void> pumpSuggestions(WidgetTester tester) async {
     usePhoneViewport(tester);
     await tester.pumpWidget(testApp(initialRoute: AppRoutes.suggestions));
+    // Two reads settle in turn: the member, then the catalogue.
+    await tester.pump();
     await tester.pump();
   }
 

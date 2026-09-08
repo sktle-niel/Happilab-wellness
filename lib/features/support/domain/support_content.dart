@@ -1,4 +1,5 @@
 import '../../../shared/domain/program_terms.dart';
+import '../../../shared/utils/number_format.dart';
 
 /// A question and its answer.
 class FaqEntry {
@@ -21,7 +22,8 @@ abstract final class SupportContent {
   static const String lastUpdated =
       'Last updated: August 2026 · Falcon Crest Ventures';
 
-  static const List<FaqEntry> faqs = [
+  /// Not a constant only because a formatted number cannot be one.
+  static final List<FaqEntry> faqs = [
     FaqEntry(
       question: 'When do my points appear?',
       answer:
@@ -37,8 +39,8 @@ abstract final class SupportContent {
     FaqEntry(
       question: 'Is there a minimum cash out?',
       answer:
-          'Yes — 500 points. You can cash out as often as you like above '
-          'that.',
+          'Yes — ${NumberFormat.points(ProgramTerms.minimumCashOutPoints)}. '
+          'You can cash out as often as you like above that.',
     ),
     FaqEntry(
       question: 'Can I use someone else\u2019s account for payouts?',

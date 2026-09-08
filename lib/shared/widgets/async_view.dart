@@ -11,12 +11,17 @@ class AsyncView<T> extends StatelessWidget {
   const AsyncView({
     required this.future,
     required this.builder,
+    this.skeleton,
     this.onRetry,
     super.key,
   });
 
   final Future<Result<T>> future;
   final Widget Function(BuildContext context, T value) builder;
+
+  /// What loading looks like: placeholders in the shape of the content to
+  /// come, breathing. Without one the screen shows the loader instead.
+  final Widget? skeleton;
   final VoidCallback? onRetry;
 
   @override
@@ -28,7 +33,7 @@ class AsyncView<T> extends StatelessWidget {
       }
 
       final result = snapshot.data;
-      if (result == null) return const LoadingView();
+      if (result == null) return skeleton ?? const LoadingView();
 
       return result.fold(
         (value) => builder(context, value),

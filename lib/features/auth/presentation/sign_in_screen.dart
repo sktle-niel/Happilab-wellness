@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/di/app_scope.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../shared/widgets/app_button.dart';
@@ -37,13 +38,19 @@ class _SignInScreenState extends State<SignInScreen> {
   VoidCallback? get _back =>
       Navigator.of(context).canPop() ? Navigator.of(context).pop : null;
 
-  /// No auth backend yet: a valid form starts a persisted local session, so
-  /// the member stays signed in across launches. The repository call that
-  /// exchanges these credentials for a server token replaces the entry helper.
+  /// A valid form is exchanged for a session through the auth repository —
+  /// the API's, or the fake's until there is one.
   Future<void> _submit() async {
     if (_isSubmitting || !_controller.validate()) return;
     setState(() => _isSubmitting = true);
-    final entered = await enterWithLocalSession(context);
+    final auth = AppScope.of(context).repositories.auth;
+    final entered = await enterWithSession(
+      context,
+      authenticate: () => auth.signIn(
+        identifier: _controller.identifier.text.trim(),
+        password: _controller.password.text,
+      ),
+    );
     if (!entered && mounted) setState(() => _isSubmitting = false);
   }
 
