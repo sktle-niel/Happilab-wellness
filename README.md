@@ -81,7 +81,9 @@ The implementation lives in the sibling project `../backend` (Fastify, Drizzle, 
 | Support | `GET support/faqs`, `GET support/terms` |
 
 Every call carries `Authorization: Bearer <access token>`; a 401 or 403 clears the session on the
-device at once. Responses are parsed defensively: a shape off the contract is a
+device at once. The access token is renewed through `auth/refresh` before it runs out, and the
+rotated refresh token replaces the old one in the same secure entry.
+Responses are parsed defensively: a shape off the contract is a
 `DataFormatException` the screen shows as an error with a retry, never a crash. Reads that tolerate
 age (`me`, `products`, `feed`, `support/*`) are cached and served stale when the backend is down.
 

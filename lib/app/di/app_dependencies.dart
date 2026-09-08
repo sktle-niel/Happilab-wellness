@@ -48,22 +48,30 @@ class AppDependencies {
   factory AppDependencies.production() {
     final config = AppConfig.fromEnvironment();
     final logger = AppLogger.forEnvironment(isProduction: config.isProduction);
-    final sessionManager = SessionManager(store: SecureTokenStore());
+    // The session renews itself through the auth repository, which sits on
+    // the client the session authenticates. The cycle closes here, lazily:
+    // the tear-off is only ever called once a request is on its way.
+    late final Repositories repositories;
+    final sessionManager = SessionManager(
+      store: SecureTokenStore(),
+      refresh: (token) => repositories.auth.refresh(token),
+    );
     final transport = IoHttpTransport(timeout: config.requestTimeout);
     final apiClient = ApiClient(
       config: config,
       transport: transport,
-      tokenStore: sessionManager,
+      credentials: sessionManager,
       logger: logger,
       rateLimiter: RateLimiter.perMinute(config.maxRequestsPerMinute),
     );
+    repositories = Repositories.forConfig(config, apiClient);
 
     return AppDependencies(
       config: config,
       logger: logger,
       sessionManager: sessionManager,
       apiClient: apiClient,
-      repositories: Repositories.forConfig(config, apiClient),
+      repositories: repositories,
       profilePhoto: ProfilePhoto(library: const NativePhotoLibrary()),
       // Their own entries in the secure store, apart from the token.
       themeController: ThemeController(
@@ -90,7 +98,11 @@ class AppDependencies {
     Repositories? repositories,
   }) {
     final logger = AppLogger.forEnvironment(isProduction: config.isProduction);
-    final sessionManager = SessionManager(store: InMemoryTokenStore());
+    final bound = repositories ?? Repositories.fake();
+    final sessionManager = SessionManager(
+      store: InMemoryTokenStore(),
+      refresh: bound.auth.refresh,
+    );
 
     return AppDependencies(
       config: config,
@@ -99,10 +111,10 @@ class AppDependencies {
       apiClient: ApiClient(
         config: config,
         transport: transport,
-        tokenStore: sessionManager,
+        credentials: sessionManager,
         logger: logger,
       ),
-      repositories: repositories ?? Repositories.fake(),
+      repositories: bound,
       profilePhoto: ProfilePhoto(
         library: photoLibrary ?? const NativePhotoLibrary(),
       ),
@@ -114,7 +126,7 @@ class AppDependencies {
   final AppConfig config;
   final AppLogger logger;
 
-  /// The session, observable — also the token store `apiClient` reads, so a
+  /// The session, observable — also the credentials `apiClient` reads, so a
   /// rejected token and an explicit log-out land in the same place.
   final SessionManager sessionManager;
   final ApiClient apiClient;

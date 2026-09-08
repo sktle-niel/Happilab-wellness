@@ -21,7 +21,7 @@ void main() {
       maxRetries: 0,
     ),
     transport: transport,
-    tokenStore: InMemoryTokenStore(),
+    credentials: InMemoryTokenStore(),
     logger: AppLogger.forEnvironment(isProduction: true),
   );
 
@@ -47,7 +47,7 @@ void main() {
             apiBaseUrl: Uri.parse('https://api.test.local'),
           ),
           transport: transport,
-          tokenStore: store,
+          credentials: store,
           logger: AppLogger.forEnvironment(isProduction: true),
         ),
       );
@@ -97,6 +97,31 @@ void main() {
       expect(outcome.valueOrNull?.refreshToken, 'r');
       expect(transport.sentRequests.single.method, HttpMethod.post);
       expect(transport.sentRequests.single.url.path, '/v1/auth/sign-in');
+    });
+  });
+
+  group('AuthApi refresh', () {
+    test('posts the refresh token alone and reads the new pair', () async {
+      final transport = FakeHttpTransport(
+        responses: const [
+          HttpTransportResponse(
+            statusCode: 200,
+            body:
+                '{"access_token":"a2","refresh_token":"r2",'
+                '"expires_at":"2026-09-08T10:15:00Z"}',
+          ),
+        ],
+      );
+
+      final outcome = await AuthApi(client(transport)).refresh('r1');
+
+      expect(outcome.valueOrNull?.accessToken, 'a2');
+      expect(outcome.valueOrNull?.refreshToken, 'r2');
+      expect(outcome.valueOrNull?.expiresAt, DateTime.utc(2026, 9, 8, 10, 15));
+      final request = transport.sentRequests.single;
+      expect(request.url.path, '/v1/auth/refresh');
+      expect(request.body, {'refresh_token': 'r1'});
+      expect(request.headers.containsKey('authorization'), isFalse);
     });
   });
 

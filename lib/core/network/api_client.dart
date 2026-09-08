@@ -24,7 +24,7 @@ class ApiClient {
   ApiClient._(
     this._config,
     this._transport,
-    this._tokenStore,
+    this._credentials,
     this._logger,
     this._rateLimiter,
     this._retryPolicy,
@@ -36,7 +36,7 @@ class ApiClient {
   factory ApiClient({
     required AppConfig config,
     required HttpTransport transport,
-    required TokenStore tokenStore,
+    required RequestCredentials credentials,
     required AppLogger logger,
     RateLimiter? rateLimiter,
     RetryPolicy? retryPolicy,
@@ -44,7 +44,7 @@ class ApiClient {
   }) => ApiClient._(
     config,
     transport,
-    tokenStore,
+    credentials,
     logger,
     rateLimiter ?? RateLimiter.perMinute(config.maxRequestsPerMinute),
     retryPolicy ?? RetryPolicy(maxAttempts: config.maxRetries + 1),
@@ -53,7 +53,7 @@ class ApiClient {
 
   final AppConfig _config;
   final HttpTransport _transport;
-  final TokenStore _tokenStore;
+  final RequestCredentials _credentials;
   final AppLogger _logger;
   final RateLimiter _rateLimiter;
   final RetryPolicy _retryPolicy;
@@ -75,11 +75,21 @@ class ApiClient {
     maxAge: maxAge,
   );
 
+  /// [authenticated] is false for the calls that establish a session — sign
+  /// in, register, refresh — which carry no bearer: there is none yet, or the
+  /// one there is has run out.
   Future<Result<T>> post<T>(
     String path, {
     required JsonParser<T> parse,
     Object? body,
-  }) => _send(method: HttpMethod.post, path: path, parse: parse, body: body);
+    bool authenticated = true,
+  }) => _send(
+    method: HttpMethod.post,
+    path: path,
+    parse: parse,
+    body: body,
+    authenticated: authenticated,
+  );
 
   Future<Result<T>> put<T>(
     String path, {
@@ -103,6 +113,7 @@ class ApiClient {
     Map<String, String>? query,
     Object? body,
     Duration? maxAge,
+    bool authenticated = true,
   }) async {
     final url = _resolve(path, query);
 
@@ -116,7 +127,7 @@ class ApiClient {
         final request = HttpTransportRequest(
           method: method,
           url: url,
-          headers: await _headers(),
+          headers: await _headers(authenticated),
           body: body,
         );
 
@@ -223,8 +234,8 @@ class ApiClient {
         : url.replace(queryParameters: query);
   }
 
-  Future<Map<String, String>> _headers() async {
-    final token = await _tokenStore.read();
+  Future<Map<String, String>> _headers(bool authenticated) async {
+    final token = authenticated ? await _credentials.read() : null;
     return <String, String>{
       'accept': 'application/json',
       if (token != null) 'authorization': 'Bearer $token',
@@ -241,7 +252,7 @@ class ApiClient {
   ) async {
     final server = ServerError.parse(response.body);
     final failure = _mapStatus(response, server?.message);
-    if (failure is UnauthorizedException) await _tokenStore.clear();
+    if (failure is UnauthorizedException) await _credentials.clear();
     final code = server == null ? '' : ' ${server.code}';
     _logger.warning(
       '${method.name.toUpperCase()} $url → ${response.statusCode}$code',
