@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../shared/widgets/card_skeleton.dart';
+import '../../../shared/widgets/member_view.dart';
+import '../../../shared/widgets/repository_view.dart';
+
 import '../../../shared/widgets/app_scaffold.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../app/shell/app_shell_scope.dart';
@@ -7,7 +11,6 @@ import '../../../app/shell/app_tab.dart';
 import '../../../app/shell/widgets/faith_nav_bar.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../shared/domain/catalogue.dart';
-import '../../../shared/domain/member_summary.dart';
 import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/invite_share_sheet.dart';
 import '../../../shared/widgets/product_share_grid.dart';
@@ -43,17 +46,14 @@ class HomeScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final summary = MemberSummary.placeholder;
-    final featured = Product.showcase.take(_featuredCount).toList();
-
-    return AppScaffold(
-      child: ListView(
+  Widget build(BuildContext context) => AppScaffold(
+    child: MemberView(
+      builder: (context, member) => ListView(
         padding: _listInset,
         children: [
           _Inset(
             child: HomeTopBar(
-              summary: summary,
+              summary: member,
               onNotifications: () =>
                   Navigator.of(context).pushNamed(AppRoutes.notifications),
             ),
@@ -61,12 +61,12 @@ class HomeScreen extends StatelessWidget {
           const Gap(AppSpacing.md),
           _Inset(
             child: PointsCard(
-              summary: summary,
+              summary: member,
               onCashOut: () =>
                   Navigator.of(context).pushNamed(AppRoutes.rewards),
               onShareCode: () => InviteShareSheet.show(
                 context,
-                referralCode: summary.referralCode,
+                referralCode: member.referralCode,
               ),
             ),
           ),
@@ -80,10 +80,14 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           const Gap(12),
-          ProductShareCarousel(
-            products: featured,
-            referralCode: summary.referralCode,
-            edgeInset: _inset,
+          RepositoryView<List<Product>>(
+            read: (repositories) => repositories.catalogue.products(),
+            skeleton: const _Inset(child: CardSkeleton(withImage: true)),
+            builder: (context, products) => ProductShareCarousel(
+              products: products.take(_featuredCount).toList(),
+              referralCode: member.referralCode,
+              edgeInset: _inset,
+            ),
           ),
           const Gap(AppSpacing.lg),
           _Inset(
@@ -94,8 +98,8 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
 }
 
 class _Inset extends StatelessWidget {

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../shared/widgets/card_skeleton.dart';
+import '../../../shared/widgets/repository_view.dart';
+
 import '../../../app/router/app_routes.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../shared/widgets/app_scaffold.dart';
@@ -27,13 +30,17 @@ class HelpCenterScreen extends StatelessWidget {
       children: [
         const ScreenHeader(title: 'Help center'),
         const Gap(14),
-        AppCard(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
-          child: DividedColumn(
-            children: [
-              for (final faq in SupportContent.faqs)
-                ProseBlock(heading: faq.question, body: faq.answer),
-            ],
+        RepositoryView<List<FaqEntry>>(
+          read: (repositories) => repositories.support.faqs(),
+          skeleton: const CardSkeleton(lines: 6),
+          builder: (context, faqs) => AppCard(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+            child: DividedColumn(
+              children: [
+                for (final faq in faqs)
+                  ProseBlock(heading: faq.question, body: faq.answer),
+              ],
+            ),
           ),
         ),
         const Gap(14),

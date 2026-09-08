@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:happilab/app/di/app_dependencies.dart';
 import 'package:happilab/app/di/app_scope.dart';
+import 'package:happilab/app/di/repositories.dart';
 import 'package:happilab/app/router/app_router.dart';
+import 'package:happilab/app/theme/app_scroll_behavior.dart';
 import 'package:happilab/app/theme/app_theme.dart';
 import 'package:happilab/app/theme/theme_reveal.dart';
 import 'package:happilab/core/config/app_config.dart';
@@ -24,7 +26,7 @@ import 'fake_photo_library.dart';
 Widget testApp({
   required String initialRoute,
   PhotoLibrary? photoLibrary,
-  PayoutAccounts? payoutAccounts,
+  Iterable<PayoutAccount> payoutAccounts = const [],
 }) {
   final dependencies = AppDependencies.withTransport(
     config: AppConfig(
@@ -33,7 +35,7 @@ Widget testApp({
     ),
     transport: FakeHttpTransport(),
     photoLibrary: photoLibrary ?? FakePhotoLibrary(),
-    payoutAccounts: payoutAccounts,
+    repositories: Repositories.fake(payoutAccounts: payoutAccounts),
   );
 
   return AppScope(
@@ -43,6 +45,7 @@ Widget testApp({
       child: ListenableBuilder(
         listenable: dependencies.themeController,
         builder: (context, _) => MaterialApp(
+          scrollBehavior: const AppScrollBehavior(),
           theme: AppTheme.light(),
           darkTheme: AppTheme.dark(),
           themeMode: dependencies.themeController.mode,

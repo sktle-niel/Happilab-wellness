@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../shared/widgets/card_skeleton.dart';
+import '../../../shared/widgets/repository_view.dart';
+
 import '../../../app/theme/app_tokens.dart';
 import '../../../shared/widgets/app_scaffold.dart';
 import '../../../app/theme/app_typography.dart';
@@ -22,23 +25,27 @@ class TermsScreen extends StatelessWidget {
       children: [
         const ScreenHeader(title: 'Terms & privacy'),
         const Gap(14),
-        AppCard(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
-          child: DividedColumn(
-            children: [
-              for (final section in SupportContent.terms)
-                ProseBlock(heading: section.heading, body: section.body),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 13),
-                child: Text(
-                  SupportContent.lastUpdated,
-                  style: AppTypography.figtree(
-                    size: 12,
-                    color: context.palette.textFaint,
+        RepositoryView<List<TermsSection>>(
+          read: (repositories) => repositories.support.terms(),
+          skeleton: const CardSkeleton(lines: 6),
+          builder: (context, sections) => AppCard(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+            child: DividedColumn(
+              children: [
+                for (final section in sections)
+                  ProseBlock(heading: section.heading, body: section.body),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 13),
+                  child: Text(
+                    SupportContent.lastUpdated,
+                    style: AppTypography.figtree(
+                      size: 12,
+                      color: context.palette.textFaint,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/di/app_scope.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../app/theme/app_palette.dart';
 import '../../../app/theme/app_tokens.dart';
@@ -39,15 +40,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     super.dispose();
   }
 
-  /// No auth backend yet: a valid form starts a persisted local session and
-  /// goes on to the photo step, so the member stays signed in across
-  /// launches. The repository call that registers the account and returns a
-  /// server token replaces the entry helper.
+  /// A valid form registers the account through the auth repository and goes
+  /// on to the photo step with the session it was given.
   Future<void> _submit() async {
     if (_isSubmitting || !_controller.validate()) return;
     setState(() => _isSubmitting = true);
-    final entered = await enterWithLocalSession(
+    final auth = AppScope.of(context).repositories.auth;
+    final entered = await enterWithSession(
       context,
+      authenticate: () => auth.register(_controller.registration),
       destination: AppRoutes.choosePhoto,
     );
     if (!entered && mounted) setState(() => _isSubmitting = false);

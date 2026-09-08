@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/di/app_scope.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../shared/widgets/app_scaffold.dart';
@@ -7,10 +8,13 @@ import '../../../app/theme/app_typography.dart';
 import '../../../shared/widgets/brand_mark.dart';
 import '../../../shared/widgets/circle_badge.dart';
 import '../../../shared/widgets/circle_icon_button.dart';
+import '../../../shared/widgets/error_view.dart';
+import '../../../shared/widgets/list_skeleton.dart';
 import '../../../shared/widgets/screen_header.dart';
 import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/pressable_scale.dart';
 import '../domain/app_notification.dart';
+import 'notifications_controller.dart';
 import '../../../app/theme/app_palette.dart';
 
 /// Everything the brand has told this member, newest first.
@@ -22,25 +26,25 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
-  List<AppNotification> _notifications = AppNotification.placeholder;
+  NotificationsController? _controller;
 
-  bool get _hasUnread => _notifications.any((entry) => entry.isUnread);
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _controller ??= NotificationsController(
+      AppScope.of(context).repositories.notifications,
+    )..load();
+  }
 
-  void _markAllRead() => setState(
-    () => _notifications = [for (final entry in _notifications) entry.asRead()],
-  );
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
 
-  /// Reading one is opening it: it is marked read, then the member is taken
-  /// where it points. One with nowhere to point never gets here.
   void _open(AppNotification notification) {
-    final destination = notification.destination;
+    final destination = _controller!.open(notification);
     if (destination == null) return;
-    setState(
-      () => _notifications = [
-        for (final entry in _notifications)
-          if (identical(entry, notification)) entry.asRead() else entry,
-      ],
-    );
     Navigator.of(context).pushNamed(_routeFor(destination));
   }
 
@@ -52,21 +56,50 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       };
 
   @override
-  Widget build(BuildContext context) => AppScaffold(
-    child: ListView(
-      padding: AppSpacing.pageInset,
-      children: [
-        ScreenHeader(
-          title: 'Notifications',
-          trailing: CircleIconButton(
-            icon: Icons.done_all_rounded,
-            semanticLabel: 'Mark all read',
-            color: context.palette.accentText,
-            onPressed: _hasUnread ? _markAllRead : null,
-          ),
+  Widget build(BuildContext context) {
+    final controller = _controller!;
+
+    return AppScaffold(
+      child: ListenableBuilder(
+        listenable: controller,
+        builder: (context, _) => ListView(
+          padding: AppSpacing.pageInset,
+          children: [
+            ScreenHeader(
+              title: 'Notifications',
+              trailing: CircleIconButton(
+                icon: Icons.done_all_rounded,
+                semanticLabel: 'Mark all read',
+                color: context.palette.accentText,
+                onPressed: controller.hasUnread ? controller.markAllRead : null,
+              ),
+            ),
+            const Gap(14),
+            _Entries(controller: controller, onOpen: _open),
+          ],
         ),
-        const Gap(14),
-        if (!_hasUnread)
+      ),
+    );
+  }
+}
+
+/// The list in its three states: still loading, failed, or the messages
+/// with the caught-up note above them once every one is read.
+class _Entries extends StatelessWidget {
+  const _Entries({required this.controller, required this.onOpen});
+
+  final NotificationsController controller;
+  final ValueChanged<AppNotification> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    if (controller.isLoading) return const ListSkeleton();
+    final error = controller.error;
+    if (error != null) return ErrorView(error: error, onRetry: controller.load);
+
+    return Column(
+      children: [
+        if (!controller.hasUnread)
           Padding(
             padding: const EdgeInsets.only(bottom: 14),
             child: Text(
@@ -79,13 +112,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               ),
             ),
           ),
-        for (final entry in _notifications) ...[
-          _NotificationTile(notification: entry, onOpen: _open),
+        for (final entry in controller.entries) ...[
+          _NotificationTile(notification: entry, onOpen: onOpen),
           const Gap(12),
         ],
       ],
-    ),
-  );
+    );
+  }
 }
 
 /// One message. Tappable only when it leads somewhere — the rest give no

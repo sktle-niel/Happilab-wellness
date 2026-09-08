@@ -1,0 +1,138 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:happilab/core/config/app_config.dart';
+import 'package:happilab/core/errors/app_exception.dart';
+import 'package:happilab/core/logging/app_logger.dart';
+import 'package:happilab/core/network/api_client.dart';
+import 'package:happilab/core/network/http_transport.dart';
+import 'package:happilab/core/security/token_store.dart';
+import 'package:happilab/features/auth/data/auth_api.dart';
+import 'package:happilab/features/notifications/data/notifications_api.dart';
+import 'package:happilab/shared/data/catalogue_api.dart';
+import 'package:happilab/shared/data/member_api.dart';
+import 'package:happilab/shared/domain/catalogue.dart';
+
+import '../../support/fake_http_transport.dart';
+
+void main() {
+  ApiClient client(FakeHttpTransport transport) => ApiClient(
+    config: AppConfig(
+      environment: AppEnvironment.dev,
+      apiBaseUrl: Uri.parse('https://api.test.local'),
+      maxRetries: 0,
+    ),
+    transport: transport,
+    tokenStore: InMemoryTokenStore(),
+    logger: AppLogger.forEnvironment(isProduction: true),
+  );
+
+  group('MemberApi', () {
+    test('reads the member off the wire and carries the token', () async {
+      final transport = FakeHttpTransport(
+        responses: const [
+          HttpTransportResponse(
+            statusCode: 200,
+            body:
+                '{"name":"Ivy Santos","referral_code":"FCV-IVY24",'
+                '"joined_on":"2025-03-12T00:00:00Z","points":1240,'
+                '"lifetime_points":4860,"referred_people":8,'
+                '"referred_buyers":5,"unread_notifications":3}',
+          ),
+        ],
+      );
+      final store = InMemoryTokenStore()..write('t0k3n');
+      final api = MemberApi(
+        ApiClient(
+          config: AppConfig(
+            environment: AppEnvironment.dev,
+            apiBaseUrl: Uri.parse('https://api.test.local'),
+          ),
+          transport: transport,
+          tokenStore: store,
+          logger: AppLogger.forEnvironment(isProduction: true),
+        ),
+      );
+
+      final outcome = await api.summary();
+
+      expect(outcome.valueOrNull?.name, 'Ivy Santos');
+      expect(outcome.valueOrNull?.pesoValue, '₱1,240');
+      expect(transport.sentRequests.single.url.path, '/v1/me');
+      expect(
+        transport.sentRequests.single.headers['authorization'],
+        'Bearer t0k3n',
+      );
+    });
+
+    test(
+      'a response off the contract is a data failure, not a crash',
+      () async {
+        final transport = FakeHttpTransport(
+          responses: const [
+            HttpTransportResponse(statusCode: 200, body: '{"name": 42}'),
+          ],
+        );
+
+        final outcome = await MemberApi(client(transport)).summary();
+
+        expect(outcome.errorOrNull, isA<DataFormatException>());
+      },
+    );
+  });
+
+  group('AuthApi', () {
+    test('posts the credentials and reads the session back', () async {
+      final transport = FakeHttpTransport(
+        responses: const [
+          HttpTransportResponse(
+            statusCode: 200,
+            body: '{"access_token":"a","refresh_token":"r"}',
+          ),
+        ],
+      );
+
+      final outcome = await AuthApi(client(transport))
+          .signIn(identifier: 'ivy@example.com', password: 'placeholder');
+
+      expect(outcome.valueOrNull?.accessToken, 'a');
+      expect(outcome.valueOrNull?.refreshToken, 'r');
+      expect(transport.sentRequests.single.method, HttpMethod.post);
+      expect(transport.sentRequests.single.url.path, '/v1/auth/sign-in');
+    });
+  });
+
+  group('parsers', () {
+    test('a notification with a destination the app does not know is news', () {
+      final entries = NotificationsApi.parseList([
+        {
+          'id': 'n9',
+          'body': 'Hello',
+          'when': '1h',
+          'is_unread': true,
+          'destination': 'someday',
+        },
+      ]);
+
+      expect(entries.single.destination, isNull);
+      expect(entries.single.isActionable, isFalse);
+    });
+
+    test('a product carries only the store links the app knows', () {
+      final products = CatalogueApi.parseProducts([
+        {
+          'name': 'Soap',
+          'blurb': 'Clean',
+          'price': '₱250',
+          'points_range': '11–17',
+          'image_url': 'https://cdn.test/soap.jpg',
+          'badge': 'topSale',
+          'store_links': {'shopee': 'https://shopee.ph/x', 'other': 'y'},
+        },
+      ]);
+
+      expect(products.single.badge, ProductBadge.topSale);
+      expect(products.single.storeLinks, {
+        SharePlatform.shopee: 'https://shopee.ph/x',
+      });
+    });
+  });
+}

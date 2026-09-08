@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../shared/widgets/list_skeleton.dart';
+import '../../../shared/widgets/member_view.dart';
+import '../../../shared/widgets/repository_view.dart';
+
 import '../../../shared/widgets/app_scaffold.dart';
 
 import 'package:flutter/services.dart';
@@ -8,7 +12,6 @@ import '../../../app/shell/app_shell_scope.dart';
 import '../../../app/shell/widgets/faith_nav_bar.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
-import '../../../shared/domain/member_summary.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/circle_badge.dart';
 import '../../../shared/widgets/divided_column.dart';
@@ -25,11 +28,9 @@ class MyReferralsScreen extends StatelessWidget {
   const MyReferralsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final summary = MemberSummary.placeholder;
-
-    return AppScaffold(
-      child: ListView(
+  Widget build(BuildContext context) => AppScaffold(
+    child: MemberView(
+      builder: (context, member) => ListView(
         padding: FaithNavBar.pageInset,
         children: [
           ScreenHeader(
@@ -37,22 +38,26 @@ class MyReferralsScreen extends StatelessWidget {
             title: 'My referrals',
           ),
           const Gap(AppSpacing.md),
-          _CodeCard(code: summary.referralCode),
+          _CodeCard(code: member.referralCode),
           const Gap(14),
-          _ReferralSummary(text: summary.referralSummary),
+          _ReferralSummary(text: member.referralSummary),
           const Gap(AppSpacing.sm),
-          AppCard.flush(
-            child: DividedColumn(
-              children: [
-                for (final referral in Referral.placeholder)
-                  ReferralRow(referral: referral),
-              ],
+          RepositoryView<List<Referral>>(
+            read: (repositories) => repositories.referrals.list(),
+            skeleton: const ListSkeleton(rows: 5),
+            builder: (context, referrals) => AppCard.flush(
+              child: DividedColumn(
+                children: [
+                  for (final referral in referrals)
+                    ReferralRow(referral: referral),
+                ],
+              ),
             ),
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
 }
 
 /// The headline count, marked with the people it counts.

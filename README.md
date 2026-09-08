@@ -5,8 +5,9 @@ every order it brings in — not just the first — and cashes those points out 
 apiece. The app is the whole loop: the catalogue, the share sheet, the referral ledger, the payout,
 and the community that keeps people coming back.
 
-The screens are built and run on placeholder data. Every figure one shows comes from a single model in
-`shared/domain/`, so the day the API exists it is a data source that changes, not a widget tree.
+Every screen reads through a repository contract with two implementations behind it: the API over
+`ApiClient`, and a fake that serves bundled data. A build with no defines runs end to end on the
+fakes; `--dart-define=BACKEND=api` binds the API without touching a widget.
 
 **Stack:** Flutter 3.47 · Dart 3.13 · Material 3 · Android + iOS
 
@@ -18,11 +19,11 @@ The screens are built and run on placeholder data. Every figure one shows comes 
 | `auth` | Sign in and create account, with the password policy checked as it is typed |
 | `home` | Points balance, affiliate banner, product grid, and the share sheet behind it |
 | `referrals` | How the programme works, and the member's own referral ledger |
-| `rewards` | Cash out — preset amounts, payout method, editable payout number, receipt |
+| `rewards` | Cash out — presets or a typed amount from 1,000 pts, editable GCash and Maya wallets, receipt |
 | `community` | News feed, member stories with video, and a suggestion box |
 | `notifications` | The activity a member has not read yet |
 | `profile` | Profile, edit profile, account activity |
-| `support` | Help centre and programme terms |
+| `support` | Help centre, programme terms, and a support chat with a "/agent" handoff |
 
 Five of those live behind the bottom bar (`AppTab`); everything else is pushed on top of a tab and
 carries a back button.
@@ -60,6 +61,34 @@ flutter run \
 | `APP_ENV` | `dev` | Flavor: `dev`, `staging`, `prod` |
 | `API_BASE_URL` | `https://api.happilab.app` | API root. Must be `https` outside local dev |
 | `API_MAX_REQUESTS_PER_MINUTE` | `60` | Client-side rate limit ceiling |
+| `BACKEND` | `fake` | `fake` serves bundled data; `api` binds the repositories to `API_BASE_URL` |
+
+## Backend
+
+The API contract the app is built against, all under `/v1` (see `core/network/api_endpoints.dart`):
+
+The implementation lives in the sibling project `../backend` (Fastify, Drizzle, PostgreSQL); its
+`FLOW.md` documents the request flow, the security levels and every endpoint's fields.
+
+| Area | Endpoints |
+| --- | --- |
+| Auth | `POST auth/sign-in`, `POST auth/register`, `POST auth/sign-out`, `POST auth/refresh` |
+| Member | `GET me`, `PUT me/details`, `PUT me/password`, `GET me/activity` |
+| Referrals | `GET me/referrals` |
+| Notifications | `GET me/notifications`, `POST me/notifications/{id}/read`, `POST me/notifications/read` |
+| Rewards | `GET me/payout-accounts`, `PUT me/payout-accounts`, `GET me/cash-outs`, `POST me/cash-outs` |
+| Catalogue and community | `GET products`, `GET feed`, `GET testimonials` |
+| Support | `GET support/faqs`, `GET support/terms` |
+
+Every call carries `Authorization: Bearer <access token>`; a 401 or 403 clears the session on the
+device at once. Responses are parsed defensively: a shape off the contract is a
+`DataFormatException` the screen shows as an error with a retry, never a crash. Reads that tolerate
+age (`me`, `products`, `feed`, `support/*`) are cached and served stale when the backend is down.
+
+The database behind that API (members, sessions and refresh-token families, a token denylist,
+login attempts and lockouts, the points ledger, payout accounts and cash outs, notifications, the
+support desk, rate-limit policies and counters, request and audit logs) is drawn as an ERD with its
+security layers and rate limits in `C:/Users/user/Documents/Niel/ERD/happilab-erd.md`.
 
 ## Architecture
 

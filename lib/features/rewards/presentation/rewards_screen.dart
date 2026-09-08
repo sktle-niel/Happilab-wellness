@@ -3,13 +3,20 @@ import 'package:flutter/material.dart';
 import '../../../app/di/app_scope.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../shared/widgets/app_scaffold.dart';
+import '../../../shared/widgets/app_toast.dart';
+import '../../../shared/widgets/list_skeleton.dart';
+import '../../../shared/widgets/member_view.dart';
+import '../../../shared/widgets/repository_view.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../shared/domain/member_summary.dart';
+import '../../../core/storage/persisted_flag.dart';
 import '../../../shared/domain/payout_account.dart';
 import '../../../shared/utils/number_format.dart';
+import '../../../shared/widgets/balance_eye.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/divided_column.dart';
 import '../../../shared/widgets/gap.dart';
 import '../../../shared/widgets/screen_header.dart';
@@ -22,16 +29,28 @@ import 'widgets/payout_method_picker.dart';
 import '../../../app/theme/app_palette.dart';
 
 /// Turn points into money: how much, where to, and what has already been sent.
-class RewardsScreen extends StatefulWidget {
+class RewardsScreen extends StatelessWidget {
   const RewardsScreen({super.key});
 
   @override
-  State<RewardsScreen> createState() => _RewardsScreenState();
+  Widget build(BuildContext context) => AppScaffold(
+    child: MemberView(
+      builder: (context, member) => _RewardsBody(member: member),
+    ),
+  );
 }
 
-class _RewardsScreenState extends State<RewardsScreen> {
-  static final MemberSummary _summary = MemberSummary.placeholder;
+/// The form and the history, once the balance is known.
+class _RewardsBody extends StatefulWidget {
+  const _RewardsBody({required this.member});
 
+  final MemberSummary member;
+
+  @override
+  State<_RewardsBody> createState() => _RewardsBodyState();
+}
+
+class _RewardsBodyState extends State<_RewardsBody> {
   RewardsController? _controller;
 
   /// The form follows the member's saved wallets; the scope holding them is
@@ -39,9 +58,12 @@ class _RewardsScreenState extends State<RewardsScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final dependencies = AppScope.of(context);
+    dependencies.payoutAccounts.load();
     _controller ??= RewardsController(
-      availablePoints: _summary.points,
-      wallets: AppScope.of(context).payoutAccounts,
+      availablePoints: widget.member.points,
+      wallets: dependencies.payoutAccounts,
+      rewards: dependencies.repositories.rewards,
     );
   }
 
@@ -56,85 +78,130 @@ class _RewardsScreenState extends State<RewardsScreen> {
       Navigator.of(context)
           .pushNamed(AppRoutes.editPayoutNumber, arguments: kind);
 
+  /// A refusal is said in a toast; the form stays as it was for another go.
+  Future<void> _submit() async {
+    final overlay = Overlay.of(context);
+    final error = await _controller!.submit();
+    if (error != null) AppToast.failureOn(overlay, error);
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = _controller!;
 
-    return AppScaffold(
-      child: ListView(
-        padding: AppSpacing.pageInset,
-        children: [
-          const ScreenHeader(title: 'Cash out'),
-          const Gap(AppSpacing.md),
-          _BalanceStrip(summary: _summary),
-          const Gap(AppSpacing.md),
-          ListenableBuilder(
-            listenable: controller,
-            builder: (context, _) => controller.isSubmitted
-                ? CashOutSuccessCard(
-                    message: controller.confirmation,
-                    onDone: controller.reset,
-                  )
-                : _CashOutForm(
-                    controller: controller,
-                    onOpenWallet: _openWallet,
-                  ),
-          ),
-          const Gap(AppSpacing.md),
-          const SectionHeader(title: 'History'),
-          const Gap(AppSpacing.sm),
-          const _HistoryCard(),
-        ],
-      ),
+    return ListView(
+      padding: AppSpacing.pageInset,
+      children: [
+        const ScreenHeader(title: 'Cash out'),
+        const Gap(AppSpacing.md),
+        _BalanceStrip(
+          summary: widget.member,
+          hidden: AppScope.of(context).balanceHidden,
+        ),
+        const Gap(AppSpacing.sm),
+        const _CashOutNote(),
+        const Gap(AppSpacing.md),
+        ListenableBuilder(
+          listenable: controller,
+          builder: (context, _) => controller.isSubmitted
+              ? CashOutSuccessCard(
+                  message: controller.confirmation,
+                  onDone: controller.reset,
+                )
+              : _CashOutForm(
+                  controller: controller,
+                  onOpenWallet: _openWallet,
+                  onSubmit: _submit,
+                ),
+        ),
+        const Gap(AppSpacing.md),
+        const SectionHeader(title: 'History'),
+        const Gap(AppSpacing.sm),
+        RepositoryView<List<CashOutRecord>>(
+          read: (repositories) => repositories.rewards.history(),
+          skeleton: const ListSkeleton(rows: 2, withAvatar: false),
+          builder: (context, records) => _HistoryCard(records: records),
+        ),
+      ],
     );
   }
 }
 
 class _BalanceStrip extends StatelessWidget {
-  const _BalanceStrip({required this.summary});
+  const _BalanceStrip({required this.summary, required this.hidden});
 
   final MemberSummary summary;
+  final PersistedFlag hidden;
 
   @override
   Widget build(BuildContext context) => AppCard(
-    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-    child: Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 10,
-      runSpacing: 4,
-      children: [
-        Text(
-          'Available',
-          style: AppTypography.figtree(
-            size: 12.5,
-            weight: 700,
-            color: context.palette.textMuted,
+    padding: const EdgeInsets.fromLTRB(18, 10, 8, 10),
+    child: ListenableBuilder(
+      listenable: hidden,
+      builder: (context, _) => Row(
+        children: [
+          Expanded(
+            child: _BalanceFigures(summary: summary, isHidden: hidden.value),
           ),
-        ),
-        Text(
-          NumberFormat.points(summary.points),
-          style: AppTypography.figtree(size: 20, weight: 800),
-        ),
-        Text(
-          '= ${summary.pesoValue}',
-          style: AppTypography.figtree(
-            size: 13.5,
-            weight: 700,
-            color: context.palette.accentText,
-          ),
-        ),
-      ],
+          BalanceEye(hidden: hidden, color: context.palette.textMuted),
+        ],
+      ),
     ),
   );
 }
 
+class _BalanceFigures extends StatelessWidget {
+  const _BalanceFigures({required this.summary, required this.isHidden});
+
+  final MemberSummary summary;
+  final bool isHidden;
+
+  @override
+  Widget build(BuildContext context) => Wrap(
+    crossAxisAlignment: WrapCrossAlignment.center,
+    spacing: 10,
+    runSpacing: 4,
+    children: [
+      Text(
+        'Available',
+        style: AppTypography.figtree(
+          size: 12.5,
+          weight: 700,
+          color: context.palette.textMuted,
+        ),
+      ),
+      Text(
+        '${summary.pointsShown(hidden: isHidden)} pts',
+        style: AppTypography.figtree(size: 20, weight: 800),
+      ),
+      Text(
+        '= ${summary.pesoShown(hidden: isHidden)}',
+        style: AppTypography.figtree(
+          size: 13.5,
+          weight: 700,
+          color: context.palette.accentText,
+        ),
+      ),
+    ],
+  );
+}
+
 class _CashOutForm extends StatelessWidget {
-  const _CashOutForm({required this.controller, required this.onOpenWallet});
+  const _CashOutForm({
+    required this.controller,
+    required this.onOpenWallet,
+    required this.onSubmit,
+  });
 
   final RewardsController controller;
 
   /// Opens a wallet's form — to add it, or to change what is saved.
   final ValueChanged<PayoutKind> onOpenWallet;
+  final VoidCallback onSubmit;
+
+  /// Inert until the form is complete, and while a request is out.
+  VoidCallback? get _onPressed =>
+      controller.canSubmit && !controller.isSubmitting ? onSubmit : null;
 
   @override
   Widget build(BuildContext context) {
@@ -148,12 +215,15 @@ class _CashOutForm extends StatelessWidget {
         const Gap(AppSpacing.sm),
         if (amounts.isEmpty)
           const _NotEnoughToSend()
-        else
+        else ...[
           AmountChipRow(
             options: amounts,
             selected: controller.amount,
             onSelect: controller.selectAmount,
           ),
+          const Gap(AppSpacing.sm + 4),
+          _CustomAmountField(controller: controller),
+        ],
         const Gap(AppSpacing.md),
         const SectionHeader(title: 'Send to'),
         const Gap(AppSpacing.sm),
@@ -176,16 +246,8 @@ class _CashOutForm extends StatelessWidget {
           label: controller.amount == null
               ? 'Choose an amount'
               : 'Cash out ${NumberFormat.peso(controller.amount!)}',
-          onPressed: controller.canSubmit ? controller.submit : null,
-        ),
-        const Gap(AppSpacing.sm),
-        Text(
-          CashOutTerms.feeNote,
-          textAlign: TextAlign.center,
-          style: AppTypography.figtree(
-            size: 13,
-            color: context.palette.textFaint,
-          ),
+          onPressed: _onPressed,
+          isLoading: controller.isSubmitting,
         ),
       ],
     );
@@ -241,6 +303,73 @@ class _AddWalletButton extends StatelessWidget {
   );
 }
 
+/// The one rule of cashing out, said before the form: the balance it takes.
+class _CashOutNote extends StatelessWidget {
+  const _CashOutNote();
+
+  @override
+  Widget build(BuildContext context) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Padding(
+        padding: const EdgeInsets.only(top: 1),
+        child: Icon(
+          Icons.info_outline_rounded,
+          size: 17,
+          color: context.palette.accentText,
+        ),
+      ),
+      const Gap.sm(),
+      Expanded(
+        child: Text(
+          CashOutTerms.requirementNote,
+          style: AppTypography.figtree(
+            size: 13,
+            weight: 600,
+            height: 1.4,
+            color: context.palette.textMuted,
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+/// An amount of the member's own, checked as it is typed. Only offered once
+/// the balance can be sent at all.
+class _CustomAmountField extends StatelessWidget {
+  const _CustomAmountField({required this.controller});
+
+  final RewardsController controller;
+
+  @override
+  Widget build(BuildContext context) => AppTextField(
+    label: 'Or enter an amount',
+    controller: controller.customAmount,
+    hint: 'e.g. 1500',
+    leadingIcon: Icons.edit_outlined,
+    style: AppTextFieldStyle.inset,
+    keyboardType: TextInputType.number,
+    textInputAction: TextInputAction.done,
+    helperText:
+        'From ${NumberFormat.points(CashOutTerms.minimumPoints)} up to your '
+        'balance.',
+    errorText: controller.customAmountError,
+    onChanged: controller.onCustomAmountChanged,
+    trailing: Padding(
+      padding: const EdgeInsets.only(right: AppSpacing.md),
+      child: Text(
+        'pts',
+        style: AppTypography.figtree(
+          size: 13,
+          weight: 700,
+          color: context.palette.textFaint,
+        ),
+      ),
+    ),
+  );
+}
+
 /// Stands in for the amount chips when the balance is below the minimum. An
 /// empty row under the heading reads as a screen that failed to load.
 class _NotEnoughToSend extends StatelessWidget {
@@ -254,16 +383,15 @@ class _NotEnoughToSend extends StatelessWidget {
 }
 
 class _HistoryCard extends StatelessWidget {
-  const _HistoryCard();
+  const _HistoryCard({required this.records});
+
+  final List<CashOutRecord> records;
 
   @override
   Widget build(BuildContext context) => AppCard.flush(
     borderRadius: AppRadius.card,
     child: DividedColumn(
-      children: [
-        for (final record in CashOutRecord.placeholder)
-          _HistoryRow(record: record),
-      ],
+      children: [for (final record in records) _HistoryRow(record: record)],
     ),
   );
 }

@@ -9,6 +9,7 @@ import '../../../app/theme/app_typography.dart';
 import '../../../shared/domain/member_summary.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/member_avatar.dart';
+import '../../../shared/widgets/member_view.dart';
 import '../../../shared/widgets/circle_icon_button.dart';
 import '../../../shared/widgets/divided_column.dart';
 import '../../../shared/widgets/gap.dart';
@@ -26,39 +27,38 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  static final MemberSummary _summary = MemberSummary.placeholder;
-
   bool _notificationsEnabled = true;
 
-  /// Ends the session; the guard above the navigator walks the member out.
-  /// Repeated taps are no-ops — an ended session cannot end again.
   void _logOut() => AppScope.of(context).sessionManager.signOut();
 
   @override
   Widget build(BuildContext context) => AppScaffold(
-    child: ListView(
-      padding: FaithNavBar.pageInset,
-      children: [
-        _ProfileHeader(
-          summary: _summary,
-          onEdit: () => Navigator.of(context).pushNamed(AppRoutes.editProfile),
-        ),
-        const Gap(AppSpacing.lg),
-        _RewardsCard(
-          summary: _summary,
-          onCashOut: () => Navigator.of(context).pushNamed(AppRoutes.rewards),
-        ),
-        const Gap(AppSpacing.sm),
-        _PreferencesGroup(
-          notificationsEnabled: _notificationsEnabled,
-          onNotificationsChanged: (value) =>
-              setState(() => _notificationsEnabled = value),
-        ),
-        const Gap(AppSpacing.sm),
-        const _SupportGroup(),
-        const Gap(AppSpacing.md),
-        _LogOutButton(onPressed: _logOut),
-      ],
+    child: MemberView(
+      builder: (context, member) => ListView(
+        padding: FaithNavBar.pageInset,
+        children: [
+          _ProfileHeader(
+            summary: member,
+            onEdit: () =>
+                Navigator.of(context).pushNamed(AppRoutes.editProfile),
+          ),
+          const Gap(AppSpacing.lg),
+          _RewardsCard(
+            summary: member,
+            onCashOut: () => Navigator.of(context).pushNamed(AppRoutes.rewards),
+          ),
+          const Gap(AppSpacing.sm),
+          _PreferencesGroup(
+            notificationsEnabled: _notificationsEnabled,
+            onNotificationsChanged: (value) =>
+                setState(() => _notificationsEnabled = value),
+          ),
+          const Gap(AppSpacing.sm),
+          const _SupportGroup(),
+          const Gap(AppSpacing.md),
+          _LogOutButton(onPressed: _logOut),
+        ],
+      ),
     ),
   );
 }
@@ -246,17 +246,25 @@ class _CashOutLabel extends StatelessWidget {
 
   final MemberSummary summary;
 
+  /// The balance follows the eye on home: hidden there, hidden here.
+  String _figures(bool hidden) =>
+      '${summary.pointsShown(hidden: hidden)} pts · '
+      '${summary.pesoShown(hidden: hidden)}';
+
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
       Text('Cash out', style: AppTypography.figtree(size: 15, weight: 800)),
-      Text(
-        '${summary.pointsFormatted} pts · ${summary.pesoValue}',
-        style: AppTypography.figtree(
-          size: 12.5,
-          color: context.palette.textMuted,
+      ListenableBuilder(
+        listenable: AppScope.of(context).balanceHidden,
+        builder: (context, _) => Text(
+          _figures(AppScope.of(context).balanceHidden.value),
+          style: AppTypography.figtree(
+            size: 12.5,
+            color: context.palette.textMuted,
+          ),
         ),
       ),
     ],

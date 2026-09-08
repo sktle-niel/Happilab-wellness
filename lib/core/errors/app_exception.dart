@@ -5,7 +5,8 @@
 sealed class AppException implements Exception {
   const AppException(this.message);
 
-  /// Safe to display: never contains tokens, payloads or stack traces.
+  /// Safe to display: never contains tokens, payloads or stack traces. The
+  /// server's own sentence when it sent one, the type's wording otherwise.
   final String message;
 
   @override
@@ -25,11 +26,11 @@ final class RequestTimeoutException extends AppException {
   ]);
 }
 
-/// 401/403 — the session is gone or the caller lacks permission.
+/// 401/403 — the session is gone, the credentials were refused, or the
+/// caller lacks permission.
 final class UnauthorizedException extends AppException {
-  const UnauthorizedException([
-    super.message = 'Your session has ended. Please sign in again.',
-  ]);
+  const UnauthorizedException([String? message])
+    : super(message ?? 'Your session has ended. Please sign in again.');
 }
 
 /// 429, or the client-side limiter refusing to send.
@@ -43,21 +44,19 @@ final class RateLimitedException extends AppException {
 
 /// Any other 4xx: the request itself was wrong, so retrying will not help.
 final class ClientException extends AppException {
-  const ClientException(
-    this.statusCode, [
-    super.message = 'That request could not be completed.',
-  ]);
+  const ClientException(this.statusCode, [String? message])
+    : super(message ?? 'That request could not be completed.');
 
   final int statusCode;
 }
 
 /// 5xx — transient by assumption, safe to retry with backoff.
 final class ServerException extends AppException {
-  const ServerException(
-    this.statusCode, [
-    super.message =
-        'Something went wrong on our side. Please try again shortly.',
-  ]);
+  const ServerException(this.statusCode, [String? message])
+    : super(
+        message ??
+            'Something went wrong on our side. Please try again shortly.',
+      );
 
   final int statusCode;
 }

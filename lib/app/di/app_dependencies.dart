@@ -9,10 +9,13 @@ import '../../core/network/rate_limiter.dart';
 import '../../core/security/secure_token_store.dart';
 import '../../core/security/session_manager.dart';
 import '../../core/security/token_store.dart';
+import '../../core/storage/persisted_flag.dart';
+import '../../shared/domain/member_store.dart';
 import '../../shared/domain/payout_account.dart';
 import '../../shared/domain/profile_photo.dart';
 import '../../shared/utils/native_photo_library.dart';
 import '../theme/theme_controller.dart';
+import 'repositories.dart';
 
 /// Composition root.
 ///
@@ -25,18 +28,21 @@ class AppDependencies {
     required this.logger,
     required this.sessionManager,
     required this.apiClient,
+    required this.repositories,
     required this.profilePhoto,
-    required this.payoutAccounts,
+    required this.balanceHidden,
     ThemeController? themeController,
-  }) : themeController = themeController ?? ThemeController() {
+  }) : themeController = themeController ?? ThemeController(),
+       member = MemberStore(repositories.member),
+       payoutAccounts = PayoutAccounts(repositories.payoutAccounts) {
     // Any session boundary — in or out — drops cached responses: one member's
     // data must never be served into another's session.
     sessionManager.addListener(apiClient.clearCache);
     // The picture is the member's; a phone the next member signs in on must
     // not still wear it.
     sessionManager.addListener(_forgetPhotoWhenSignedOut);
-    // The wallets too: they are the member's, not the phone's.
-    sessionManager.addListener(_forgetPayoutAccountsWhenSignedOut);
+    // The wallets too, and the member's own figures: theirs, not the phone's.
+    sessionManager.addListener(_forgetMemberWhenSignedOut);
   }
 
   factory AppDependencies.production() {
@@ -44,24 +50,30 @@ class AppDependencies {
     final logger = AppLogger.forEnvironment(isProduction: config.isProduction);
     final sessionManager = SessionManager(store: SecureTokenStore());
     final transport = IoHttpTransport(timeout: config.requestTimeout);
+    final apiClient = ApiClient(
+      config: config,
+      transport: transport,
+      tokenStore: sessionManager,
+      logger: logger,
+      rateLimiter: RateLimiter.perMinute(config.maxRequestsPerMinute),
+    );
 
     return AppDependencies(
       config: config,
       logger: logger,
       sessionManager: sessionManager,
-      apiClient: ApiClient(
-        config: config,
-        transport: transport,
-        tokenStore: sessionManager,
-        logger: logger,
-        rateLimiter: RateLimiter.perMinute(config.maxRequestsPerMinute),
-      ),
+      apiClient: apiClient,
+      repositories: Repositories.forConfig(config, apiClient),
       profilePhoto: ProfilePhoto(library: const NativePhotoLibrary()),
-      payoutAccounts: PayoutAccounts(),
-      // Its own entry in the secure store, apart from the token.
+      // Their own entries in the secure store, apart from the token.
       themeController: ThemeController(
         store: SecureTokenStore(key: 'theme_mode'),
         logger: logger,
+      ),
+      balanceHidden: PersistedFlag(
+        store: SecureTokenStore(key: 'balance_hidden'),
+        logger: logger,
+        onValue: 'hidden',
       ),
     );
   }
@@ -70,12 +82,12 @@ class AppDependencies {
   /// and previews use instead of touching the network. Credentials stay in
   /// memory here: secure storage needs a platform channel that a widget test
   /// does not have. [photoLibrary] is the same seam for the picker, and
-  /// [payoutAccounts] lets a test start with wallets already saved.
+  /// [repositories] lets a test hand in its own data — the fakes otherwise.
   factory AppDependencies.withTransport({
     required AppConfig config,
     required HttpTransport transport,
     PhotoLibrary? photoLibrary,
-    PayoutAccounts? payoutAccounts,
+    Repositories? repositories,
   }) {
     final logger = AppLogger.forEnvironment(isProduction: config.isProduction);
     final sessionManager = SessionManager(store: InMemoryTokenStore());
@@ -90,11 +102,12 @@ class AppDependencies {
         tokenStore: sessionManager,
         logger: logger,
       ),
+      repositories: repositories ?? Repositories.fake(),
       profilePhoto: ProfilePhoto(
         library: photoLibrary ?? const NativePhotoLibrary(),
       ),
-      payoutAccounts: payoutAccounts ?? PayoutAccounts(),
       themeController: ThemeController(logger: logger),
+      balanceHidden: PersistedFlag(store: InMemoryTokenStore(), logger: logger),
     );
   }
 
@@ -106,6 +119,12 @@ class AppDependencies {
   final SessionManager sessionManager;
   final ApiClient apiClient;
 
+  /// Every data source, behind its contract — API or the bundled fakes.
+  final Repositories repositories;
+
+  /// The signed-in member's figures, observable, loaded once per session.
+  final MemberStore member;
+
   /// The member's picture, observable — every avatar of them draws from it.
   final ProfilePhoto profilePhoto;
 
@@ -113,21 +132,29 @@ class AppDependencies {
   /// edit form share them.
   final PayoutAccounts payoutAccounts;
 
-  /// Light or dark, chosen by the member for the session.
+  /// Light or dark, chosen by the member.
   final ThemeController themeController;
+
+  /// Whether the member keeps their balance out of sight — on home, on cash
+  /// out, wherever the figure shows. Set once, it holds everywhere.
+  final PersistedFlag balanceHidden;
 
   void _forgetPhotoWhenSignedOut() {
     if (!sessionManager.isSignedIn) unawaited(profilePhoto.remove());
   }
 
-  void _forgetPayoutAccountsWhenSignedOut() {
-    if (!sessionManager.isSignedIn) payoutAccounts.clear();
+  void _forgetMemberWhenSignedOut() {
+    if (sessionManager.isSignedIn) return;
+    payoutAccounts.clear();
+    member.reset();
   }
 
   void dispose() {
     themeController.dispose();
+    balanceHidden.dispose();
     profilePhoto.dispose();
     payoutAccounts.dispose();
+    member.dispose();
     sessionManager.dispose();
     apiClient.close();
   }

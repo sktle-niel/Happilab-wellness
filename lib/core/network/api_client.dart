@@ -9,6 +9,7 @@ import 'http_transport.dart';
 import 'rate_limiter.dart';
 import 'response_cache.dart';
 import 'retry_policy.dart';
+import 'server_error.dart';
 
 /// Turns raw JSON into a typed model.
 typedef JsonParser<T> = T Function(Object? json);
@@ -231,27 +232,37 @@ class ApiClient {
   }
 
   /// A rejected session is dropped immediately — holding a token the server has
-  /// already refused only invites replay.
+  /// already refused only invites replay. The server's own account of the
+  /// failure supplies the sentence the member reads; its code goes to the log.
   Future<AppException> _failureFor(
     HttpMethod method,
     Uri url,
     HttpTransportResponse response,
   ) async {
-    final failure = _mapStatus(response);
+    final server = ServerError.parse(response.body);
+    final failure = _mapStatus(response, server?.message);
     if (failure is UnauthorizedException) await _tokenStore.clear();
+    final code = server == null ? '' : ' ${server.code}';
     _logger.warning(
-      '${method.name.toUpperCase()} $url → ${response.statusCode}',
+      '${method.name.toUpperCase()} $url → ${response.statusCode}$code',
     );
     return failure;
   }
 
-  static AppException _mapStatus(HttpTransportResponse response) =>
-      switch (response.statusCode) {
-        401 || 403 => const UnauthorizedException(),
-        429 => RateLimitedException(retryAfter: response.retryAfter),
-        final code when code >= 500 => ServerException(code),
-        final code => ClientException(code),
-      };
+  /// [message] is the server's sentence when it sent one; each exception
+  /// falls back to its own wording otherwise.
+  static AppException _mapStatus(
+    HttpTransportResponse response,
+    String? message,
+  ) => switch (response.statusCode) {
+    401 || 403 => UnauthorizedException(message),
+    429 => RateLimitedException(
+      retryAfter: response.retryAfter,
+      message: message,
+    ),
+    final code when code >= 500 => ServerException(code, message),
+    final code => ClientException(code, message),
+  };
 
   static Object? _decode(String body) {
     if (body.isEmpty) return null;

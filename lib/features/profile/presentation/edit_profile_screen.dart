@@ -6,9 +6,10 @@ import '../../../shared/widgets/app_toast.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../core/security/input_validator.dart';
-import '../../../shared/domain/member_summary.dart';
+import '../../../core/errors/result.dart';
 import '../../../shared/domain/password_policy.dart';
 import '../../../shared/domain/profile_photo.dart';
+import '../domain/profile_repository.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_text_field.dart';
@@ -27,11 +28,7 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  static final MemberSummary _summary = MemberSummary.placeholder;
-
-  final TextEditingController _name = TextEditingController(
-    text: _summary.name,
-  );
+  final TextEditingController _name = TextEditingController();
   final TextEditingController _phone = TextEditingController();
   final TextEditingController _currentPassword = TextEditingController();
   final TextEditingController _newPassword = TextEditingController();
@@ -40,8 +37,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String? _nameError;
   String? _phoneError;
   String? _passwordError;
+  bool _isSavingDetails = false;
+  bool _isSavingPassword = false;
+
+  /// The stored name, which the avatar draws its initials from — not the
+  /// text being edited, which changes under the cursor.
+  String _memberName = '';
 
   ProfilePhoto get _photo => AppScope.of(context).profilePhoto;
+
+  ProfileRepository get _profile => AppScope.of(context).repositories.profile;
+
+  /// The form opens on what is on the account.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final member = AppScope.of(context).member.summary;
+    if (member == null || _memberName.isNotEmpty) return;
+    _memberName = member.name;
+    _name.text = member.name;
+  }
 
   @override
   void dispose() {
@@ -53,27 +68,41 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.dispose();
   }
 
-  void _saveDetails() {
+  Future<void> _saveDetails() async {
+    final name = InputValidator.sanitize(_name.text);
+    final phone = InputValidator.sanitize(_phone.text);
     setState(() {
-      _nameError = InputValidator.notEmpty(
-        InputValidator.sanitize(_name.text),
-        field: 'Full name',
-      );
-      _phoneError = InputValidator.minLength(
-        InputValidator.sanitize(_phone.text),
-        11,
-        field: 'Mobile number',
-      );
+      _nameError = InputValidator.notEmpty(name, field: 'Full name');
+      _phoneError = InputValidator.minLength(phone, 11, field: 'Mobile number');
     });
-    if (_nameError != null || _phoneError != null) return;
-    _confirm('Profile saved.');
+    if (_nameError != null || _phoneError != null || _isSavingDetails) return;
+
+    setState(() => _isSavingDetails = true);
+    final outcome = await _profile.updateDetails(fullName: name, phone: phone);
+    if (!mounted) return;
+    setState(() => _isSavingDetails = false);
+    _report(outcome, 'Profile saved.');
+    if (outcome.isSuccess) AppScope.of(context).member.refresh();
   }
 
-  void _savePassword() {
+  Future<void> _savePassword() async {
     setState(() => _passwordError = _validatePasswordChange());
-    if (_passwordError != null) return;
-    _confirm('Password updated.');
+    if (_passwordError != null || _isSavingPassword) return;
+
+    setState(() => _isSavingPassword = true);
+    final outcome = await _profile.changePassword(
+      current: _currentPassword.text,
+      next: _newPassword.text,
+    );
+    if (!mounted) return;
+    setState(() => _isSavingPassword = false);
+    _report(outcome, 'Password updated.');
   }
+
+  void _report(Result<void> outcome, String success) => outcome.fold(
+    (_) => AppToast.success(context, success),
+    (error) => AppToast.failureOn(Overlay.of(context), error),
+  );
 
   /// The first thing wrong with the password change, or null if nothing is.
   String? _validatePasswordChange() {
@@ -87,8 +116,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return null;
   }
 
-  void _confirm(String message) => AppToast.success(context, message);
-
   @override
   Widget build(BuildContext context) => AppScaffold(
     child: ListView(
@@ -97,7 +124,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         const ScreenHeader(title: 'Edit profile'),
         const Gap(AppSpacing.md),
         _DetailsCard(
-          photoPicker: ProfilePhotoPicker(photo: _photo, name: _summary.name),
+          photoPicker: ProfilePhotoPicker(photo: _photo, name: _memberName),
           name: _name,
           phone: _phone,
           nameError: _nameError,

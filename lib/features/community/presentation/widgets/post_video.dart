@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
-import '../../../../app/theme/app_palette.dart';
 import '../../../../shared/utils/video_clips.dart';
+import '../../../../shared/widgets/skeleton.dart';
 import '../../../../shared/widgets/video_cover.dart';
 
 /// A looping, muted clip inside a feed post.
@@ -36,7 +36,7 @@ class _PostVideoState extends State<PostVideo> {
 
   Future<void> _load() async {
     // Unplayable clips come back null; the placeholder stands in.
-    final controller = await initializeAssetClip(widget.assetPath);
+    final controller = await initializeClip(widget.assetPath);
     if (controller == null) return;
     if (!mounted) {
       await controller.dispose();
@@ -57,7 +57,7 @@ class _PostVideoState extends State<PostVideo> {
       height: widget.height,
       width: double.infinity,
       child: controller == null
-          ? ColoredBox(color: context.palette.tint)
+          ? const SkeletonBox(borderRadius: BorderRadius.zero)
           : VideoCover(controller: controller),
     );
   }
