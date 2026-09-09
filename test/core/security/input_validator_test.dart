@@ -18,7 +18,7 @@ void main() {
 
   group('InputValidator.email', () {
     test('accepts an address, ignoring the space around it', () {
-      expect(InputValidator.email('ivy.santos+ph@gmail.com'), isNull);
+      expect(InputValidator.email('ivy.12+ph@gmail.com'), isNull);
       expect(InputValidator.email('  ivy@gmail.com  '), isNull);
     });
 

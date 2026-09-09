@@ -16,10 +16,10 @@ import io.flutter.plugin.common.MethodChannel
 import java.io.File
 import java.io.FileOutputStream
 
-/// The member's profile picture on the platform side: the system photo picker
-/// and the camera, one bounded JPEG kept under the app's private files, and
-/// the activity round trip that joins them. Only the file's path crosses to
-/// Dart.
+/// Pictures on the platform side: the system photo picker and the camera,
+/// one bounded JPEG kept under the app's private files for the profile, or
+/// handed over from the cache for a chat, and the activity round trip that
+/// joins them. Only the file's path crosses to Dart.
 ///
 /// Hand-rolled over `image_picker` deliberately: the picker on 13+ and the
 /// capture intent need no permission, and the plugin's ten transitive
@@ -36,6 +36,8 @@ class ProfilePhotoChannel(private val activity: Activity) {
                 "current" -> result.success(current()?.path)
                 "pick" -> open(result, pickIntent(), REQUEST_PICK)
                 "capture" -> open(result, captureIntent(), REQUEST_CAPTURE)
+                "attach" -> open(result, pickIntent(), REQUEST_ATTACH)
+                "snap" -> open(result, captureIntent(), REQUEST_SNAP)
                 "keep" -> keep(call.argument<String>("path")!!, result)
                 "remove" -> {
                     discard()
@@ -49,25 +51,25 @@ class ProfilePhotoChannel(private val activity: Activity) {
     /// True when the result was this channel's. Backing out answers null; a
     /// picture that will not read answers an error the Dart side words.
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
-        if (requestCode != REQUEST_PICK && requestCode != REQUEST_CAPTURE) return false
+        if (requestCode !in REQUESTS) return false
         val result = pending ?: return true
         pending = null
-        val uri = if (requestCode == REQUEST_PICK) data?.data else captureUri
+        val uri = if (requestCode == REQUEST_PICK || requestCode == REQUEST_ATTACH) data?.data else captureUri
         captureUri = null
         if (resultCode != Activity.RESULT_OK || uri == null) {
             result.success(null)
             return true
         }
-        storeAsync(uri, captureFile, result)
+        storeAsync(uri, captureFile, result, forProfile = requestCode == REQUEST_PICK || requestCode == REQUEST_CAPTURE)
         return true
     }
 
     /// Decoding a full-size photo is too slow for the main thread; the channel
     /// still wants its answer there. [leftover] is what the round trip wrote
     /// to the cache and no longer needs.
-    private fun storeAsync(uri: Uri, leftover: File, result: MethodChannel.Result) {
+    private fun storeAsync(uri: Uri, leftover: File, result: MethodChannel.Result, forProfile: Boolean = true) {
         Thread {
-            val stored = runCatching { store(uri) }
+            val stored = runCatching { store(uri, forProfile) }
             leftover.delete()
             activity.runOnUiThread {
                 stored.fold(
@@ -127,25 +129,30 @@ class ProfilePhotoChannel(private val activity: Activity) {
         }
     }
 
-    /// Keeps the picture as one JPEG no longer than [MAX_EDGE] on its longer
-    /// side, orientation baked in, under a fresh name. The fresh name is what
-    /// lets the Dart image cache notice the change.
-    private fun store(uri: Uri): File {
-        val bitmap = decodeBounded(uri)
-        discard()
-        val file = File(activity.filesDir, "$PREFIX${System.currentTimeMillis()}.jpg")
+    /// Keeps the picture as one JPEG, orientation baked in, under a fresh
+    /// name — the fresh name is what lets the Dart image cache notice the
+    /// change. A profile picture replaces the last one under the app's files;
+    /// a chat photo goes to the cache, larger, and never touches the profile.
+    private fun store(uri: Uri, forProfile: Boolean): File {
+        val bitmap = decodeBounded(uri, if (forProfile) MAX_EDGE else CHAT_MAX_EDGE)
+        val file = if (forProfile) {
+            discard()
+            File(activity.filesDir, "$PREFIX${System.currentTimeMillis()}.jpg")
+        } else {
+            File(activity.cacheDir, "$CHAT_PREFIX${System.currentTimeMillis()}.jpg")
+        }
         FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.JPEG, 88, it) }
         return file
     }
 
     /// ImageDecoder applies the EXIF orientation itself; the BitmapFactory
     /// path before API 28 does not, which those few devices live with.
-    private fun decodeBounded(uri: Uri): Bitmap {
+    private fun decodeBounded(uri: Uri, maxEdge: Int): Bitmap {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val source = ImageDecoder.createSource(activity.contentResolver, uri)
             return ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
                 decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
-                decoder.setTargetSampleSize(sampleSize(info.size.width, info.size.height))
+                decoder.setTargetSampleSize(sampleSize(info.size.width, info.size.height, maxEdge))
             }
         }
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
@@ -153,7 +160,7 @@ class ProfilePhotoChannel(private val activity: Activity) {
             BitmapFactory.decodeStream(it, null, bounds)
         }
         val options = BitmapFactory.Options().apply {
-            inSampleSize = sampleSize(bounds.outWidth, bounds.outHeight)
+            inSampleSize = sampleSize(bounds.outWidth, bounds.outHeight, maxEdge)
         }
         return activity.contentResolver.openInputStream(uri)!!.use {
             BitmapFactory.decodeStream(it, null, options)
@@ -161,10 +168,10 @@ class ProfilePhotoChannel(private val activity: Activity) {
     }
 
     /// The largest power of two that still leaves the longer side at least
-    /// [MAX_EDGE] — the decoder only shrinks in those steps.
-    private fun sampleSize(width: Int, height: Int): Int {
+    /// [maxEdge] — the decoder only shrinks in those steps.
+    private fun sampleSize(width: Int, height: Int, maxEdge: Int): Int {
         var sample = 1
-        while (maxOf(width, height) / (sample * 2) >= MAX_EDGE) sample *= 2
+        while (maxOf(width, height) / (sample * 2) >= maxEdge) sample *= 2
         return sample
     }
 
@@ -183,7 +190,13 @@ class ProfilePhotoChannel(private val activity: Activity) {
         const val NAME = "happilab/profile_photo"
         const val REQUEST_PICK = 0x9101
         const val REQUEST_CAPTURE = 0x9102
+        const val REQUEST_ATTACH = 0x9103
+        const val REQUEST_SNAP = 0x9104
+        val REQUESTS = setOf(REQUEST_PICK, REQUEST_CAPTURE, REQUEST_ATTACH, REQUEST_SNAP)
         const val PREFIX = "profile-photo-"
+        const val CHAT_PREFIX = "chat-photo-"
         const val MAX_EDGE = 1024
+        // A wallet screenshot has to stay legible; the profile disc does not.
+        const val CHAT_MAX_EDGE = 1600
     }
 }

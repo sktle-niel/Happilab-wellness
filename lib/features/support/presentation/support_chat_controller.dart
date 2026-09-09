@@ -2,11 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
+import '../../../core/errors/app_exception.dart';
 import '../../../core/security/input_validator.dart';
+import '../../../shared/domain/profile_photo.dart';
 import '../domain/support_chat.dart';
 
-/// The conversation with support: what has been said, what is being typed,
-/// who is on the other end, and the reply that follows each message.
+/// The conversation with support: what has been said and shown, what is
+/// being typed, who is on the other end, and the reply that follows each
+/// message.
 ///
 /// No support backend yet: the bot answers with the first thing support
 /// would ask back, and asking for a person goes through a [SupportDesk] —
@@ -17,6 +20,7 @@ class SupportChatController extends ChangeNotifier {
   SupportChatController({
     this._now = DateTime.now,
     SupportDesk? desk,
+    this._library,
     this.replyDelay,
     this.linePace = const Duration(seconds: 4),
     this.joinDelay = const Duration(milliseconds: 1500),
@@ -32,6 +36,9 @@ class SupportChatController extends ChangeNotifier {
 
   final DateTime Function() _now;
   final SupportDesk _desk;
+
+  /// Where a photo to send comes from; null where the platform has none.
+  final PhotoLibrary? _library;
 
   /// How long a reply takes; null lets it depend on the answer.
   final Duration? replyDelay;
@@ -51,6 +58,7 @@ class SupportChatController extends ChangeNotifier {
   Timer? _reply;
   Timer? _line;
   int _agentReplies = 0;
+  bool _isAttaching = false;
 
   List<ChatMessage> get messages => List.unmodifiable(_messages);
 
@@ -60,6 +68,9 @@ class SupportChatController extends ChangeNotifier {
 
   /// True from a message going out until the answer lands.
   bool get isSupportTyping => _reply?.isActive ?? false;
+
+  /// True while a photo is being chosen; the photo button goes inert.
+  bool get isAttaching => _isAttaching;
 
   /// Whoever answers right now: the agent on the line, or the bot.
   ChatSender get responder => switch (_handoff) {
@@ -149,9 +160,44 @@ class SupportChatController extends ChangeNotifier {
     _note(SupportChatCopy.ended(current.agent));
   }
 
-  void _send(String text, {required String botReply}) {
+  /// Opens [source] and sends what the member picks as a photo, when it is
+  /// within the limit. Answers the failure for the screen to word — too
+  /// heavy, or a source that will not open — or null; backing out is null too.
+  Future<AppException?> attachPhoto(PhotoSource source) async {
+    final library = _library;
+    if (library == null) {
+      return const UnknownException(SupportChatCopy.photosUnavailable);
+    }
+    if (_isAttaching) return null;
+    _setAttaching(true);
+    final handed = await library.attach(source);
+    _setAttaching(false);
+    final file = handed.valueOrNull;
+    if (file == null) return handed.errorOrNull;
+    final bytes = await file.length();
+    final refusal = ChatPhoto.validate(bytes);
+    if (refusal != null) return ValidationException(refusal);
+    _send(
+      '',
+      botReply: SupportChatCopy.photoAcknowledgement,
+      photo: ChatPhoto(file: file, bytes: bytes),
+    );
+    return null;
+  }
+
+  void _setAttaching(bool attaching) {
+    _isAttaching = attaching;
+    notifyListeners();
+  }
+
+  void _send(String text, {required String botReply, ChatPhoto? photo}) {
     _messages.add(
-      ChatMessage(text: text, sentAt: _now(), sender: const MemberSender()),
+      ChatMessage(
+        text: text,
+        sentAt: _now(),
+        sender: const MemberSender(),
+        photo: photo,
+      ),
     );
     final reply = switch (_handoff) {
       WithAgent() => _nextAgentReply(),

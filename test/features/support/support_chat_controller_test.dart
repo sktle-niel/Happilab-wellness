@@ -1,6 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:happilab/core/errors/app_exception.dart';
+import 'package:happilab/core/errors/result.dart';
 import 'package:happilab/features/support/domain/support_chat.dart';
 import 'package:happilab/features/support/presentation/support_chat_controller.dart';
+import 'package:happilab/shared/domain/profile_photo.dart';
+
+import '../../support/fake_photo_library.dart';
 
 /// A desk with a known line and a known person on it.
 final class _FixedDesk implements SupportDesk {
@@ -144,6 +151,99 @@ void main() {
       controller.requestAgent();
 
       expect(controller.messages, hasLength(count));
+    });
+  });
+
+  group('SupportChatController photos', () {
+    final clock = DateTime(2026, 9, 7, 15, 5);
+
+    Future<File> fileOf(int bytes) async {
+      final file = File('${Directory.systemTemp.path}/chat-photo-$bytes.jpg');
+      await file.writeAsBytes(List.filled(bytes, 0));
+      addTearDown(file.delete);
+      return file;
+    }
+
+    SupportChatController build([FakePhotoLibrary? library]) {
+      final controller = SupportChatController(
+        now: () => clock,
+        library: library,
+        replyDelay: Duration.zero,
+      );
+      addTearDown(controller.dispose);
+      return controller;
+    }
+
+    test('a photo within the limit goes out and is acknowledged', () async {
+      final file = await fileOf(1024);
+      final library = FakePhotoLibrary()..onAttach = (_) async => Success(file);
+      final controller = build(library);
+
+      final error = await controller.attachPhoto(PhotoSource.gallery);
+      await pumpEventQueue();
+
+      expect(error, isNull);
+      expect(library.attachments, [PhotoSource.gallery]);
+      // Sent, not worn: the profile picture is untouched.
+      expect(library.stored, isNull);
+      final sent = controller.messages[1];
+      expect(sent.isFromMember, isTrue);
+      expect(sent.text, isEmpty);
+      expect(sent.photo?.file.path, file.path);
+      expect(sent.photo?.bytes, 1024);
+      expect(
+        controller.messages.last.text,
+        SupportChatCopy.photoAcknowledgement,
+      );
+    });
+
+    test('a photo over the limit is refused and nothing goes out', () async {
+      final file = await fileOf(ChatPhoto.maxBytes + 1);
+      final controller = build(
+        FakePhotoLibrary()..onAttach = (_) async => Success(file),
+      );
+
+      final error = await controller.attachPhoto(PhotoSource.camera);
+
+      expect(error, isA<ValidationException>());
+      expect(error?.message, contains('5 MB'));
+      expect(controller.messages, hasLength(1));
+    });
+
+    test(
+      'a source that will not open is reported; backing out is not',
+      () async {
+        final library = FakePhotoLibrary()
+          ..onAttach = (_) async =>
+              const Failure(UnknownException('Could not open the camera.'));
+        final controller = build(library);
+
+        expect(
+          await controller.attachPhoto(PhotoSource.camera),
+          isA<UnknownException>(),
+        );
+
+        library.onAttach = (_) async => const Success(null);
+        expect(await controller.attachPhoto(PhotoSource.gallery), isNull);
+        expect(controller.messages, hasLength(1));
+      },
+    );
+
+    test('without a library, photos are unavailable', () async {
+      final error = await build().attachPhoto(PhotoSource.gallery);
+
+      expect(error?.message, SupportChatCopy.photosUnavailable);
+    });
+  });
+
+  group('ChatPhoto', () {
+    test('fits under five megabytes, and says so when it does not', () {
+      expect(ChatPhoto.validate(ChatPhoto.maxBytes), isNull);
+      expect(ChatPhoto.validate(ChatPhoto.maxBytes + 1), contains('5.0 MB'));
+      expect(
+        ChatPhoto.validate(8 * 1024 * 1024),
+        'That photo is 8.0 MB; the most is 5 MB.',
+      );
     });
   });
 

@@ -30,6 +30,7 @@ class AppDependencies {
     required this.apiClient,
     required this.repositories,
     required this.profilePhoto,
+    required this.photoLibrary,
     required this.balanceHidden,
     ThemeController? themeController,
   }) : themeController = themeController ?? ThemeController(),
@@ -65,6 +66,7 @@ class AppDependencies {
       rateLimiter: RateLimiter.perMinute(config.maxRequestsPerMinute),
     );
     repositories = Repositories.forConfig(config, apiClient);
+    const library = NativePhotoLibrary();
 
     return AppDependencies(
       config: config,
@@ -72,7 +74,8 @@ class AppDependencies {
       sessionManager: sessionManager,
       apiClient: apiClient,
       repositories: repositories,
-      profilePhoto: ProfilePhoto(library: const NativePhotoLibrary()),
+      profilePhoto: ProfilePhoto(library: library),
+      photoLibrary: library,
       // Their own entries in the secure store, apart from the token.
       themeController: ThemeController(
         store: SecureTokenStore(key: 'theme_mode'),
@@ -99,6 +102,7 @@ class AppDependencies {
   }) {
     final logger = AppLogger.forEnvironment(isProduction: config.isProduction);
     final bound = repositories ?? Repositories.fake();
+    final library = photoLibrary ?? const NativePhotoLibrary();
     final sessionManager = SessionManager(
       store: InMemoryTokenStore(),
       refresh: bound.auth.refresh,
@@ -115,9 +119,8 @@ class AppDependencies {
         logger: logger,
       ),
       repositories: bound,
-      profilePhoto: ProfilePhoto(
-        library: photoLibrary ?? const NativePhotoLibrary(),
-      ),
+      profilePhoto: ProfilePhoto(library: library),
+      photoLibrary: library,
       themeController: ThemeController(logger: logger),
       balanceHidden: PersistedFlag(store: InMemoryTokenStore(), logger: logger),
     );
@@ -139,6 +142,10 @@ class AppDependencies {
 
   /// The member's picture, observable — every avatar of them draws from it.
   final ProfilePhoto profilePhoto;
+
+  /// The platform's pictures: the same library behind [profilePhoto], for
+  /// what is sent in a chat rather than worn.
+  final PhotoLibrary photoLibrary;
 
   /// The member's payout wallets, observable — the cash-out picker and the
   /// edit form share them.

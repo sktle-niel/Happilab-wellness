@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 /// A person on the support desk.
@@ -50,17 +51,43 @@ final class SystemSender extends ChatSender {
   const SystemSender();
 }
 
-/// One line of the conversation with support.
+/// A picture sent in the chat, as it sits on this device.
+class ChatPhoto {
+  const ChatPhoto({required this.file, required this.bytes});
+
+  final File file;
+  final int bytes;
+
+  /// The most a photo may weigh. The API refuses anything heavier, so the
+  /// check is made here, before a byte leaves the phone.
+  static const int maxBytes = 5 * 1024 * 1024;
+
+  static const String limitNote = 'Photos up to 5 MB.';
+
+  /// Null when [bytes] fits under the limit; the sentence the member reads
+  /// otherwise.
+  static String? validate(int bytes) {
+    if (bytes <= maxBytes) return null;
+    final megabytes = (bytes / (1024 * 1024)).toStringAsFixed(1);
+    return 'That photo is $megabytes MB; the most is 5 MB.';
+  }
+}
+
+/// One line of the conversation with support: words, a photo, or both.
 class ChatMessage {
   const ChatMessage({
     required this.text,
     required this.sentAt,
     required this.sender,
+    this.photo,
   });
 
   final String text;
   final DateTime sentAt;
   final ChatSender sender;
+  final ChatPhoto? photo;
+
+  bool get hasPhoto => photo != null;
 
   bool get isFromMember => sender is MemberSender;
 
@@ -194,6 +221,15 @@ abstract final class SupportChatCopy {
   /// The answer to a message typed freely, until a person picks it up.
   static const String acknowledgement =
       'Thanks, we have got it. A teammate will reply here within 24 hours.';
+
+  /// The answer to a photo, until a person picks it up.
+  static const String photoAcknowledgement =
+      'Got the photo, thanks. A teammate will take a look.';
+
+  static const String sendPhoto = 'Send a photo';
+  static const String photoSourceNote =
+      'From your gallery or the camera. ${ChatPhoto.limitNote}';
+  static const String photosUnavailable = 'Photos cannot be sent from here.';
 
   /// Typed into the composer, this asks for a person.
   static const String agentCommand = '/agent';
