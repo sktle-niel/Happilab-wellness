@@ -239,7 +239,7 @@ void main() {
   group('ChatPhoto', () {
     test('fits under five megabytes, and says so when it does not', () {
       expect(ChatPhoto.validate(ChatPhoto.maxBytes), isNull);
-      expect(ChatPhoto.validate(ChatPhoto.maxBytes + 1), contains('5.0 MB'));
+      expect(ChatPhoto.validate(ChatPhoto.maxBytes + 1), contains('5.1 MB'));
       expect(
         ChatPhoto.validate(8 * 1024 * 1024),
         'That photo is 8.0 MB; the most is 5 MB.',

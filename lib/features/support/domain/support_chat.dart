@@ -68,8 +68,9 @@ class ChatPhoto {
   /// otherwise.
   static String? validate(int bytes) {
     if (bytes <= maxBytes) return null;
-    final megabytes = (bytes / (1024 * 1024)).toStringAsFixed(1);
-    return 'That photo is $megabytes MB; the most is 5 MB.';
+    // Rounded up, so a photo a byte over never reads as exactly 5 MB.
+    final megabytes = ((bytes * 10) / (1024 * 1024)).ceil() / 10;
+    return 'That photo is ${megabytes.toStringAsFixed(1)} MB; the most is 5 MB.';
   }
 }
 
