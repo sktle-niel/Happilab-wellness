@@ -40,6 +40,10 @@ abstract final class AppRadius {
 /// Motion tokens, matching the canvas timings.
 abstract final class AppDuration {
   static const Duration fast = Duration(milliseconds: 150);
+
+  /// A press answering under the finger: quick enough to feel like the
+  /// button heard it, long enough to be seen.
+  static const Duration press = Duration(milliseconds: 160);
   static const Duration screenIn = Duration(milliseconds: 250);
 
   /// One thing turning up on its own — a message landing in a thread.
@@ -91,4 +95,9 @@ abstract final class AppCurves {
   /// cubic-bezier(.32, .08, .24, 1) — a quick start that settles softly, the
   /// pace of the theme wipe.
   static const Curve themeReveal = Cubic(0.32, 0.08, 0.24, 1);
+
+  /// cubic-bezier(.23, 1, .32, 1) — the strong ease-out every press and
+  /// arrival in the admin uses; the built-in easeOut is too weak to read
+  /// as intent.
+  static const Curve press = Cubic(0.23, 1, 0.32, 1);
 }

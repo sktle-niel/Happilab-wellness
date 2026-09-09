@@ -78,7 +78,7 @@ class Repositories {
     notifications: FakeNotificationsRepository(),
     referrals: const FakeReferralsRepository(),
     rewards: const FakeRewardsRepository(),
-    community: const FakeCommunityRepository(),
+    community: FakeCommunityRepository(),
     profile: const FakeProfileRepository(),
     support: const FakeSupportRepository(),
   );

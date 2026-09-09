@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 ///
 /// Lives on the theme as an extension so a widget reads `context.palette`
 /// and repaints when the member flips dark mode. Nothing outside this file
-/// names a colour value.
+/// names a colour value. The scheme is the admin website's: paper and ink,
+/// lime for the action, lavender for the notice, quiet greys for the rest.
 class AppPalette extends ThemeExtension<AppPalette> {
   const AppPalette({
     required this.brightness,
@@ -29,50 +30,50 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.shadowStrength,
   });
 
-  /// White and green: the default.
+  /// Paper and ink with lime: the default.
   static const AppPalette light = AppPalette(
     brightness: Brightness.light,
-    canvas: Color(0xFFFBFCF8),
+    canvas: Color(0xFFF6F6F4),
     surface: Color(0xFFFFFFFF),
-    accent: Color(0xFFA6E22E),
-    onAccent: Color(0xFF12200A),
-    accentText: Color(0xFF3F7D0A),
-    accentPressed: Color(0xFF8CC61E),
-    accentDeep: Color(0xFF2F6108),
-    brand: Color(0xFFB08A2E),
-    textPrimary: Color(0xFF141A0E),
-    textMuted: Color(0xFF5C6853),
-    textFaint: Color(0xFF98A28E),
-    danger: Color(0xFFE0563E),
-    info: Color(0xFF2F86C5),
-    tint: Color(0xFFEFF8DC),
-    glass: Color(0xF0F4FAEC),
-    glassEdge: Color(0x38A6E22E),
-    divider: Color(0x1A141A0E),
-    shadow: Color(0xFF1B2A10),
-    shadowStrength: 0.08,
+    accent: Color(0xFFD6F26A),
+    onAccent: Color(0xFF2F3B00),
+    accentText: Color(0xFF4F7A00),
+    accentPressed: Color(0xFFC9E85A),
+    accentDeep: Color(0xFF2F3B00),
+    brand: Color(0xFFB7791F),
+    textPrimary: Color(0xFF141414),
+    textMuted: Color(0xFF5C5C59),
+    textFaint: Color(0xFF9A9A96),
+    danger: Color(0xFFC73E3E),
+    info: Color(0xFF5F55CF),
+    tint: Color(0xFFEEF7CF),
+    glass: Color(0xF5FFFFFF),
+    glassEdge: Color(0x0D141414),
+    divider: Color(0x14141414),
+    shadow: Color(0xFF141414),
+    shadowStrength: 0.06,
   );
 
-  /// Black and green: the dark option.
+  /// Ink with lime: the dark option.
   static const AppPalette dark = AppPalette(
     brightness: Brightness.dark,
-    canvas: Color(0xFF161616),
-    surface: Color(0xFF232323),
-    accent: Color(0xFFA6E22E),
-    onAccent: Color(0xFF101508),
-    accentText: Color(0xFFB9EE45),
-    accentPressed: Color(0xFF8CC61E),
-    accentDeep: Color(0xFFC8F26A),
-    brand: Color(0xFFD9B54A),
-    textPrimary: Color(0xFFF2F4EC),
-    textMuted: Color(0xFFA9B29E),
-    textFaint: Color(0xFF6F7866),
+    canvas: Color(0xFF111111),
+    surface: Color(0xFF1F1F1F),
+    accent: Color(0xFFD6F26A),
+    onAccent: Color(0xFF2F3B00),
+    accentText: Color(0xFFD6F26A),
+    accentPressed: Color(0xFFC9E85A),
+    accentDeep: Color(0xFFE7F8A6),
+    brand: Color(0xFFD9A84A),
+    textPrimary: Color(0xFFF2F2EE),
+    textMuted: Color(0xFFB9B9B5),
+    textFaint: Color(0xFF7A7A76),
     danger: Color(0xFFFF6B54),
-    info: Color(0xFF6BB8E8),
-    tint: Color(0xFF2C3320),
-    glass: Color(0xE61F241A),
-    glassEdge: Color(0x24FFFFFF),
-    divider: Color(0x24FFFFFF),
+    info: Color(0xFFB9B2F4),
+    tint: Color(0xFF262626),
+    glass: Color(0xF01F1F1F),
+    glassEdge: Color(0x14FFFFFF),
+    divider: Color(0x1FFFFFFF),
     shadow: Color(0xFF000000),
     shadowStrength: 0.4,
   );
@@ -85,28 +86,27 @@ class AppPalette extends ThemeExtension<AppPalette> {
 
   final Brightness brightness;
 
-  /// Screen background.
+  /// Screen background behind the illustration.
   final Color canvas;
 
   /// Cards, inputs and the secondary button.
   final Color surface;
 
-  /// Primary call to action.
+  /// Primary call to action: the lime.
   final Color accent;
 
-  /// Text and icons drawn on [accent].
+  /// Text and icons drawn on [accent]: the lime's own dark ink.
   final Color onAccent;
 
-  /// Links and accent text — dark enough on [canvas] to read.
+  /// Links and accent text — a green dark enough on paper to read.
   final Color accentText;
   final Color accentPressed;
 
   /// Small uppercase labels on [tint].
   final Color accentDeep;
 
-  /// The emblem's gold, in both palettes. The wordmark left it for the accent
-  /// green; what stays gold is what should not read as an action — the rating
-  /// stars and the caution toast.
+  /// Amber, for what should not read as an action — the rating stars and
+  /// the caution toast.
   final Color brand;
 
   final Color textPrimary;
@@ -114,16 +114,16 @@ class AppPalette extends ThemeExtension<AppPalette> {
   final Color textFaint;
   final Color danger;
 
-  /// Neutral notice. The one status colour outside the brand family — green is
-  /// spoken for by the accent, so information needs its own voice.
+  /// Neutral notice, in the website's lavender: the one status colour outside
+  /// the lime, so information has its own voice.
   final Color info;
 
-  /// Soft tint behind chips, avatars and secondary buttons.
+  /// Soft lime behind chips, avatars and secondary buttons.
   final Color tint;
 
-  /// Cards and sheets, laid over the backdrop: a breath of the brand green so
-  /// they never dissolve into a white page, and just enough of the picture
-  /// let through to sit in the scene rather than on it.
+  /// Cards and sheets, laid over the backdrop: paper with a breath of the
+  /// picture through it, held off the page by a hairline and a soft shadow
+  /// rather than a drawn border.
   final Color glass;
 
   /// The hairline round a [glass] surface.

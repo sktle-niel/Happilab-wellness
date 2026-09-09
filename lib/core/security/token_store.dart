@@ -1,20 +1,24 @@
-/// Contract for persisting credentials.
+/// What a request needs from the session: the credential to send, and a
+/// way to drop it when the server refuses it.
 ///
-/// Features depend on this interface, never on a storage package, so hardening
-/// storage later is a one-line change in the composition root.
-abstract interface class TokenStore {
+/// `ApiClient` depends on this and nothing more, so the session that keeps
+/// a token pair and the bare store a test hands over are interchangeable.
+abstract interface class RequestCredentials {
   Future<String?> read();
-
-  Future<void> write(String token);
 
   Future<void> clear();
 }
 
-/// Process-memory implementation: nothing is written to disk, so nothing can
-/// leak from disk. This is the safe default until the app gains a real login.
+/// Contract for persisting one credential.
 ///
-/// When it does, add a platform-secure implementation (Keychain on iOS,
-/// EncryptedSharedPreferences on Android) and bind it in `AppDependencies`.
+/// Features depend on this interface, never on a storage package, so hardening
+/// storage later is a one-line change in the composition root.
+abstract interface class TokenStore implements RequestCredentials {
+  Future<void> write(String token);
+}
+
+/// Process-memory implementation: nothing is written to disk, so nothing can
+/// leak from disk. Tests and previews use it in place of the platform store.
 /// Tokens must never land in SharedPreferences, a plain file, or a log line.
 final class InMemoryTokenStore implements TokenStore {
   String? _token;

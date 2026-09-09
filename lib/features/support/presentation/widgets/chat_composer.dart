@@ -3,17 +3,21 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_palette.dart';
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../app/theme/app_typography.dart';
-import '../../../../shared/widgets/circle_badge.dart';
+import '../../../../shared/domain/profile_photo.dart';
+import '../../../../shared/widgets/app_share_sheet.dart';
+import '../../../../shared/widgets/app_toast.dart';
+import '../../../../shared/widgets/circle_icon_button.dart';
+import '../../../../shared/widgets/draft_composer.dart';
 import '../../../../shared/widgets/gap.dart';
 import '../../../../shared/widgets/pressable_scale.dart';
 import '../../domain/support_chat.dart';
 import '../support_chat_controller.dart';
 
 /// The foot of the thread: one-tap openers for what members write in about,
-/// and the line to type anything else.
+/// the way to send a photo, and the line to type anything else.
 ///
-/// Only the send disc follows the draft, keystroke by keystroke; the chips
-/// and the field are built once.
+/// The line itself is the shared [DraftComposer]; what is this screen's own
+/// is the row of chips above it and the photo button before it.
 class ChatComposer extends StatelessWidget {
   const ChatComposer({required this.controller, super.key});
 
@@ -29,23 +33,11 @@ class ChatComposer extends StatelessWidget {
         const Gap(10),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            children: [
-              Expanded(
-                child: _DraftField(
-                  draft: controller.draft,
-                  onSubmit: controller.sendDraft,
-                ),
-              ),
-              const Gap(10),
-              ValueListenableBuilder(
-                valueListenable: controller.draft,
-                builder: (context, _, _) => _SendButton(
-                  enabled: controller.canSend,
-                  onPressed: controller.sendDraft,
-                ),
-              ),
-            ],
+          child: DraftComposer(
+            leading: _PhotoButton(controller: controller),
+            draft: controller.draft,
+            hint: 'Type a message… or ${SupportChatCopy.agentCommand}',
+            onSubmit: controller.sendDraft,
           ),
         ),
       ],
@@ -139,71 +131,49 @@ class _Chip extends StatelessWidget {
   );
 }
 
-class _DraftField extends StatelessWidget {
-  const _DraftField({required this.draft, required this.onSubmit});
+/// The way to send a picture: a choice of gallery or camera, then the pick
+/// goes to the controller, which refuses one over the limit. Inert while a
+/// picture is on its way.
+class _PhotoButton extends StatelessWidget {
+  const _PhotoButton({required this.controller});
 
-  final TextEditingController draft;
-  final VoidCallback onSubmit;
+  final SupportChatController controller;
 
-  @override
-  Widget build(BuildContext context) => Container(
-    height: AppSpacing.inputHeight,
-    alignment: Alignment.centerLeft,
-    decoration: BoxDecoration(
-      color: context.palette.glass,
-      borderRadius: AppRadius.pill,
-      border: Border.all(color: context.palette.glassEdge),
-    ),
-    child: TextField(
-      controller: draft,
-      style: AppTypography.input,
-      cursorColor: context.palette.accent,
-      textCapitalization: TextCapitalization.sentences,
-      textInputAction: TextInputAction.send,
-      onSubmitted: (_) => onSubmit(),
-      decoration: InputDecoration(
-        isDense: true,
-        border: InputBorder.none,
-        hintText: 'Type a message… or ${SupportChatCopy.agentCommand}',
-        hintStyle: AppTypography.input.copyWith(
-          color: context.palette.textFaint,
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18),
+  Future<void> _openSheet(BuildContext context) => AppShareSheet.show(
+    context,
+    title: SupportChatCopy.sendPhoto,
+    note: SupportChatCopy.photoSourceNote,
+    targets: [
+      ShareTarget.icon(
+        label: 'Gallery',
+        icon: Icons.photo_library_outlined,
+        color: context.palette.accentText,
+        onChosen: () => _attach(context, PhotoSource.gallery),
       ),
-    ),
+      ShareTarget.icon(
+        label: 'Camera',
+        icon: Icons.photo_camera_outlined,
+        color: context.palette.accentText,
+        onChosen: () => _attach(context, PhotoSource.camera),
+      ),
+    ],
   );
-}
 
-/// The accent disc that sends. Inert while there is nothing to send.
-class _SendButton extends StatelessWidget {
-  const _SendButton({required this.enabled, required this.onPressed});
-
-  final bool enabled;
-  final VoidCallback onPressed;
-
-  VoidCallback? get _onPressed => enabled ? onPressed : null;
+  /// A refusal — too heavy, or a source that will not open — is said in a
+  /// toast; backing out says nothing.
+  Future<void> _attach(BuildContext context, PhotoSource source) async {
+    final overlay = Overlay.of(context);
+    final error = await controller.attachPhoto(source);
+    if (error != null) AppToast.failureOn(overlay, error);
+  }
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    button: true,
-    enabled: enabled,
-    label: 'Send',
-    child: PressableScale(
-      scale: 0.9,
-      onPressed: _onPressed,
-      child: AnimatedOpacity(
-        opacity: enabled ? 1 : 0.55,
-        duration: AppDuration.fast,
-        child: CircleBadge(
-          size: AppSpacing.inputHeight,
-          color: context.palette.accent,
-          child: Icon(
-            Icons.send_rounded,
-            size: 20,
-            color: context.palette.onAccent,
-          ),
-        ),
-      ),
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: controller,
+    builder: (context, _) => CircleIconButton(
+      icon: Icons.add_photo_alternate_outlined,
+      semanticLabel: SupportChatCopy.sendPhoto,
+      onPressed: controller.isAttaching ? null : () => _openSheet(context),
     ),
   );
 }

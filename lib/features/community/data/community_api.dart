@@ -4,11 +4,13 @@ import '../../../core/network/api_endpoints.dart';
 import '../../../core/utils/json_reader.dart';
 import '../../../shared/domain/catalogue.dart';
 import '../domain/community_repository.dart';
+import '../domain/feed_comment.dart';
 import '../domain/feed_post.dart';
 import '../domain/testimonial.dart';
 
 /// [CommunityRepository] over the API. Both feeds are cached briefly: a
-/// member flicking between tabs should not refetch the same posts.
+/// member flicking between tabs should not refetch the same posts. Comments
+/// are live — a thread is read when the sheet opens.
 final class CommunityApi implements CommunityRepository {
   const CommunityApi(this._client);
 
@@ -27,9 +29,25 @@ final class CommunityApi implements CommunityRepository {
     maxAge: _maxAge,
   );
 
+  @override
+  Future<Result<List<FeedComment>>> comments(String postId) =>
+      _client.get(ApiEndpoints.postComments(postId), parse: parseComments);
+
+  @override
+  Future<Result<FeedComment>> comment(
+    String postId,
+    String body, {
+    String? replyTo,
+  }) => _client.post(
+    ApiEndpoints.postComments(postId),
+    body: {'body': body, 'reply_to': ?replyTo},
+    parse: parseComment,
+  );
+
   static List<FeedPost> parsePosts(Object? json) => JsonReader.listOf(
     json,
     (item) => FeedPost(
+      id: item.string('id'),
       author: item.string('author'),
       when: item.string('when'),
       body: item.string('body'),
@@ -39,6 +57,27 @@ final class CommunityApi implements CommunityRepository {
       comments: item.integer('comments'),
     ),
   );
+
+  static List<FeedComment> parseComments(Object? json) =>
+      JsonReader.listOf(json, _comment);
+
+  static FeedComment parseComment(Object? json) =>
+      _comment(JsonReader.of(json));
+
+  /// A reply carries no replies of its own: the thread is one level deep.
+  static FeedComment _comment(JsonReader item) {
+    final author = item.string('author');
+    return FeedComment(
+      id: item.string('id'),
+      author: author,
+      handle: item.optionalString('handle') ?? FeedComment.handleFor(author),
+      when: item.string('when'),
+      body: item.string('body'),
+      likes: item.optionalInteger('likes') ?? 0,
+      avatarUrl: item.optionalString('avatar_url'),
+      replies: item.optionalList('replies', _comment) ?? const [],
+    );
+  }
 
   static List<Testimonial> parseTestimonials(Object? json) =>
       JsonReader.listOf(json, _testimonial);

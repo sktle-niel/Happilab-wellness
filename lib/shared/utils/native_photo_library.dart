@@ -35,6 +35,19 @@ class NativePhotoLibrary implements PhotoLibrary {
     return picked.map(_toFile);
   }
 
+  @override
+  Future<Result<File?>> attach(PhotoSource source) async {
+    final method = switch (source) {
+      PhotoSource.gallery => 'attach',
+      PhotoSource.camera => 'snap',
+    };
+    final handed = await _ask<String>(
+      method,
+      UnknownException(source.unavailableMessage),
+    );
+    return handed.map(_toFile);
+  }
+
   /// The bundle is Dart's to read, the files folder is the platform's to
   /// write: the avatar is staged in the cache between the two.
   @override

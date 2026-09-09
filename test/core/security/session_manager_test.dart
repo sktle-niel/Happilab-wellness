@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:happilab/core/errors/result.dart';
 import 'package:happilab/core/security/session_manager.dart';
+import 'package:happilab/core/security/session_tokens.dart';
 import 'package:happilab/core/security/token_store.dart';
 
 /// Counts reads so restore's memoization is observable.
@@ -20,99 +22,120 @@ final class _CountingTokenStore implements TokenStore {
   Future<void> clear() async => _token = null;
 }
 
+/// No pair here is near expiry, so a renewal would be a bug.
+Future<Result<SessionTokens>> _neverRenews(String refreshToken) =>
+    throw StateError('unexpected refresh');
+
+const SessionTokens _pair = SessionTokens(accessToken: 'token');
+
+SessionManager _session([TokenStore? store]) =>
+    SessionManager(store: store ?? InMemoryTokenStore(), refresh: _neverRenews);
+
 void main() {
   group('SessionManager', () {
     test('starts unknown until restored', () {
-      final manager = SessionManager(store: InMemoryTokenStore());
+      final session = _session();
 
-      expect(manager.status, SessionStatus.unknown);
-      expect(manager.isSignedIn, isFalse);
+      expect(session.status, SessionStatus.unknown);
+      expect(session.isSignedIn, isFalse);
     });
 
-    test('restores to signed in when a token is stored', () async {
+    test('restores to signed in when a pair is stored', () async {
       final store = InMemoryTokenStore();
-      await store.write('token');
-      final manager = SessionManager(store: store);
+      await store.write(_pair.encode());
+      final session = _session(store);
 
-      await manager.restore();
+      await session.restore();
 
-      expect(manager.status, SessionStatus.signedIn);
+      expect(session.status, SessionStatus.signedIn);
+      expect(await session.read(), 'token');
     });
 
     test('restores to signed out when nothing is stored', () async {
-      final manager = SessionManager(store: InMemoryTokenStore());
+      final session = _session();
 
-      await manager.restore();
+      await session.restore();
 
-      expect(manager.status, SessionStatus.signedOut);
+      expect(session.status, SessionStatus.signedOut);
     });
 
-    test(
-      'restore reads the store once no matter how often it is called',
-      () async {
-        final store = _CountingTokenStore();
-        final manager = SessionManager(store: store);
-
-        await manager.restore();
-        await manager.restore();
-
-        expect(store.reads, 1);
-      },
-    );
-
-    test('sign in persists the token and raises the session', () async {
+    test('restores to signed out when the entry cannot be read', () async {
+      // A bare token, as a build before the pair was kept wrote it.
       final store = InMemoryTokenStore();
-      final manager = SessionManager(store: store);
+      await store.write('local.session.v1');
+      final session = _session(store);
 
-      await manager.signIn('token');
+      await session.restore();
 
-      expect(manager.isSignedIn, isTrue);
-      expect(await store.read(), 'token');
+      expect(session.status, SessionStatus.signedOut);
+      expect(await session.read(), isNull);
     });
 
-    test('sign out clears the token and records the member chose it', () async {
+    test('restore reads the store once however often it is asked', () async {
+      final store = _CountingTokenStore();
+      final session = _session(store);
+
+      await session.restore();
+      await session.restore();
+      await session.read();
+
+      expect(store.reads, 1);
+    });
+
+    test('sign in persists the pair and raises the session', () async {
       final store = InMemoryTokenStore();
-      final manager = SessionManager(store: store);
-      await manager.signIn('token');
+      final session = _session(store);
 
-      await manager.signOut();
+      await session.signIn(_pair);
 
-      expect(manager.status, SessionStatus.signedOut);
-      expect(manager.endReason, SessionEndReason.signedOut);
+      expect(session.isSignedIn, isTrue);
+      expect(SessionTokens.decode((await store.read())!)?.accessToken, 'token');
+    });
+
+    test('sign out clears the pair and records the member chose it', () async {
+      final store = InMemoryTokenStore();
+      final session = _session(store);
+      await session.signIn(_pair);
+
+      await session.signOut();
+
+      expect(session.status, SessionStatus.signedOut);
+      expect(session.endReason, SessionEndReason.signedOut);
       expect(await store.read(), isNull);
+      expect(await session.read(), isNull);
     });
 
-    test('a clear through the TokenStore contract reads as revoked', () async {
-      // The 401 path: ApiClient drops a rejected token via TokenStore.clear.
-      final manager = SessionManager(store: InMemoryTokenStore());
-      await manager.signIn('token');
+    test('a clear through the credentials contract reads as revoked', () async {
+      // The 401 path: ApiClient drops a rejected token via clear.
+      final session = _session();
+      await session.signIn(_pair);
 
-      await manager.clear();
+      await session.clear();
 
-      expect(manager.status, SessionStatus.signedOut);
-      expect(manager.endReason, SessionEndReason.revoked);
+      expect(session.status, SessionStatus.signedOut);
+      expect(session.endReason, SessionEndReason.revoked);
     });
 
     test('signing back in forgets the old end reason', () async {
-      final manager = SessionManager(store: InMemoryTokenStore());
-      await manager.signIn('token');
-      await manager.clear();
+      final session = _session();
+      await session.signIn(_pair);
+      await session.clear();
 
-      await manager.signIn('fresh');
+      await session.signIn(const SessionTokens(accessToken: 'fresh'));
 
-      expect(manager.endReason, isNull);
+      expect(session.endReason, isNull);
     });
 
     test('notifies only when the status actually changes', () async {
-      final manager = SessionManager(store: InMemoryTokenStore());
+      final session = _session();
       var notifications = 0;
-      manager.addListener(() => notifications++);
+      session.addListener(() => notifications++);
 
-      await manager.restore(); // unknown -> signedOut
-      await manager.signOut(); // already signed out: silent
-      await manager.signIn('token'); // -> signedIn
-      await manager.signIn('token'); // already signed in: silent
-      await manager.clear(); // -> signedOut
+      await session.restore(); // unknown -> signedOut
+      await session.signOut(); // already signed out: silent
+      await session.signIn(_pair); // -> signedIn
+      await session.signIn(_pair); // already signed in: silent
+      await session.clear(); // -> signedOut
 
       expect(notifications, 3);
     });

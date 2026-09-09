@@ -34,16 +34,80 @@ class ChatBubble extends StatelessWidget {
   Widget build(BuildContext context) => _BubbleRow(
     sender: message.sender,
     showsAvatar: showsAvatar,
-    child: Text(
-      message.text,
-      style: AppTypography.figtree(
-        size: 14,
-        height: 1.4,
-        color: message.isFromMember
-            ? context.palette.onAccent
-            : context.palette.textPrimary,
-      ),
+    tight: message.hasPhoto,
+    child: _Content(message: message),
+  );
+}
+
+/// What a bubble holds: the photo, the words, or both, one under the other.
+class _Content extends StatelessWidget {
+  const _Content({required this.message});
+
+  final ChatMessage message;
+
+  @override
+  Widget build(BuildContext context) {
+    final photo = message.photo;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (photo != null) _Photo(photo: photo),
+        if (message.text.isNotEmpty)
+          Padding(
+            padding: photo == null
+                ? EdgeInsets.zero
+                : const EdgeInsets.fromLTRB(8, 8, 8, 2),
+            child: Text(
+              message.text,
+              style: AppTypography.figtree(
+                size: 14,
+                height: 1.4,
+                color: message.isFromMember
+                    ? context.palette.onAccent
+                    : context.palette.textPrimary,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// The picture, a square no wider than a bubble, clipped to its corners.
+/// One that will not read any more shows a broken frame, never a crash.
+class _Photo extends StatelessWidget {
+  const _Photo({required this.photo});
+
+  static const double _edge = 220;
+
+  final ChatPhoto photo;
+
+  @override
+  Widget build(BuildContext context) => ClipRRect(
+    borderRadius: AppRadius.input,
+    child: Image.file(
+      photo.file,
+      width: _edge,
+      height: _edge,
+      fit: BoxFit.cover,
+      cacheWidth: (_edge * 3).round(),
+      errorBuilder: (context, error, stackTrace) => const _MissingPhoto(),
     ),
+  );
+}
+
+class _MissingPhoto extends StatelessWidget {
+  const _MissingPhoto();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: _Photo._edge,
+    height: _Photo._edge,
+    alignment: Alignment.center,
+    color: context.palette.glass,
+    child: Icon(Icons.broken_image_outlined, color: context.palette.textMuted),
   );
 }
 
@@ -97,6 +161,7 @@ class _BubbleRow extends StatelessWidget {
     required this.sender,
     required this.showsAvatar,
     required this.child,
+    this.tight = false,
   });
 
   /// How much of the width a bubble may take before it wraps.
@@ -105,6 +170,9 @@ class _BubbleRow extends StatelessWidget {
   final ChatSender sender;
   final bool showsAvatar;
   final Widget child;
+
+  /// True for a photo, which sits close to the bubble's edge.
+  final bool tight;
 
   bool get fromMember => sender is MemberSender;
 
@@ -125,7 +193,11 @@ class _BubbleRow extends StatelessWidget {
               alignment: fromMember
                   ? Alignment.centerRight
                   : Alignment.centerLeft,
-              child: _Bubble(fromMember: fromMember, child: child),
+              child: _Bubble(
+                fromMember: fromMember,
+                tight: tight,
+                child: child,
+              ),
             ),
           ),
         ),
@@ -163,15 +235,22 @@ class _AvatarSlot extends StatelessWidget {
 }
 
 class _Bubble extends StatelessWidget {
-  const _Bubble({required this.fromMember, required this.child});
+  const _Bubble({
+    required this.fromMember,
+    required this.tight,
+    required this.child,
+  });
 
   final bool fromMember;
+  final bool tight;
   final Widget child;
 
   @override
   Widget build(BuildContext context) => Container(
     margin: const EdgeInsets.symmetric(vertical: 3),
-    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+    padding: tight
+        ? const EdgeInsets.all(6)
+        : const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
     decoration: BoxDecoration(
       color: fromMember ? context.palette.accent : context.palette.glass,
       borderRadius: AppRadius.input,

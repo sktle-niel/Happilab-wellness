@@ -21,7 +21,7 @@ void main() {
       ApiClient(
         config: config,
         transport: FakeHttpTransport(),
-        tokenStore: InMemoryTokenStore(),
+        credentials: InMemoryTokenStore(),
         logger: AppLogger.forEnvironment(isProduction: true),
       ),
     );

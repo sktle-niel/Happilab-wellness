@@ -4,6 +4,7 @@ enum PostMedia { none, image, video }
 /// A post in the news feed.
 class FeedPost {
   const FeedPost({
+    required this.id,
     required this.author,
     required this.when,
     required this.body,
@@ -13,6 +14,7 @@ class FeedPost {
     this.mediaUrl,
   });
 
+  final String id;
   final String author;
   final String when;
   final String body;
@@ -27,6 +29,7 @@ class FeedPost {
 
   static const List<FeedPost> placeholder = [
     FeedPost(
+      id: 'f1',
       author: _brand,
       when: 'Just now',
       body:
@@ -35,9 +38,10 @@ class FeedPost {
       media: PostMedia.video,
       mediaUrl: 'assets/video/onboarding-routine.mp4',
       likes: 128,
-      comments: 14,
+      comments: 5,
     ),
     FeedPost(
+      id: 'f2',
       author: _brand,
       when: '2 hours ago',
       body:
@@ -49,6 +53,7 @@ class FeedPost {
       comments: 9,
     ),
     FeedPost(
+      id: 'f3',
       author: _brand,
       when: 'Yesterday',
       body:

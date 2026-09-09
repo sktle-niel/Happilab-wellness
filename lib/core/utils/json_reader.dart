@@ -59,6 +59,9 @@ final class JsonReader {
   List<T> list<T>(String key, T Function(JsonReader item) parse) =>
       listOf(_fields[key], parse);
 
+  List<T>? optionalList<T>(String key, T Function(JsonReader item) parse) =>
+      _fields[key] == null ? null : list(key, parse);
+
   /// A closed set of names, matched to [values] by [name].
   T enumerated<T extends Enum>(String key, List<T> values) {
     final name = string(key);

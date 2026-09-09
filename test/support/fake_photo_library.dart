@@ -19,7 +19,12 @@ class FakePhotoLibrary implements PhotoLibrary {
   Future<Result<File?>> Function(Avatar avatar) onAdopt = (avatar) async =>
       Success(File('${avatar.name}.jpg'));
 
+  /// What opening a source for a chat photo comes back with — backing out, by default.
+  Future<Result<File?>> Function(PhotoSource source) onAttach = (_) async =>
+      const Success(null);
+
   final List<PhotoSource> picks = [];
+  final List<PhotoSource> attachments = [];
   final List<Avatar> adoptions = [];
   int restores = 0;
   int discards = 0;
@@ -40,6 +45,12 @@ class FakePhotoLibrary implements PhotoLibrary {
   Future<Result<File?>> adopt(Avatar avatar) async {
     adoptions.add(avatar);
     return _keep(await onAdopt(avatar));
+  }
+
+  @override
+  Future<Result<File?>> attach(PhotoSource source) async {
+    attachments.add(source);
+    return onAttach(source);
   }
 
   @override

@@ -1,18 +1,5 @@
 import '../../../core/errors/result.dart';
-
-/// What the member gets back for their credentials: the token every other
-/// call will carry, and when it runs out.
-class AuthSession {
-  const AuthSession({
-    required this.accessToken,
-    this.refreshToken,
-    this.expiresAt,
-  });
-
-  final String accessToken;
-  final String? refreshToken;
-  final DateTime? expiresAt;
-}
+import '../../../core/security/session_tokens.dart';
 
 /// Everything a new account needs, already validated by the form.
 class Registration {
@@ -31,15 +18,19 @@ class Registration {
 
 /// The way in and out.
 ///
-/// The token a success carries is handed to the session manager; nothing
+/// The pair a success carries is handed to the session manager; nothing
 /// else in the app ever sees a credential.
 abstract interface class AuthRepository {
-  Future<Result<AuthSession>> signIn({
+  Future<Result<SessionTokens>> signIn({
     required String identifier,
     required String password,
   });
 
-  Future<Result<AuthSession>> register(Registration registration);
+  Future<Result<SessionTokens>> register(Registration registration);
+
+  /// A new pair for a refresh token that is still good. The old token is
+  /// spent either way: presenting it again is what ends the whole session.
+  Future<Result<SessionTokens>> refresh(String refreshToken);
 
   /// Tells the server the session is over. The local session is cleared
   /// whatever this answers — a member who asked to leave has left.

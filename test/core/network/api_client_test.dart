@@ -23,7 +23,7 @@ void main() {
       ApiClient(
         config: config(),
         transport: transport,
-        tokenStore: tokenStore,
+        credentials: tokenStore,
         logger: const AppLogger(minimumLevel: LogLevel.error),
         cache: cache,
         // Real backoff would make this suite wait seconds for nothing, and a
@@ -88,6 +88,19 @@ void main() {
 
       expect(result.errorOrNull, isA<UnauthorizedException>());
       expect(await tokenStore.read(), isNull);
+    });
+
+    test('sends no bearer on a call that establishes the session', () async {
+      await tokenStore.write('stale-token');
+      final transport = FakeHttpTransport();
+
+      await buildClient(transport)
+          .post('v1/auth/refresh', parse: parseName, authenticated: false);
+
+      expect(
+        transport.sentRequests.single.headers.containsKey('authorization'),
+        isFalse,
+      );
     });
 
     test('surfaces 429 with the cooldown the server asked for', () async {

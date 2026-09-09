@@ -44,6 +44,10 @@ abstract interface class PhotoLibrary {
   /// Keeps [avatar] as the picture, the same way a chosen photo is kept.
   Future<Result<File?>> adopt(Avatar avatar);
 
+  /// Opens [source] for a picture to send, not to wear: it is handed over
+  /// and the profile picture stays as it is. Same answers as [pick].
+  Future<Result<File?>> attach(PhotoSource source);
+
   /// Forgets the kept picture.
   Future<void> discard();
 }

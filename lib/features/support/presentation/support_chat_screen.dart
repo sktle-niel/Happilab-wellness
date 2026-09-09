@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/di/app_scope.dart';
 import '../../../app/theme/app_palette.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../app/theme/app_typography.dart';
@@ -24,41 +25,54 @@ class SupportChatScreen extends StatefulWidget {
 }
 
 class _SupportChatScreenState extends State<SupportChatScreen> {
-  final SupportChatController _controller = SupportChatController();
+  SupportChatController? _controller;
+
+  /// Photos come through the platform's library, which the scope holds; it is
+  /// not reachable before dependencies are.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _controller ??= SupportChatController(
+      library: AppScope.of(context).photoLibrary,
+    );
+  }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => AppScaffold(
-    child: Column(
-      children: [
-        ListenableBuilder(
-          listenable: _controller,
-          builder: (context, _) => _ChatHeader(
-            name: _controller.counterpartName,
-            line: _controller.presenceLine,
-            isTyping: _controller.isSupportTyping,
-            agent: _controller.agent,
-          ),
-        ),
-        Expanded(
-          child: ListenableBuilder(
-            listenable: _controller,
-            builder: (context, _) => ChatThread(
-              messages: _controller.messages,
-              isSupportTyping: _controller.isSupportTyping,
-              responder: _controller.responder,
+  Widget build(BuildContext context) {
+    final controller = _controller!;
+    return AppScaffold(
+      child: Column(
+        children: [
+          ListenableBuilder(
+            listenable: controller,
+            builder: (context, _) => _ChatHeader(
+              name: controller.counterpartName,
+              line: controller.presenceLine,
+              isTyping: controller.isSupportTyping,
+              agent: controller.agent,
             ),
           ),
-        ),
-        ChatComposer(controller: _controller),
-      ],
-    ),
-  );
+          Expanded(
+            child: ListenableBuilder(
+              listenable: controller,
+              builder: (context, _) => ChatThread(
+                messages: controller.messages,
+                isSupportTyping: controller.isSupportTyping,
+                responder: controller.responder,
+              ),
+            ),
+          ),
+          ChatComposer(controller: controller),
+        ],
+      ),
+    );
+  }
 }
 
 /// Who the member is talking to — the desk, or the person who picked up —

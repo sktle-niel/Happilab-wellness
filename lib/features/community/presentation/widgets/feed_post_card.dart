@@ -8,6 +8,7 @@ import '../../../../shared/widgets/gap.dart';
 import '../../../../shared/widgets/remote_image.dart';
 import '../../../../shared/widgets/status_pill.dart';
 import '../../domain/feed_post.dart';
+import 'comments_sheet.dart';
 import 'heart_burst.dart';
 import 'post_video.dart';
 import '../../../../app/theme/app_palette.dart';
@@ -39,6 +40,8 @@ class _FeedPostCardState extends State<FeedPostCard> {
     setState(() => _isLiked = true);
   }
 
+  void _openComments() => CommentsSheet.show(context, post: widget.post);
+
   @override
   Widget build(BuildContext context) => AppCard(
     padding: EdgeInsets.zero,
@@ -66,6 +69,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
           isLiked: _isLiked,
           onToggleLike: _toggleLike,
           onShare: widget.onShare,
+          onComments: _openComments,
         ),
       ],
     ),
@@ -80,6 +84,7 @@ class _PostFooter extends StatelessWidget {
     required this.isLiked,
     required this.onToggleLike,
     required this.onShare,
+    required this.onComments,
   });
 
   final FeedPost post;
@@ -87,6 +92,7 @@ class _PostFooter extends StatelessWidget {
   final bool isLiked;
   final VoidCallback onToggleLike;
   final VoidCallback onShare;
+  final VoidCallback onComments;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -115,12 +121,12 @@ class _PostFooter extends StatelessWidget {
               onPressed: onShare,
             ),
             const Spacer(),
-            Text(
-              '${post.comments} comments',
-              style: AppTypography.figtree(
-                size: 12.5,
-                color: context.palette.textFaint,
-              ),
+            _PostAction(
+              icon: Icons.mode_comment_outlined,
+              label: '${post.comments}',
+              semanticsLabel: 'Comments',
+              color: context.palette.textMuted,
+              onPressed: onComments,
             ),
           ],
         ),
@@ -208,17 +214,21 @@ class _PostAction extends StatelessWidget {
     required this.label,
     required this.color,
     required this.onPressed,
+    this.semanticsLabel,
   });
 
   final IconData icon;
   final String label;
+
+  /// What a screen reader calls it, when the label is only a number.
+  final String? semanticsLabel;
   final Color color;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) => Semantics(
     button: true,
-    label: label,
+    label: semanticsLabel ?? label,
     child: GestureDetector(
       onTap: onPressed,
       behavior: HitTestBehavior.opaque,

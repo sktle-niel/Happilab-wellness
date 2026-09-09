@@ -179,7 +179,9 @@ Treat everything outside the process as hostile.
   it to `SecureTokenStore` (`flutter_secure_storage`: Keychain on iOS, KeyStore-wrapped AES-GCM on
   Android). `SharedPreferences`, plain files and query strings are not credential stores. Keychain
   items stay `unlocked_this_device` and never `synchronizable` — a synced token leaves the device.
-  On 401/403 the token is cleared immediately.
+  On 401/403 the token is cleared immediately. `SessionManager` keeps the access and refresh tokens
+  in one secure entry, renews the pair before the access token expires — once, however many requests
+  wait on it — and treats a refused refresh as a revoked session.
 - **Nothing leaves the device.** Android backup is off (`android:allowBackup="false"` plus
   `android/app/src/main/res/xml/data_extraction_rules.xml`, which blocks cloud backup and
   device-to-device transfer on API 31+). A restored token is a stale credential waiting to be
