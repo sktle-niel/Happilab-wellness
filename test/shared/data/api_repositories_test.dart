@@ -8,7 +8,9 @@ import 'package:happilab/core/security/token_store.dart';
 import 'package:happilab/features/auth/data/auth_api.dart';
 import 'package:happilab/features/notifications/data/notifications_api.dart';
 import 'package:happilab/shared/data/catalogue_api.dart';
+import 'package:happilab/shared/data/delivery_address_api.dart';
 import 'package:happilab/shared/data/member_api.dart';
+import 'package:happilab/shared/data/orders_api.dart';
 import 'package:happilab/shared/domain/catalogue.dart';
 
 import '../../support/fake_http_transport.dart';
@@ -141,13 +143,49 @@ void main() {
       expect(entries.single.isActionable, isFalse);
     });
 
+    test('an address comes back whole, or as none', () {
+      expect(DeliveryAddressApi.parseAddress({'address': null}), isNull);
+      final address = DeliveryAddressApi.parseAddress({
+        'address': {
+          'full_name': 'Ana Cruz',
+          'email': 'ana@test.ph',
+          'mobile': '09171234567',
+          'street': '12 Mabini St',
+          'purok': '',
+          'barangay': 'San Isidro',
+          'city': 'Bacolod City',
+          'province': 'Negros Occidental',
+          'postal_code': '6100',
+          'landmark': '',
+        },
+      });
+      expect(
+        address?.oneLine,
+        '12 Mabini St, San Isidro, Bacolod City, Negros Occidental, 6100',
+      );
+      expect(
+        () => DeliveryAddressApi.parseAddress({
+          'address': {'full_name': 1},
+        }),
+        throwsA(isA<DataFormatException>()),
+      );
+      final receipt = OrdersApi.parseReceipt({
+        'reference': 'FC-1',
+        'total': '₱900',
+        'status': 'placed',
+      });
+      expect(receipt.reference, 'FC-1');
+      expect(receipt.total, '₱900');
+    });
+
     test('a product carries only the store links the app knows', () {
       final products = CatalogueApi.parseProducts([
         {
+          'id': 'p1',
           'name': 'Soap',
           'blurb': 'Clean',
           'price': '₱250',
-          'points_range': '11–17',
+          'points': 11,
           'image_url': 'https://cdn.test/soap.jpg',
           'badge': 'topSale',
           'store_links': {'shopee': 'https://shopee.ph/x', 'other': 'y'},

@@ -84,9 +84,10 @@ implementation it got:
 - **A new data source is not done** until it has the contract, the API implementation, the fake, a
   parser test on a wire-shaped fixture, and a screen test on the fake.
 
-Cash out, sign in, sign up, payout accounts, profile edits and notifications already go through
-this path; the support desk (`SupportDesk`) is the one seam still simulated in presentation, waiting
-on a push channel.
+Cash out, sign in, sign up, payout accounts, profile edits, notifications and the support chat
+already go through this path. The chat has no push channel yet: `SupportChatController` reads the
+conversation again every few seconds while it is open, and the id of an open chat is kept in
+`OpenChat` for the session so leaving the screen never opens a second one.
 
 ## Folder structure
 

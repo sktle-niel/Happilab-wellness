@@ -8,6 +8,7 @@ import 'package:happilab/app/theme/app_scroll_behavior.dart';
 import 'package:happilab/app/theme/app_theme.dart';
 import 'package:happilab/app/theme/theme_reveal.dart';
 import 'package:happilab/core/config/app_config.dart';
+import 'package:happilab/shared/domain/delivery_address.dart';
 import 'package:happilab/shared/domain/payout_account.dart';
 import 'package:happilab/shared/domain/profile_photo.dart';
 import 'package:happilab/shared/widgets/app_backdrop.dart';
@@ -27,6 +28,7 @@ Widget testApp({
   required String initialRoute,
   PhotoLibrary? photoLibrary,
   Iterable<PayoutAccount> payoutAccounts = const [],
+  DeliveryAddress? deliveryAddress,
 }) {
   final dependencies = AppDependencies.withTransport(
     config: AppConfig(
@@ -35,7 +37,10 @@ Widget testApp({
     ),
     transport: FakeHttpTransport(),
     photoLibrary: photoLibrary ?? FakePhotoLibrary(),
-    repositories: Repositories.fake(payoutAccounts: payoutAccounts),
+    repositories: Repositories.fake(
+      payoutAccounts: payoutAccounts,
+      deliveryAddress: deliveryAddress,
+    ),
   );
 
   return AppScope(

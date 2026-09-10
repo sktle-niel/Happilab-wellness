@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import '../errors/app_exception.dart';
 import 'http_transport.dart';
@@ -28,9 +29,12 @@ final class IoHttpTransport implements HttpTransport {
       );
       request.headers.forEach(httpRequest.headers.set);
 
-      if (request.body != null) {
+      final payload = request.body;
+      if (payload is Uint8List) {
+        httpRequest.add(payload);
+      } else if (payload != null) {
         httpRequest.headers.contentType = ContentType.json;
-        httpRequest.add(utf8.encode(jsonEncode(request.body)));
+        httpRequest.add(utf8.encode(jsonEncode(payload)));
       }
 
       final response = await httpRequest.close();

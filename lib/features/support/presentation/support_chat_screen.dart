@@ -27,13 +27,17 @@ class SupportChatScreen extends StatefulWidget {
 class _SupportChatScreenState extends State<SupportChatScreen> {
   SupportChatController? _controller;
 
-  /// Photos come through the platform's library, which the scope holds; it is
-  /// not reachable before dependencies are.
+  /// The desk, the chat kept from earlier and the platform's library all
+  /// come from the scope, which is not reachable before dependencies are.
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _controller ??= SupportChatController(
-      library: AppScope.of(context).photoLibrary,
+    if (_controller != null) return;
+    final dependencies = AppScope.of(context);
+    _controller = SupportChatController(
+      desk: dependencies.repositories.supportDesk,
+      openChat: dependencies.openChat,
+      library: dependencies.photoLibrary,
     );
   }
 
@@ -54,18 +58,14 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
             builder: (context, _) => _ChatHeader(
               name: controller.counterpartName,
               line: controller.presenceLine,
-              isTyping: controller.isSupportTyping,
               agent: controller.agent,
             ),
           ),
           Expanded(
             child: ListenableBuilder(
               listenable: controller,
-              builder: (context, _) => ChatThread(
-                messages: controller.messages,
-                isSupportTyping: controller.isSupportTyping,
-                responder: controller.responder,
-              ),
+              builder: (context, _) =>
+                  ChatThread(messages: controller.messages),
             ),
           ),
           ChatComposer(controller: controller),
@@ -81,13 +81,11 @@ class _ChatHeader extends StatelessWidget {
   const _ChatHeader({
     required this.name,
     required this.line,
-    required this.isTyping,
     required this.agent,
   });
 
   final String name;
   final String line;
-  final bool isTyping;
   final SupportAgent? agent;
 
   @override
@@ -114,7 +112,7 @@ class _ChatHeader extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              _Presence(line: line, isTyping: isTyping),
+              _Presence(line: line),
             ],
           ),
         ),
@@ -140,12 +138,11 @@ class _CounterpartAvatar extends StatelessWidget {
 }
 
 /// A green dot and the line under the name, which cross-fades as it
-/// changes — online, a place in line, typing.
+/// changes — online, a place in line, an agent, the end.
 class _Presence extends StatelessWidget {
-  const _Presence({required this.line, required this.isTyping});
+  const _Presence({required this.line});
 
   final String line;
-  final bool isTyping;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -164,9 +161,7 @@ class _Presence extends StatelessWidget {
             key: ValueKey(line),
             style: AppTypography.figtree(
               size: 12.5,
-              color: isTyping
-                  ? context.palette.accentText
-                  : context.palette.textMuted,
+              color: context.palette.textMuted,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

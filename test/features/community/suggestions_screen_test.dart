@@ -63,10 +63,11 @@ void main() {
 
     test('prefers a real listing when the catalogue has one', () {
       const product = Product(
+        id: 'soap',
         name: 'Soap',
         blurb: '',
         price: '₱1',
-        pointsRange: '1',
+        points: 1,
         imageUrl: '',
         storeLinks: {SharePlatform.lazada: 'https://www.lazada.com.ph/p/soap'},
       );

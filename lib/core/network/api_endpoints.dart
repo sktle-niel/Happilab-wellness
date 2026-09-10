@@ -20,6 +20,12 @@ abstract final class ApiEndpoints {
   static const String myPayoutAccounts = '$_v/me/payout-accounts';
   static const String myCashOuts = '$_v/me/cash-outs';
 
+  /// Where the member's orders go; a PUT sets or replaces it.
+  static const String myAddress = '$_v/me/address';
+
+  /// The member's orders; a POST places one.
+  static const String myOrders = '$_v/me/orders';
+
   /// One notification, read.
   static String notificationRead(String id) => '$_v/me/notifications/$id/read';
 
@@ -34,4 +40,16 @@ abstract final class ApiEndpoints {
   // Support
   static const String faqs = '$_v/support/faqs';
   static const String terms = '$_v/support/terms';
+
+  /// The member's chats with the desk; a POST opens one.
+  static const String supportConversations = '$_v/support/conversations';
+
+  /// One signed address for a chat photo.
+  static const String supportUploadSign = '$_v/support/uploads/sign';
+
+  static String supportConversation(String id) => '$supportConversations/$id';
+
+  /// What was said in one chat; a POST says something new.
+  static String supportMessages(String id) =>
+      '$supportConversations/$id/messages';
 }

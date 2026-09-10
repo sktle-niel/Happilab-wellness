@@ -24,7 +24,8 @@ class HttpTransportRequest {
   final Uri url;
   final Map<String, String> headers;
 
-  /// JSON-encodable payload, or `null` for bodyless verbs.
+  /// JSON-encodable payload, raw bytes as a `Uint8List` sent as they are
+  /// under the caller's `content-type`, or `null` for bodyless verbs.
   final Object? body;
 }
 

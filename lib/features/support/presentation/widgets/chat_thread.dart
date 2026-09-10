@@ -7,52 +7,29 @@ import 'chat_bubble.dart';
 /// view whatever the keyboard does, and built lazily: a long thread costs
 /// only the rows on screen.
 class ChatThread extends StatelessWidget {
-  const ChatThread({
-    required this.messages,
-    required this.isSupportTyping,
-    required this.responder,
-    super.key,
-  });
+  const ChatThread({required this.messages, super.key});
 
   final List<ChatMessage> messages;
-  final bool isSupportTyping;
 
-  /// Whose dots show while a reply is being typed — the bot or the agent.
-  final ChatSender responder;
-
-  /// One row per message, the day pill above them all, and the typing dots
-  /// below them while a reply is being typed.
-  int get _rowCount => messages.length + 1 + (isSupportTyping ? 1 : 0);
+  /// One row per message, and the day pill above them all.
+  int get _rowCount => messages.length + 1;
 
   /// A time is shown over the first message of each minute.
   bool _startsMinute(int index) =>
       index == 0 || !messages[index].sharesMinuteWith(messages[index - 1]);
 
-  /// A face goes beside the last message of a run from one sender. While a
-  /// reply is being typed, its dots close the responder's run, not its last
-  /// message.
-  bool _endsRun(int index) {
-    final message = messages[index];
-    if (index < messages.length - 1) {
-      return !message.sender.isSameAs(messages[index + 1].sender);
-    }
-    return !isSupportTyping || !message.sender.isSameAs(responder);
-  }
+  /// A face goes beside the last message of a run from one sender.
+  bool _endsRun(int index) =>
+      index == messages.length - 1 ||
+      !messages[index].sender.isSameAs(messages[index + 1].sender);
 
   /// Row 0 is the bottom of the thread. Keyed to the message, so the list
   /// shifting as one lands only rises the new row in.
   Widget _row(BuildContext context, int row) {
-    var slot = row;
-    if (isSupportTyping) {
-      if (slot == 0) {
-        return TypingBubble(key: const ValueKey('typing'), sender: responder);
-      }
-      slot -= 1;
-    }
-    if (slot == messages.length) {
+    if (row == messages.length) {
       return const DayPill(key: ValueKey('day'), label: 'Today');
     }
-    final index = messages.length - 1 - slot;
+    final index = messages.length - 1 - row;
     final message = messages[index];
     return _MessageRow(
       key: ValueKey(message),
