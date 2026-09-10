@@ -18,8 +18,11 @@ import '../../features/referrals/domain/referrals_repository.dart';
 import '../../features/rewards/data/fake_rewards_repository.dart';
 import '../../features/rewards/data/rewards_api.dart';
 import '../../features/rewards/domain/rewards_repository.dart';
+import '../../features/support/data/fake_support_desk.dart';
 import '../../features/support/data/fake_support_repository.dart';
 import '../../features/support/data/support_api.dart';
+import '../../features/support/data/support_desk_api.dart';
+import '../../features/support/domain/support_desk.dart';
 import '../../features/support/domain/support_repository.dart';
 import '../../shared/data/catalogue_api.dart';
 import '../../shared/data/fake_catalogue_repository.dart';
@@ -48,6 +51,7 @@ class Repositories {
     required this.community,
     required this.profile,
     required this.support,
+    required this.supportDesk,
   });
 
   factory Repositories.forConfig(AppConfig config, ApiClient client) =>
@@ -64,6 +68,7 @@ class Repositories {
     community: CommunityApi(client),
     profile: ProfileApi(client),
     support: SupportApi(client),
+    supportDesk: SupportDeskApi(client),
   );
 
   /// The bundled placeholders. [payoutAccounts] may be seeded, for a test
@@ -81,6 +86,7 @@ class Repositories {
     community: FakeCommunityRepository(),
     profile: const FakeProfileRepository(),
     support: const FakeSupportRepository(),
+    supportDesk: FakeSupportDesk(),
   );
 
   final AuthRepository auth;
@@ -93,4 +99,5 @@ class Repositories {
   final CommunityRepository community;
   final ProfileRepository profile;
   final SupportRepository support;
+  final SupportDesk supportDesk;
 }

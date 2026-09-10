@@ -3,160 +3,264 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:happilab/core/errors/app_exception.dart';
 import 'package:happilab/core/errors/result.dart';
+import 'package:happilab/features/support/data/fake_support_desk.dart';
+import 'package:happilab/features/support/domain/open_chat.dart';
 import 'package:happilab/features/support/domain/support_chat.dart';
+import 'package:happilab/features/support/domain/support_desk.dart';
 import 'package:happilab/features/support/presentation/support_chat_controller.dart';
 import 'package:happilab/shared/domain/profile_photo.dart';
 
 import '../../support/fake_photo_library.dart';
+import '../../support/fixed_random.dart';
 
-/// A desk with a known line and a known person on it.
-final class _FixedDesk implements SupportDesk {
-  _FixedDesk({required this.ahead});
+/// A desk that refuses everything with one failure.
+final class _RefusingDesk implements SupportDesk {
+  const _RefusingDesk(this.failure);
 
-  static const SupportAgent maria = SupportAgent('Maria');
-
-  final int ahead;
-
-  @override
-  int queueLength() => ahead;
+  final AppException failure;
 
   @override
-  SupportAgent nextAgent() => maria;
+  Future<Result<SupportConversation>> open({
+    String? topic,
+    String? body,
+    String? photoUrl,
+  }) async => Failure(failure);
+
+  @override
+  Future<Result<SupportConversation>> conversation(String id) async =>
+      Failure(failure);
+
+  @override
+  Future<Result<ChatMessage>> send(
+    String id, {
+    String? body,
+    String? photoUrl,
+  }) async => Failure(failure);
+
+  @override
+  Future<Result<String>> uploadPhoto(File file, {required int bytes}) async =>
+      Failure(failure);
+}
+
+/// The fake desk, with one read that can be made to fail.
+final class _FlakyDesk implements SupportDesk {
+  final FakeSupportDesk _desk = FakeSupportDesk(random: const FixedRandom(0));
+
+  AppException? readFailure;
+
+  @override
+  Future<Result<SupportConversation>> open({
+    String? topic,
+    String? body,
+    String? photoUrl,
+  }) => _desk.open(topic: topic, body: body, photoUrl: photoUrl);
+
+  @override
+  Future<Result<SupportConversation>> conversation(String id) async {
+    final failure = readFailure;
+    if (failure != null) return Failure(failure);
+    return _desk.conversation(id);
+  }
+
+  @override
+  Future<Result<ChatMessage>> send(
+    String id, {
+    String? body,
+    String? photoUrl,
+  }) => _desk.send(id, body: body, photoUrl: photoUrl);
+
+  @override
+  Future<Result<String>> uploadPhoto(File file, {required int bytes}) =>
+      _desk.uploadPhoto(file, bytes: bytes);
 }
 
 void main() {
-  group('SupportChatController', () {
-    final clock = DateTime(2026, 9, 7, 15, 5);
+  final clock = DateTime(2026, 9, 7, 15, 5);
 
-    SupportChatController build({int ahead = 0}) {
+  List<String> textsOf(SupportChatController controller) =>
+      controller.messages.map((m) => m.text).toList();
+
+  group('SupportChatController', () {
+    /// [line] picks the fake's draw: 0 is first in line with Maria, 0.5 is
+    /// second with Paolo.
+    SupportChatController build({
+      double line = 0,
+      SupportDesk? desk,
+      OpenChat? openChat,
+    }) {
       final controller = SupportChatController(
+        desk: desk ?? FakeSupportDesk(random: FixedRandom(line)),
+        openChat: openChat ?? OpenChat(),
         now: () => clock,
-        desk: _FixedDesk(ahead: ahead),
-        replyDelay: Duration.zero,
-        linePace: Duration.zero,
-        joinDelay: Duration.zero,
       );
       addTearDown(controller.dispose);
       return controller;
     }
 
-    List<String> textsOf(SupportChatController controller) =>
-        controller.messages.map((m) => m.text).toList();
-
-    test('opens with the bot saying hello', () {
+    test('opens with the bot saying hello and the openers', () {
       final controller = build();
 
       expect(controller.messages, hasLength(1));
       expect(controller.messages.single.text, SupportChatCopy.greeting);
       expect(controller.messages.single.sender, isA<BotSender>());
       expect(controller.handoff, isA<NoAgent>());
+      expect(controller.canChooseTopic, isTrue);
       expect(controller.canSend, isFalse);
+      expect(controller.presenceLine, SupportChatCopy.status);
     });
 
-    test('a topic is sent in the member\'s words and answered', () async {
-      final controller = build();
+    test('a topic opens the chat in the member\'s words', () async {
+      final openChat = OpenChat();
+      final controller = build(line: 0.5, openChat: openChat);
 
-      controller.choose(SupportTopic.cashOut);
-      expect(controller.isSupportTyping, isTrue);
-      await pumpEventQueue();
+      expect(await controller.choose(SupportTopic.cashOut), isNull);
 
-      expect(textsOf(controller), contains(SupportTopic.cashOut.opener));
-      expect(textsOf(controller).last, SupportTopic.cashOut.followUp);
-      expect(controller.messages.last.sender, isA<BotSender>());
-      expect(controller.isSupportTyping, isFalse);
-    });
-
-    test('a typed message goes out trimmed and is acknowledged', () async {
-      final controller = build()..draft.text = '  My referral link is broken  ';
-      expect(controller.canSend, isTrue);
-
-      controller.sendDraft();
-      await pumpEventQueue();
-
-      expect(controller.draft.text, isEmpty);
-      expect(controller.messages[1].text, 'My referral link is broken');
+      expect(textsOf(controller), [
+        SupportChatCopy.greeting,
+        SupportTopic.cashOut.opener,
+        SupportTopic.cashOut.followUp,
+        SupportChatCopy.inLine(2),
+      ]);
       expect(controller.messages[1].isFromMember, isTrue);
-      expect(textsOf(controller).last, SupportChatCopy.acknowledgement);
-    });
-
-    test('an empty draft sends nothing', () {
-      final controller = build()..draft.text = '   ';
-
-      controller.sendDraft();
-
-      expect(controller.messages, hasLength(1));
-      expect(controller.isSupportTyping, isFalse);
-    });
-
-    test('the agent command brings a free agent straight in', () async {
-      final controller = build()..draft.text = '/Agent';
-
-      controller.sendDraft();
-      await pumpEventQueue();
-
-      final texts = textsOf(controller);
-      expect(texts, contains(SupportChatCopy.requestingAgent));
-      expect(texts, contains(SupportChatCopy.joined(_FixedDesk.maria)));
-      expect(texts.last, _FixedDesk.maria.greeting);
-      expect(controller.messages.last.sender, isA<AgentSender>());
-      expect(controller.handoff, isA<WithAgent>());
-      expect(controller.counterpartName, 'Maria');
-      expect(controller.presenceLine, SupportChatCopy.agentStatus);
-    });
-
-    test('a busy desk gives a place in line that counts down', () async {
-      final controller = build(ahead: 2)..requestAgent();
-
+      expect(controller.messages[2].sender, isA<BotSender>());
+      expect(controller.messages[3].isNote, isTrue);
       expect(controller.handoff, isA<InLine>());
       expect(controller.presenceLine, SupportChatCopy.inLineStatus(2));
-      expect(textsOf(controller), contains(SupportChatCopy.inLine(2)));
-
-      await pumpEventQueue();
-
-      final texts = textsOf(controller);
-      expect(texts, contains(SupportChatCopy.inLine(1)));
-      expect(texts, contains(SupportChatCopy.joined(_FixedDesk.maria)));
-      expect(controller.handoff, isA<WithAgent>());
+      expect(controller.canChooseTopic, isFalse);
+      expect(openChat.id, isNotNull);
     });
 
-    test('with an agent on the line, the agent answers, not the bot', () async {
-      final controller = build()..requestAgent();
-      await pumpEventQueue();
+    test(
+      'a typed line opens the chat and the draft clears once it is in',
+      () async {
+        final controller = build()
+          ..draft.text = '  My referral link is broken  ';
+        expect(controller.canSend, isTrue);
 
-      controller.choose(SupportTopic.points);
-      await pumpEventQueue();
+        expect(await controller.sendDraft(), isNull);
 
-      expect(textsOf(controller).last, SupportChatCopy.agentReplies.first);
+        expect(controller.draft.text, isEmpty);
+        expect(controller.messages[1].text, 'My referral link is broken');
+        expect(controller.messages[1].isFromMember, isTrue);
+        expect(textsOf(controller).last, SupportChatCopy.inLine(1));
+      },
+    );
+
+    test('an empty draft sends nothing', () async {
+      final controller = build()..draft.text = '   ';
+
+      await controller.sendDraft();
+
+      expect(controller.messages, hasLength(1));
+      expect(controller.handoff, isA<NoAgent>());
+    });
+
+    test('each read moves the line until an agent joins', () async {
+      final controller = build(line: 0.5);
+      await controller.choose(SupportTopic.points);
+
+      await controller.refresh();
+      expect(controller.presenceLine, SupportChatCopy.inLineStatus(1));
+
+      await controller.refresh();
+      expect(controller.handoff, isA<WithAgent>());
+      expect(controller.counterpartName, 'Paolo');
+      expect(controller.presenceLine, SupportChatCopy.agentStatus);
+      expect(textsOf(controller), contains('Paolo joined the chat.'));
       expect(controller.messages.last.sender, isA<AgentSender>());
     });
 
-    test('ending the chat hands back to the bot', () async {
-      final controller = build()..requestAgent();
-      await pumpEventQueue();
+    test('the agent answers each line, then closes the chat', () async {
+      final openChat = OpenChat();
+      final controller = build(openChat: openChat);
+      await controller.choose(SupportTopic.other);
+      await controller.refresh();
+      expect(controller.handoff, isA<WithAgent>());
 
-      controller.endAgentChat();
+      for (final reply in FakeSupportDesk.replies) {
+        controller.draft.text = 'More detail';
+        await controller.sendDraft();
+        await controller.refresh();
+        expect(textsOf(controller).last, reply);
+        expect(controller.messages.last.sender, isA<AgentSender>());
+      }
+
+      await controller.refresh();
+      expect(controller.handoff, isA<ChatEnded>());
+      expect(controller.canType, isFalse);
+      expect(controller.presenceLine, SupportChatCopy.endedStatus);
+      expect(textsOf(controller).last, 'Marked resolved by Maria.');
+      expect(openChat.id, isNull);
+
+      controller.draft.text = 'One more';
+      final count = controller.messages.length;
+      expect(await controller.sendDraft(), isNull);
+      expect(controller.messages, hasLength(count));
+
+      controller.startNewChat();
+      expect(textsOf(controller), [SupportChatCopy.greeting]);
       expect(controller.handoff, isA<NoAgent>());
-      expect(textsOf(controller).last, SupportChatCopy.ended(_FixedDesk.maria));
-
-      controller.choose(SupportTopic.other);
-      await pumpEventQueue();
-      expect(textsOf(controller).last, SupportTopic.other.followUp);
-      expect(controller.messages.last.sender, isA<BotSender>());
+      expect(controller.canChooseTopic, isTrue);
     });
 
-    test('asking twice does nothing more', () {
-      final controller = build(ahead: 1)..requestAgent();
-      final count = controller.messages.length;
+    test('a chat kept from earlier is read back, not started over', () async {
+      final desk = FakeSupportDesk(random: const FixedRandom(0.5));
+      final openChat = OpenChat();
+      final earlier = build(desk: desk, openChat: openChat);
+      await earlier.choose(SupportTopic.account);
 
-      controller.requestAgent();
+      final later = build(desk: desk, openChat: openChat);
+      await pumpEventQueue();
 
-      expect(controller.messages, hasLength(count));
+      expect(textsOf(later), contains(SupportTopic.account.opener));
+      expect(later.handoff, isA<InLine>());
+      expect(later.canChooseTopic, isFalse);
+    });
+
+    test('a refused line keeps the draft and says why', () async {
+      const refusal = ServerException(503, 'The desk is closed.');
+      final controller = build(desk: const _RefusingDesk(refusal))
+        ..draft.text = 'Hello?';
+
+      expect(await controller.sendDraft(), refusal);
+
+      expect(controller.draft.text, 'Hello?');
+      expect(controller.messages, hasLength(1));
+      expect(controller.handoff, isA<NoAgent>());
+    });
+
+    test('a read the desk did not answer reads as reconnecting', () async {
+      final desk = _FlakyDesk();
+      final controller = build(desk: desk);
+      await controller.choose(SupportTopic.payout);
+
+      desk.readFailure = const NetworkException();
+      await controller.refresh();
+      expect(controller.isOffline, isTrue);
+      expect(controller.presenceLine, SupportChatCopy.reconnecting);
+
+      desk.readFailure = null;
+      await controller.refresh();
+      expect(controller.isOffline, isFalse);
+      expect(controller.handoff, isA<WithAgent>());
+    });
+
+    test('a chat the desk no longer has is let go', () async {
+      final desk = _FlakyDesk();
+      final openChat = OpenChat();
+      final controller = build(desk: desk, openChat: openChat);
+      await controller.choose(SupportTopic.referral);
+
+      desk.readFailure = const ClientException(404, 'Not found.');
+      await controller.refresh();
+
+      expect(openChat.id, isNull);
+      expect(controller.handoff, isA<NoAgent>());
+      expect(controller.canChooseTopic, isTrue);
     });
   });
 
   group('SupportChatController photos', () {
-    final clock = DateTime(2026, 9, 7, 15, 5);
-
     Future<File> fileOf(int bytes) async {
       final file = File('${Directory.systemTemp.path}/chat-photo-$bytes.jpg');
       await file.writeAsBytes(List.filled(bytes, 0));
@@ -164,23 +268,26 @@ void main() {
       return file;
     }
 
-    SupportChatController build([FakePhotoLibrary? library]) {
+    SupportChatController build({
+      FakePhotoLibrary? library,
+      SupportDesk? desk,
+    }) {
       final controller = SupportChatController(
-        now: () => clock,
+        desk: desk ?? FakeSupportDesk(random: const FixedRandom(0)),
+        openChat: OpenChat(),
         library: library,
-        replyDelay: Duration.zero,
+        now: () => clock,
       );
       addTearDown(controller.dispose);
       return controller;
     }
 
-    test('a photo within the limit goes out and is acknowledged', () async {
+    test('a photo within the limit opens the chat with its picture', () async {
       final file = await fileOf(1024);
       final library = FakePhotoLibrary()..onAttach = (_) async => Success(file);
-      final controller = build(library);
+      final controller = build(library: library);
 
       final error = await controller.attachPhoto(PhotoSource.gallery);
-      await pumpEventQueue();
 
       expect(error, isNull);
       expect(library.attachments, [PhotoSource.gallery]);
@@ -189,18 +296,16 @@ void main() {
       final sent = controller.messages[1];
       expect(sent.isFromMember, isTrue);
       expect(sent.text, isEmpty);
-      expect(sent.photo?.file.path, file.path);
-      expect(sent.photo?.bytes, 1024);
-      expect(
-        controller.messages.last.text,
-        SupportChatCopy.photoAcknowledgement,
-      );
+      expect(sent.photo?.isLocal, isTrue);
+      expect(sent.photo?.uri, file.absolute.uri);
+      expect(textsOf(controller).last, SupportChatCopy.inLine(1));
+      expect(controller.isAttaching, isFalse);
     });
 
     test('a photo over the limit is refused and nothing goes out', () async {
       final file = await fileOf(ChatPhoto.maxBytes + 1);
       final controller = build(
-        FakePhotoLibrary()..onAttach = (_) async => Success(file),
+        library: FakePhotoLibrary()..onAttach = (_) async => Success(file),
       );
 
       final error = await controller.attachPhoto(PhotoSource.camera);
@@ -210,13 +315,25 @@ void main() {
       expect(controller.messages, hasLength(1));
     });
 
+    test('a desk that will not take the photo says so', () async {
+      final file = await fileOf(1024);
+      const refusal = ServerException(503, 'Uploads are not configured.');
+      final controller = build(
+        library: FakePhotoLibrary()..onAttach = (_) async => Success(file),
+        desk: const _RefusingDesk(refusal),
+      );
+
+      expect(await controller.attachPhoto(PhotoSource.gallery), refusal);
+      expect(controller.messages, hasLength(1));
+    });
+
     test(
       'a source that will not open is reported; backing out is not',
       () async {
         final library = FakePhotoLibrary()
           ..onAttach = (_) async =>
               const Failure(UnknownException('Could not open the camera.'));
-        final controller = build(library);
+        final controller = build(library: library);
 
         expect(
           await controller.attachPhoto(PhotoSource.camera),
@@ -244,6 +361,11 @@ void main() {
         ChatPhoto.validate(8 * 1024 * 1024),
         'That photo is 8.0 MB; the most is 5 MB.',
       );
+    });
+
+    test('knows a picture still on the device from one at an address', () {
+      expect(ChatPhoto(Uri.file('/tmp/a.jpg')).isLocal, isTrue);
+      expect(ChatPhoto(Uri.parse('https://files.test/a.jpg')).isLocal, isFalse);
     });
   });
 

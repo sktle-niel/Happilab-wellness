@@ -6,11 +6,11 @@ import '../../../../app/theme/app_tokens.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../shared/domain/member_summary.dart';
 import '../../../../shared/utils/date_format.dart';
-import '../../../../shared/widgets/app_loader.dart';
 import '../../../../shared/widgets/arrival.dart';
 import '../../../../shared/widgets/avatar_circle.dart';
 import '../../../../shared/widgets/gap.dart';
 import '../../../../shared/widgets/member_avatar.dart';
+import '../../../../shared/widgets/remote_image.dart';
 import '../../domain/support_chat.dart';
 import 'support_avatar.dart';
 
@@ -75,8 +75,10 @@ class _Content extends StatelessWidget {
   }
 }
 
-/// The picture, a square no wider than a bubble, clipped to its corners.
-/// One that will not read any more shows a broken frame, never a crash.
+/// The picture, a square no wider than a bubble, clipped to its corners:
+/// from its file while it is still on this device, from the desk's address
+/// once it is there. One that will not read any more shows a broken frame,
+/// never a crash.
 class _Photo extends StatelessWidget {
   const _Photo({required this.photo});
 
@@ -85,17 +87,27 @@ class _Photo extends StatelessWidget {
   final ChatPhoto photo;
 
   @override
-  Widget build(BuildContext context) => ClipRRect(
-    borderRadius: AppRadius.input,
-    child: Image.file(
-      photo.file,
-      width: _edge,
-      height: _edge,
-      fit: BoxFit.cover,
-      cacheWidth: (_edge * 3).round(),
-      errorBuilder: (context, error, stackTrace) => const _MissingPhoto(),
-    ),
-  );
+  Widget build(BuildContext context) {
+    if (!photo.isLocal) {
+      return RemoteImage(
+        url: photo.url,
+        width: _edge,
+        height: _edge,
+        borderRadius: AppRadius.input,
+      );
+    }
+    return ClipRRect(
+      borderRadius: AppRadius.input,
+      child: Image.file(
+        photo.file,
+        width: _edge,
+        height: _edge,
+        fit: BoxFit.cover,
+        cacheWidth: (_edge * 3).round(),
+        errorBuilder: (context, error, stackTrace) => const _MissingPhoto(),
+      ),
+    );
+  }
 }
 
 class _MissingPhoto extends StatelessWidget {
@@ -108,23 +120,6 @@ class _MissingPhoto extends StatelessWidget {
     alignment: Alignment.center,
     color: context.palette.glass,
     child: Icon(Icons.broken_image_outlined, color: context.palette.textMuted),
-  );
-}
-
-/// Whoever is answering, mid-reply: the loader's dots in their bubble.
-class TypingBubble extends StatelessWidget {
-  const TypingBubble({required this.sender, super.key});
-
-  final ChatSender sender;
-
-  @override
-  Widget build(BuildContext context) => _BubbleRow(
-    sender: sender,
-    showsAvatar: true,
-    child: const Padding(
-      padding: EdgeInsets.symmetric(vertical: 4),
-      child: AppLoader(size: 7),
-    ),
   );
 }
 

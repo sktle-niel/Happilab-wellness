@@ -6,6 +6,8 @@ import 'package:happilab/core/network/api_client.dart';
 import 'package:happilab/core/security/token_store.dart';
 import 'package:happilab/features/auth/data/auth_api.dart';
 import 'package:happilab/features/auth/data/fake_auth_repository.dart';
+import 'package:happilab/features/support/data/fake_support_desk.dart';
+import 'package:happilab/features/support/data/support_desk_api.dart';
 
 import '../support/fake_http_transport.dart';
 
@@ -29,6 +31,8 @@ void main() {
 
   test('the fake backend is bound unless the build asks for the API', () {
     expect(bind(BackendMode.fake).auth, isA<FakeAuthRepository>());
+    expect(bind(BackendMode.fake).supportDesk, isA<FakeSupportDesk>());
     expect(bind(BackendMode.api).auth, isA<AuthApi>());
+    expect(bind(BackendMode.api).supportDesk, isA<SupportDeskApi>());
   });
 }

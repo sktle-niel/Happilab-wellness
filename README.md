@@ -23,7 +23,7 @@ fakes; `--dart-define=BACKEND=api` binds the API without touching a widget.
 | `community` | News feed, member stories with video, and a suggestion box |
 | `notifications` | The activity a member has not read yet |
 | `profile` | Profile, edit profile, account activity |
-| `support` | Help centre, programme terms, and a support chat with a "/agent" handoff |
+| `support` | Help centre, programme terms, and a support chat that waits in the desk's line for a person |
 
 Five of those live behind the bottom bar (`AppTab`); everything else is pushed on top of a tab and
 carries a back button.
@@ -78,7 +78,7 @@ The implementation lives in the sibling project `../backend` (Fastify, Drizzle, 
 | Notifications | `GET me/notifications`, `POST me/notifications/{id}/read`, `POST me/notifications/read` |
 | Rewards | `GET me/payout-accounts`, `PUT me/payout-accounts`, `GET me/cash-outs`, `POST me/cash-outs` |
 | Catalogue and community | `GET products`, `GET feed`, `GET testimonials` |
-| Support | `GET support/faqs`, `GET support/terms` |
+| Support | `GET support/faqs`, `GET support/terms`, `POST support/conversations`, `GET support/conversations/{id}`, `POST support/conversations/{id}/messages`, `POST support/uploads/sign` |
 
 Every call carries `Authorization: Bearer <access token>`; a 401 or 403 clears the session on the
 device at once. The access token is renewed through `auth/refresh` before it runs out, and the
@@ -178,7 +178,7 @@ model changes, and nothing else moves.
 
 ```bash
 flutter analyze         # must be clean
-flutter test            # 131 tests
+flutter test            # 267 tests
 dart format lib test
 ```
 

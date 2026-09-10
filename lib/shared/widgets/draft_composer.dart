@@ -19,6 +19,7 @@ class DraftComposer extends StatelessWidget {
     required this.onSubmit,
     this.leading,
     this.autofocus = false,
+    this.enabled = true,
     super.key,
   });
 
@@ -30,6 +31,10 @@ class DraftComposer extends StatelessWidget {
   final Widget? leading;
   final bool autofocus;
 
+  /// False while nothing may be typed or sent — a chat that has ended, a
+  /// line still on its way.
+  final bool enabled;
+
   @override
   Widget build(BuildContext context) => Row(
     children: [
@@ -39,6 +44,7 @@ class DraftComposer extends StatelessWidget {
           draft: draft,
           hint: hint,
           autofocus: autofocus,
+          enabled: enabled,
           onSubmit: onSubmit,
         ),
       ),
@@ -46,7 +52,7 @@ class DraftComposer extends StatelessWidget {
       ValueListenableBuilder(
         valueListenable: draft,
         builder: (context, value, _) => _SendButton(
-          enabled: value.text.trim().isNotEmpty,
+          enabled: enabled && value.text.trim().isNotEmpty,
           onPressed: onSubmit,
         ),
       ),
@@ -59,12 +65,14 @@ class _DraftField extends StatelessWidget {
     required this.draft,
     required this.hint,
     required this.autofocus,
+    required this.enabled,
     required this.onSubmit,
   });
 
   final TextEditingController draft;
   final String hint;
   final bool autofocus;
+  final bool enabled;
   final VoidCallback onSubmit;
 
   @override
@@ -79,6 +87,7 @@ class _DraftField extends StatelessWidget {
     child: TextField(
       controller: draft,
       autofocus: autofocus,
+      enabled: enabled,
       style: AppTypography.input,
       cursorColor: context.palette.accent,
       textCapitalization: TextCapitalization.sentences,

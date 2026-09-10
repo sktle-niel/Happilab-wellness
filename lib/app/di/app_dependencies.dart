@@ -10,6 +10,7 @@ import '../../core/security/secure_token_store.dart';
 import '../../core/security/session_manager.dart';
 import '../../core/security/token_store.dart';
 import '../../core/storage/persisted_flag.dart';
+import '../../features/support/domain/open_chat.dart';
 import '../../shared/domain/member_store.dart';
 import '../../shared/domain/payout_account.dart';
 import '../../shared/domain/profile_photo.dart';
@@ -35,7 +36,8 @@ class AppDependencies {
     ThemeController? themeController,
   }) : themeController = themeController ?? ThemeController(),
        member = MemberStore(repositories.member),
-       payoutAccounts = PayoutAccounts(repositories.payoutAccounts) {
+       payoutAccounts = PayoutAccounts(repositories.payoutAccounts),
+       openChat = OpenChat() {
     // Any session boundary — in or out — drops cached responses: one member's
     // data must never be served into another's session.
     sessionManager.addListener(apiClient.clearCache);
@@ -151,6 +153,10 @@ class AppDependencies {
   /// edit form share them.
   final PayoutAccounts payoutAccounts;
 
+  /// The support chat the member has open, so leaving the screen and coming
+  /// back lands in the same line.
+  final OpenChat openChat;
+
   /// Light or dark, chosen by the member.
   final ThemeController themeController;
 
@@ -166,6 +172,7 @@ class AppDependencies {
     if (sessionManager.isSignedIn) return;
     payoutAccounts.clear();
     member.reset();
+    openChat.forget();
   }
 
   void dispose() {

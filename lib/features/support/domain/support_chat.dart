@@ -1,15 +1,10 @@
 import 'dart:io';
-import 'dart:math';
 
 /// A person on the support desk.
 class SupportAgent {
   const SupportAgent(this.name);
 
   final String name;
-
-  String get greeting =>
-      'Hi, I am $name from Falcon Crest support. I have read the thread — '
-      'how can I help?';
 
   @override
   bool operator ==(Object other) => other is SupportAgent && other.name == name;
@@ -51,12 +46,19 @@ final class SystemSender extends ChatSender {
   const SystemSender();
 }
 
-/// A picture sent in the chat, as it sits on this device.
+/// A picture in the chat: one just picked on this device, or one the desk
+/// holds at an address.
 class ChatPhoto {
-  const ChatPhoto({required this.file, required this.bytes});
+  const ChatPhoto(this.uri);
 
-  final File file;
-  final int bytes;
+  final Uri uri;
+
+  /// True for a picture still on this device — drawn from its file.
+  bool get isLocal => uri.isScheme('file');
+
+  File get file => File.fromUri(uri);
+
+  String get url => uri.toString();
 
   /// The most a photo may weigh. The API refuses anything heavier, so the
   /// check is made here, before a byte leaves the phone.
@@ -80,9 +82,12 @@ class ChatMessage {
     required this.text,
     required this.sentAt,
     required this.sender,
+    this.id,
     this.photo,
   });
 
+  /// The desk's id for a line it holds; null for what the app says itself.
+  final String? id;
   final String text;
   final DateTime sentAt;
   final ChatSender sender;
@@ -109,16 +114,16 @@ sealed class Handoff {
   const Handoff();
 }
 
-/// Talking to the bot.
+/// Nothing sent yet: the app's greeting and the openers.
 final class NoAgent extends Handoff {
   const NoAgent();
 }
 
-/// Waiting for a person; [ahead] is how many members are before us.
+/// Waiting for a person; [position] is the one-based place in line.
 final class InLine extends Handoff {
-  const InLine({required this.ahead});
+  const InLine({required this.position});
 
-  final int ahead;
+  final int position;
 }
 
 final class WithAgent extends Handoff {
@@ -127,35 +132,9 @@ final class WithAgent extends Handoff {
   final SupportAgent agent;
 }
 
-/// The desk: how long the line is right now, and who picks up next.
-abstract interface class SupportDesk {
-  /// Members ahead in line; zero means an agent is free this moment.
-  int queueLength();
-
-  SupportAgent nextAgent();
-}
-
-/// Stands in for the real desk until there is one: a short line as often as
-/// none, and one of a few names.
-class SimulatedSupportDesk implements SupportDesk {
-  SimulatedSupportDesk({Random? random}) : _random = random ?? Random();
-
-  static const List<SupportAgent> _agents = [
-    SupportAgent('Maria'),
-    SupportAgent('Paolo'),
-    SupportAgent('Jen'),
-  ];
-
-  /// The line is never longer than this.
-  static const int _longestLine = 3;
-
-  final Random _random;
-
-  @override
-  int queueLength() => _random.nextInt(_longestLine + 1);
-
-  @override
-  SupportAgent nextAgent() => _agents[_random.nextInt(_agents.length)];
+/// The desk closed the chat; a new one can be opened.
+final class ChatEnded extends Handoff {
+  const ChatEnded();
 }
 
 /// What members most often write in about — offered as one-tap openers so a
@@ -204,56 +183,33 @@ enum SupportTopic {
   /// What is sent in the member's name when the chip is tapped.
   final String opener;
 
-  /// Support's first question back.
+  /// Support's first question back, in the app's voice, while the desk is
+  /// reached.
   final String followUp;
 }
 
-/// The lines the app says on its own, and the ways in to a person.
+/// The lines the app says on its own.
 abstract final class SupportChatCopy {
   static const String agentName = 'Falcon Crest Support';
   static const String status = 'Online · replies within 24 hours';
-  static const String typing = 'typing…';
   static const String agentStatus = 'Customer service agent · Online';
-  static const String connecting = 'Connecting…';
+  static const String endedStatus = 'Chat ended';
+  static const String reconnecting = 'Reconnecting…';
   static const String greeting =
       'Hi! You are chatting with Falcon Crest support. What can we help '
       'you with today?';
 
-  /// The answer to a message typed freely, until a person picks it up.
-  static const String acknowledgement =
-      'Thanks, we have got it. A teammate will reply here within 24 hours.';
-
-  /// The answer to a photo, until a person picks it up.
-  static const String photoAcknowledgement =
-      'Got the photo, thanks. A teammate will take a look.';
+  static const String hint = 'Type a message…';
+  static const String endedHint = 'This chat has ended';
+  static const String newChat = 'Start a new chat';
 
   static const String sendPhoto = 'Send a photo';
   static const String photoSourceNote =
       'From your gallery or the camera. ${ChatPhoto.limitNote}';
   static const String photosUnavailable = 'Photos cannot be sent from here.';
 
-  /// Typed into the composer, this asks for a person.
-  static const String agentCommand = '/agent';
-  static const String talkToAgent = 'Talk to an agent';
-  static const String endChat = 'End chat';
-  static const String requestingAgent =
-      'Connecting you to a customer service agent…';
+  static String inLine(int position) =>
+      'You are number $position in line. An agent will be with you shortly.';
 
-  static String inLine(int ahead) =>
-      'You are number $ahead in line. An agent will be with you shortly.';
-
-  static String inLineStatus(int ahead) => 'Number $ahead in line';
-
-  static String joined(SupportAgent agent) =>
-      '${agent.name} has joined the chat.';
-
-  static String ended(SupportAgent agent) =>
-      'Chat with ${agent.name} has ended. We are here if you need us again.';
-
-  /// What an agent says while a real answer is being worked out, in turn.
-  static const List<String> agentReplies = [
-    'Got it — let me check that for you.',
-    'Thanks, one moment while I look into it.',
-    'Understood, I am on it. I will be right back with an answer.',
-  ];
+  static String inLineStatus(int position) => 'Number $position in line';
 }

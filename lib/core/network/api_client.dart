@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import '../config/app_config.dart';
 import '../errors/app_exception.dart';
@@ -69,9 +70,8 @@ class ApiClient {
     Duration? maxAge,
   }) => _send(
     method: HttpMethod.get,
-    path: path,
+    url: _resolve(path, query),
     parse: parse,
-    query: query,
     maxAge: maxAge,
   );
 
@@ -85,7 +85,7 @@ class ApiClient {
     bool authenticated = true,
   }) => _send(
     method: HttpMethod.post,
-    path: path,
+    url: _resolve(path),
     parse: parse,
     body: body,
     authenticated: authenticated,
@@ -95,10 +95,31 @@ class ApiClient {
     String path, {
     required JsonParser<T> parse,
     Object? body,
-  }) => _send(method: HttpMethod.put, path: path, parse: parse, body: body);
+  }) => _send(
+    method: HttpMethod.put,
+    url: _resolve(path),
+    parse: parse,
+    body: body,
+  );
 
   Future<Result<T>> delete<T>(String path, {required JsonParser<T> parse}) =>
-      _send(method: HttpMethod.delete, path: path, parse: parse);
+      _send(method: HttpMethod.delete, url: _resolve(path), parse: parse);
+
+  /// Puts [bytes] at a signed [url]: a store the API pointed at, which takes
+  /// no bearer and answers nothing the app reads. Same limiter, timeout and
+  /// retries as every other call.
+  Future<Result<void>> upload(
+    Uri url,
+    Uint8List bytes, {
+    required String contentType,
+  }) => _send(
+    method: HttpMethod.put,
+    url: url,
+    parse: (_) {},
+    body: bytes,
+    authenticated: false,
+    headers: {'content-type': contentType, 'x-upsert': 'false'},
+  );
 
   /// Drops every cached response. Called on any session boundary — one
   /// member's data must never be served into another's session.
@@ -108,15 +129,13 @@ class ApiClient {
 
   Future<Result<T>> _send<T>({
     required HttpMethod method,
-    required String path,
+    required Uri url,
     required JsonParser<T> parse,
-    Map<String, String>? query,
     Object? body,
     Duration? maxAge,
     bool authenticated = true,
+    Map<String, String> headers = const {},
   }) async {
-    final url = _resolve(path, query);
-
     if (maxAge != null) {
       final hit = _fromCache(url, parse);
       if (hit != null) return hit;
@@ -127,7 +146,7 @@ class ApiClient {
         final request = HttpTransportRequest(
           method: method,
           url: url,
-          headers: await _headers(authenticated),
+          headers: {...await _headers(authenticated), ...headers},
           body: body,
         );
 
@@ -226,7 +245,7 @@ class ApiClient {
       error is ServerException ||
       error is RateLimitedException;
 
-  Uri _resolve(String path, Map<String, String>? query) {
+  Uri _resolve(String path, [Map<String, String>? query]) {
     final relative = path.startsWith('/') ? path.substring(1) : path;
     final url = _config.apiBaseUrl.resolve(relative);
     return (query == null || query.isEmpty)
