@@ -147,7 +147,7 @@ void main() {
           'name': 'Soap',
           'blurb': 'Clean',
           'price': '₱250',
-          'points_range': '11–17',
+          'points': 11,
           'image_url': 'https://cdn.test/soap.jpg',
           'badge': 'topSale',
           'store_links': {'shopee': 'https://shopee.ph/x', 'other': 'y'},

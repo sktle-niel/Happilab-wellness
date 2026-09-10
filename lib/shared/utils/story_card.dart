@@ -94,7 +94,7 @@ abstract final class StoryCard {
     );
     y = _text(
       canvas,
-      '${product.price} · Earn ${product.pointsRange} pts per sale',
+      '${product.price} · Earn ${product.points} pts per sale',
       y: y + 12,
       size: 44,
       weight: 700,

@@ -28,7 +28,7 @@ final class CatalogueApi implements CatalogueRepository {
       name: item.string('name'),
       blurb: item.string('blurb'),
       price: item.string('price'),
-      pointsRange: item.string('points_range'),
+      points: item.integer('points'),
       imageUrl: item.string('image_url'),
       badge: badge == null
           ? null

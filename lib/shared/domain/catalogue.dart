@@ -31,7 +31,7 @@ class Product {
     required this.name,
     required this.blurb,
     required this.price,
-    required this.pointsRange,
+    required this.points,
     required this.imageUrl,
     this.badge,
     this.storeLinks = const {},
@@ -59,16 +59,18 @@ class Product {
   /// Formatted for display — pricing is presentation copy until the catalogue
   /// comes from an API with a currency and an amount.
   final String price;
-  final String pointsRange;
+
+  /// What the referrer earns for each unit sold through their code.
+  final int points;
 
   /// Stock photography from the design canvas. Replace with product shots in
   /// `assets/images/` before shipping — a remote URL is a blank card offline.
   final String imageUrl;
 
-  String get earnLine => '$price · Earn $pointsRange pts per sale';
+  String get earnLine => '$price · Earn $points pts per sale';
 
   /// Compact form for the two-column home grid.
-  String get earnShort => 'Earn $pointsRange pts';
+  String get earnShort => 'Earn $points pts';
 
   final ProductBadge? badge;
 
@@ -78,7 +80,7 @@ class Product {
       name: 'Sakura Glow Soap',
       blurb: 'Gentle wellness soap with sunscreen benefits',
       price: '₱150',
-      pointsRange: '7–11',
+      points: 7,
       badge: ProductBadge.topSale,
       imageUrl: 'https://images.unsplash.com/photo-1584305574647-0cc949a2bb9f?w=400&q=80',
     ),
@@ -86,7 +88,7 @@ class Product {
       name: 'Sunscreen SPF50',
       blurb: 'Daily protection made for everyday glow',
       price: '₱380',
-      pointsRange: '19–27',
+      points: 19,
       badge: ProductBadge.newArrival,
       imageUrl: 'https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=400&q=80',
     ),
@@ -94,7 +96,7 @@ class Product {
       name: 'Falcon Coffee',
       blurb: 'Wellness blend with real benefits — coming soon',
       price: '₱520',
-      pointsRange: '26–36',
+      points: 26,
       badge: ProductBadge.comingSoon,
       imageUrl: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=80',
     ),
@@ -102,7 +104,7 @@ class Product {
       name: 'Herbal Tea',
       blurb: 'Tea with benefits for everyday balance — coming soon',
       price: '₱450',
-      pointsRange: '23–32',
+      points: 23,
       badge: ProductBadge.comingSoon,
       imageUrl: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&q=80',
     ),

@@ -66,7 +66,7 @@ void main() {
         name: 'Soap',
         blurb: '',
         price: '₱1',
-        pointsRange: '1',
+        points: 1,
         imageUrl: '',
         storeLinks: {SharePlatform.lazada: 'https://www.lazada.com.ph/p/soap'},
       );
