@@ -63,6 +63,7 @@ void main() {
 
     test('prefers a real listing when the catalogue has one', () {
       const product = Product(
+        id: 'soap',
         name: 'Soap',
         blurb: '',
         price: '₱1',

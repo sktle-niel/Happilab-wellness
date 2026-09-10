@@ -25,6 +25,7 @@ final class CatalogueApi implements CatalogueRepository {
   static Product _product(JsonReader item) {
     final badge = item.optionalString('badge');
     return Product(
+      id: item.string('id'),
       name: item.string('name'),
       blurb: item.string('blurb'),
       price: item.string('price'),

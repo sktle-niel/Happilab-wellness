@@ -12,8 +12,8 @@ import 'status_pill.dart';
 import '../../app/theme/app_palette.dart';
 
 /// A product card for the two-column grids: inset photo with its badge, the
-/// name, two lines of blurb, then the money with the one action — share —
-/// beside it.
+/// name, two lines of blurb, the money with share beside it, then the one
+/// button that gets the product.
 ///
 /// The column spreads its ends apart, so when a grid row stretches the card to
 /// match its neighbour the money stays on the bottom edge instead of floating.
@@ -21,6 +21,7 @@ class ProductShareTile extends StatelessWidget {
   const ProductShareTile({
     required this.product,
     required this.onShare,
+    required this.onGet,
     super.key,
   });
 
@@ -28,6 +29,9 @@ class ProductShareTile extends StatelessWidget {
 
   final Product product;
   final VoidCallback onShare;
+
+  /// Opens the checkout for this product.
+  final VoidCallback onGet;
 
   @override
   Widget build(BuildContext context) => AppCard(
@@ -39,7 +43,7 @@ class ProductShareTile extends StatelessWidget {
         _Photo(product: product),
         Padding(
           padding: const EdgeInsets.fromLTRB(6, 10, 6, 4),
-          child: _Details(product: product, onShare: onShare),
+          child: _Details(product: product, onShare: onShare, onGet: onGet),
         ),
       ],
     ),
@@ -101,10 +105,15 @@ class _Badge extends StatelessWidget {
 }
 
 class _Details extends StatelessWidget {
-  const _Details({required this.product, required this.onShare});
+  const _Details({
+    required this.product,
+    required this.onShare,
+    required this.onGet,
+  });
 
   final Product product;
   final VoidCallback onShare;
+  final VoidCallback onGet;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -136,6 +145,8 @@ class _Details extends StatelessWidget {
           _ShareButton(onPressed: onShare, label: product.name),
         ],
       ),
+      const SizedBox(height: AppSpacing.sm),
+      _GetButton(onPressed: onGet, label: product.name),
     ],
   );
 }
@@ -199,4 +210,47 @@ class _ShareButton extends StatelessWidget {
       ),
     ),
   );
+}
+
+/// The full-width lime bar under the money: the way a shop card sells, so
+/// the member can get the product for themselves, not only pass it on.
+class _GetButton extends StatelessWidget {
+  const _GetButton({required this.onPressed, required this.label});
+
+  static const double _height = 36;
+
+  final VoidCallback onPressed;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+
+    return Semantics(
+      button: true,
+      label: 'Get $label',
+      // The bar reads as one control, not a button and a word.
+      excludeSemantics: true,
+      child: PressableScale(
+        scale: 0.96,
+        onPressed: onPressed,
+        child: Container(
+          height: _height,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: palette.accent,
+            borderRadius: AppRadius.pill,
+          ),
+          child: Text(
+            'Get',
+            style: AppTypography.figtree(
+              size: 13.5,
+              weight: 800,
+              color: palette.onAccent,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

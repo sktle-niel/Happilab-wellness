@@ -28,6 +28,7 @@ enum SharePlatform {
 /// both present it.
 class Product {
   const Product({
+    required this.id,
     required this.name,
     required this.blurb,
     required this.price,
@@ -39,6 +40,10 @@ class Product {
 
   /// Listing URLs per storefront, once the catalogue has them. A store search
   /// for the product name stands in for any that are missing.
+  /// The catalogue row, as an order names it. Bundled products carry a slug
+  /// so the fakes can tell them apart; the API sends its own ids.
+  final String id;
+
   final Map<SharePlatform, String> storeLinks;
 
   /// Where a share lands on [platform], with the member's code attached so
@@ -77,6 +82,7 @@ class Product {
   /// The catalogue, in the order the design lists it.
   static const List<Product> showcase = [
     Product(
+      id: 'sakura-glow-soap',
       name: 'Sakura Glow Soap',
       blurb: 'Gentle wellness soap with sunscreen benefits',
       price: '₱150',
@@ -85,6 +91,7 @@ class Product {
       imageUrl: 'https://images.unsplash.com/photo-1584305574647-0cc949a2bb9f?w=400&q=80',
     ),
     Product(
+      id: 'sunscreen-spf50',
       name: 'Sunscreen SPF50',
       blurb: 'Daily protection made for everyday glow',
       price: '₱380',
@@ -93,6 +100,7 @@ class Product {
       imageUrl: 'https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=400&q=80',
     ),
     Product(
+      id: 'falcon-coffee',
       name: 'Falcon Coffee',
       blurb: 'Wellness blend with real benefits — coming soon',
       price: '₱520',
@@ -101,6 +109,7 @@ class Product {
       imageUrl: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=80',
     ),
     Product(
+      id: 'herbal-tea',
       name: 'Herbal Tea',
       blurb: 'Tea with benefits for everyday balance — coming soon',
       price: '₱450',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../app/router/app_routes.dart';
 import '../domain/catalogue.dart';
 import 'gap.dart';
 import 'product_share_sheet.dart';
@@ -49,9 +50,10 @@ class ProductShareCarousel extends StatelessWidget {
 
   static const double _cardWidth = 236;
 
-  /// Tall enough for a square photo, a one-line name, two lines of blurb and
-  /// the money row at [_cardWidth]; the card fills it from both ends.
-  static const double _height = 354;
+  /// Tall enough for a square photo, a one-line name, two lines of blurb,
+  /// the money row and the get bar at [_cardWidth]; the card fills it from
+  /// both ends.
+  static const double _height = 398;
 
   static const double _gap = 12;
 
@@ -110,7 +112,8 @@ class _GridRow extends StatelessWidget {
   }
 }
 
-/// One card whose share button opens the share sheet.
+/// One card whose share button opens the share sheet and whose get bar opens
+/// the checkout.
 class ProductShareCell extends StatelessWidget {
   const ProductShareCell({
     required this.product,
@@ -129,5 +132,8 @@ class ProductShareCell extends StatelessWidget {
       product: product,
       referralCode: referralCode,
     ),
+    onGet: () =>
+        Navigator.of(context)
+            .pushNamed(AppRoutes.getProduct, arguments: product),
   );
 }

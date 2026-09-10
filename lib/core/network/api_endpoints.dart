@@ -20,6 +20,12 @@ abstract final class ApiEndpoints {
   static const String myPayoutAccounts = '$_v/me/payout-accounts';
   static const String myCashOuts = '$_v/me/cash-outs';
 
+  /// Where the member's orders go; a PUT sets or replaces it.
+  static const String myAddress = '$_v/me/address';
+
+  /// The member's orders; a POST places one.
+  static const String myOrders = '$_v/me/orders';
+
   /// One notification, read.
   static String notificationRead(String id) => '$_v/me/notifications/$id/read';
 

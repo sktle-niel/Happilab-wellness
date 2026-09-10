@@ -38,6 +38,10 @@ abstract final class AppRoutes {
   static const String editProfile = '/profile/edit';
   static const String accountActivity = '/profile/activity';
 
+  // Shop: getting a product, and where it goes
+  static const String getProduct = '/get';
+  static const String deliveryAddress = '/get/address';
+
   // Support
   static const String helpCenter = '/help';
   static const String supportChat = '/help/chat';

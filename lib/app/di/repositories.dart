@@ -25,13 +25,19 @@ import '../../features/support/data/support_desk_api.dart';
 import '../../features/support/domain/support_desk.dart';
 import '../../features/support/domain/support_repository.dart';
 import '../../shared/data/catalogue_api.dart';
+import '../../shared/data/delivery_address_api.dart';
 import '../../shared/data/fake_catalogue_repository.dart';
+import '../../shared/data/fake_delivery_address_repository.dart';
 import '../../shared/data/fake_member_repository.dart';
+import '../../shared/data/fake_orders_repository.dart';
 import '../../shared/data/fake_payout_accounts_repository.dart';
 import '../../shared/data/member_api.dart';
+import '../../shared/data/orders_api.dart';
 import '../../shared/data/payout_accounts_api.dart';
 import '../../shared/domain/catalogue_repository.dart';
+import '../../shared/domain/delivery_address.dart';
 import '../../shared/domain/member_repository.dart';
+import '../../shared/domain/orders.dart';
 import '../../shared/domain/payout_account.dart';
 
 /// Every data source the app reads, behind its contract.
@@ -45,6 +51,8 @@ class Repositories {
     required this.member,
     required this.catalogue,
     required this.payoutAccounts,
+    required this.deliveryAddress,
+    required this.orders,
     required this.notifications,
     required this.referrals,
     required this.rewards,
@@ -62,6 +70,8 @@ class Repositories {
     member: MemberApi(client),
     catalogue: CatalogueApi(client),
     payoutAccounts: PayoutAccountsApi(client),
+    deliveryAddress: DeliveryAddressApi(client),
+    orders: OrdersApi(client),
     notifications: NotificationsApi(client),
     referrals: ReferralsApi(client),
     rewards: RewardsApi(client),
@@ -71,15 +81,18 @@ class Repositories {
     supportDesk: SupportDeskApi(client),
   );
 
-  /// The bundled placeholders. [payoutAccounts] may be seeded, for a test
-  /// that starts with wallets already saved.
+  /// The bundled placeholders. [payoutAccounts] and [deliveryAddress] may be
+  /// seeded, for a test that starts with them already saved.
   factory Repositories.fake({
     Iterable<PayoutAccount> payoutAccounts = const [],
+    DeliveryAddress? deliveryAddress,
   }) => Repositories(
     auth: const FakeAuthRepository(),
     member: const FakeMemberRepository(),
     catalogue: const FakeCatalogueRepository(),
     payoutAccounts: FakePayoutAccountsRepository(initial: payoutAccounts),
+    deliveryAddress: FakeDeliveryAddressRepository(initial: deliveryAddress),
+    orders: FakeOrdersRepository(),
     notifications: FakeNotificationsRepository(),
     referrals: const FakeReferralsRepository(),
     rewards: const FakeRewardsRepository(),
@@ -93,6 +106,8 @@ class Repositories {
   final MemberRepository member;
   final CatalogueRepository catalogue;
   final PayoutAccountsRepository payoutAccounts;
+  final DeliveryAddressRepository deliveryAddress;
+  final OrdersRepository orders;
   final NotificationsRepository notifications;
   final ReferralsRepository referrals;
   final RewardsRepository rewards;

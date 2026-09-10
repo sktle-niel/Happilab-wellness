@@ -17,6 +17,8 @@ import '../../features/referrals/presentation/how_it_works_screen.dart';
 import '../../features/referrals/presentation/my_referrals_screen.dart';
 import '../../features/rewards/presentation/edit_payout_number_screen.dart';
 import '../../features/rewards/presentation/rewards_screen.dart';
+import '../../features/shop/presentation/delivery_address_screen.dart';
+import '../../features/shop/presentation/get_product_screen.dart';
 import '../../features/support/presentation/help_center_screen.dart';
 import '../../features/support/presentation/support_chat_screen.dart';
 import '../../features/support/presentation/terms_screen.dart';
@@ -49,6 +51,10 @@ abstract final class AppRouter {
           AppRoutes.editPayoutNumber => (_) => EditPayoutNumberScreen(
             kind: EditPayoutNumberScreen.kindFrom(settings.arguments),
           ),
+          AppRoutes.getProduct => (_) => GetProductScreen(
+            product: GetProductScreen.productFrom(settings.arguments),
+          ),
+          AppRoutes.deliveryAddress => (_) => const DeliveryAddressScreen(),
           AppRoutes.newsFeed => (_) => const NewsFeedScreen(),
           AppRoutes.testimonials => (_) => const TestimonialsScreen(),
           AppRoutes.suggestions => (_) => const SuggestionsScreen(),
